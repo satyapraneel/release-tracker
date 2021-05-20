@@ -45,7 +45,7 @@ func CreateUser(c *gin.Context) {
 }
 
 func GetAllReleases (c *gin.Context)  {
-	release := models.Release{}
+	var release []models.Release
 	records := db.Debug().Find(&release)
 	if records.Error != nil {
 		log.Fatalln(records.Error)
