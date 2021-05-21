@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/release-trackers/gin/database/seed"
 	"github.com/release-trackers/gin/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -20,7 +21,17 @@ func InitConnection() *gorm.DB{
 	db.AutoMigrate(
 		&models.Users{},
 		&models.Release{},
+		&models.Project{},
+		&models.ReleaseProject{},
 	)
+
+	//For running project seeder
+	//comment the code after seeding
+	for _, seeds := range seed.All() {
+		if err := seeds.Run(db); err != nil {
+			log.Fatalf("Running seed '%s', failed with error: %s", seeds.Name, err)
+		}
+	}
 
 	return db
 }
