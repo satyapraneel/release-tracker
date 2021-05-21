@@ -2,6 +2,7 @@ package release
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/database"
 	"github.com/release-trackers/gin/models"
@@ -25,11 +26,10 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 	log.Print("in create user method 2")
-	release.ID=3
+	release.ID=4
 	release.Name="may_19_release"
 	release.Type="new"
 	release.Owner="roopa@gmail.com"
-	release.Project="9"
 	release.TargetDate=time.Now()
 	log.Print("release", release)
 
@@ -38,6 +38,14 @@ func CreateUser(c *gin.Context) {
 	log.Print("error release", errMessage)
 
 	if createdRelease.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": errMessage})
+		return
+	}
+	releaseProjectData := db.Model(&models.ReleaseProject{}).Create([]map[string]interface{}{
+		{"ReleaseId": release.ID, "ProjectId": 1},
+		{"ReleaseId": release.ID, "ProjectId": 2},
+	})
+	if releaseProjectData.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": errMessage})
 		return
 	}
@@ -71,12 +79,12 @@ func GetAllReleases (c *gin.Context)  {
 	}
 
 
-	//for _,releaseData := range releaseArr{
-	//	fmt.Printf("%v\n", releaseData)
-	//}
-	if rows.Err() != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": errNotExist.Error()})
-		return
+	for _,releaseData := range releaseArr{
+		fmt.Printf("%v\n", releaseData)
 	}
-	c.JSON(http.StatusOK, gin.H{"status": "success", "releases": releaseArr})
+	//if rows.Err() != nil {
+	//	c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": errNotExist.Error()})
+	//	return
+	//}
+	//c.JSON(http.StatusOK, gin.H{"status": "success", "releases": releaseArr})
 }

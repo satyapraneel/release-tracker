@@ -8,9 +8,8 @@ import (
 //Release struct declaration
 type Release struct {
 	gorm.Model
-	Name          	string `json:"name"`
-	TargetDate    	time.Time `json:"target_date"`
-	Type          	string `json:"type"`
-	Project			string 	`json:"project"`
-	Owner           string  `json:"owner"`
+	Name          		string `gorm:"type:varchar(100);index:,unique"`
+	TargetDate    		time.Time `json:"target_date"`
+	Type          		string `json:"type"`
+	Owner           	string  `json:"owner"`
 }
