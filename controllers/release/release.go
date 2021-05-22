@@ -16,7 +16,7 @@ var (
 	errNotExist			= errors.New("No records found")
 	db = database.InitConnection()
 )
-func CreateUser(c *gin.Context) {
+func CreateRelease(c *gin.Context) {
 	log.Print("in create user method")
 	// Get DB from Mysql Config
 	release := models.Release{}
