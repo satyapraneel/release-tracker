@@ -1,16 +1,18 @@
 package database
 
 import (
+	"fmt"
+	"log"
+
+	"github.com/release-trackers/gin/config"
 	"github.com/release-trackers/gin/database/seed"
 	"github.com/release-trackers/gin/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"log"
 )
 
-
-func InitConnection() *gorm.DB{
-	dsn := "root:secret@tcp(127.0.0.1:3307)/release_tracker?parseTime=true"
+func InitConnection() *gorm.DB {
+	dsn := getDbConnectionString()
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("DB connection error")
@@ -34,4 +36,16 @@ func InitConnection() *gorm.DB{
 	}
 
 	return db
+}
+
+func getDbConnectionString() string {
+	conf := config.New()
+	return fmt.Sprintf(
+		"%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
+		conf.Database.User,
+		conf.Database.Password,
+		conf.Database.Host,
+		conf.Database.Port,
+		conf.Database.DBName,
+	)
 }

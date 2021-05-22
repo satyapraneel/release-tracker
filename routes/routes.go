@@ -1,14 +1,21 @@
 package routes
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/controllers/release"
-	"net/http"
-	"os"
 )
 
+// Config will hold services that will eventually be injected into this
+// handler layer on handler initialization
+type Config struct {
+	R *gin.Engine
+}
+
 //RouterGin function
-func RouterGin() {
+func RouterGin() *gin.Engine {
+
 	router := gin.Default()
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(
@@ -30,5 +37,5 @@ func RouterGin() {
 	router.NoRoute(func(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
 	})
-	router.Run(os.Getenv("PORT"))
+	return router
 }

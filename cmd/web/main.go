@@ -1,15 +1,19 @@
 package main
 
 import (
+	"os"
+
 	"github.com/joho/godotenv"
 	"github.com/release-trackers/gin/routes"
-	"log"
 )
-func main() {
-	err := godotenv.Load(".env")
 
-	if err != nil {
-		log.Fatalf("Error loading .env file")
+type Handler struct{}
+
+func main() {
+	// load .env environment variables
+	if err := godotenv.Load(); err != nil {
+		panic(err)
 	}
-	routes.RouterGin()
+	r := routes.RouterGin()
+	r.Run(os.Getenv("PORT"))
 }
