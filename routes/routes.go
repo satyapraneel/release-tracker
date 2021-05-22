@@ -17,16 +17,12 @@ type Config struct {
 func RouterGin() *gin.Engine {
 
 	router := gin.Default()
-	// router.Static("/html/assets", "./html/assets")
-	// router.LoadHTMLGlob("ui/html/*")
+	router.Static("/assets", "/ui/assets")
+	router.LoadHTMLGlob("ui/html/*")
 	router.GET("/", func(c *gin.Context) {
-		c.JSON(
-			http.StatusOK,
-			gin.H{
-				"code":  http.StatusOK,
-				"error": "Welcome server 01",
-			},
-		)
+		c.HTML(http.StatusOK, "base.layout.tmpl", gin.H{
+			"title": "Main website",
+		})
 
 	})
 	api := router.Group("/api")
