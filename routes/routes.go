@@ -17,7 +17,7 @@ type Config struct {
 func RouterGin() *gin.Engine {
 
 	router := gin.Default()
-	router.Static("/assets", "/ui/assets")
+	router.Static("/assets", "./ui/assets")
 	router.LoadHTMLGlob("ui/html/*")
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "base.layout.tmpl", gin.H{
