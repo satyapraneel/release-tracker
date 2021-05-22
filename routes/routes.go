@@ -17,6 +17,8 @@ type Config struct {
 func RouterGin() *gin.Engine {
 
 	router := gin.Default()
+	// router.Static("/html/assets", "./html/assets")
+	// router.LoadHTMLGlob("ui/html/*")
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(
 			http.StatusOK,
@@ -25,6 +27,7 @@ func RouterGin() *gin.Engine {
 				"error": "Welcome server 01",
 			},
 		)
+
 	})
 	api := router.Group("/api")
 	{
