@@ -18,7 +18,7 @@ func RouterGin() *gin.Engine {
 
 	router := gin.Default()
 	router.Static("/assets", "./ui/assets")
-	router.LoadHTMLGlob("ui/html/*")
+	router.LoadHTMLGlob("ui/html/*.tmpl")
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "base.layout.tmpl", gin.H{
 			"title": "Main website",
@@ -28,7 +28,7 @@ func RouterGin() *gin.Engine {
 	api := router.Group("/api")
 	{
 		api.GET("/releases", release.GetAllReleases)
-		api.POST("/release/create", release.CreateUser)
+		api.POST("/release/create", release.CreateRelease)
 		//api.GET("/users/:id", user.GetUser)
 		//api.PUT("/users/:id", user.UpdateUser)
 		//api.DELETE("/users/:id", user.DeleteUser)
