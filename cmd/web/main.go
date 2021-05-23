@@ -1,10 +1,9 @@
 package main
 
 import (
-	"os"
-
 	"github.com/joho/godotenv"
 	"github.com/release-trackers/gin/routes"
+	"os"
 )
 
 type Handler struct{}
@@ -14,6 +13,8 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		panic(err)
 	}
+	//bitbucket.GetPr()
 	r := routes.RouterGin()
 	r.Run(os.Getenv("PORT"))
+
 }
