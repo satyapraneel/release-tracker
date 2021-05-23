@@ -18,9 +18,10 @@ func RouterGin() *gin.Engine {
 
 	router := gin.Default()
 	router.Static("/assets", "./ui/assets")
-	router.LoadHTMLGlob("ui/html/*.tmpl")
+	router.LoadHTMLGlob("ui/html/layout/*.tmpl")
+	// router.LoadHTMLGlob("ui/html/*.tmpl")
 	router.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "base.layout.tmpl", gin.H{
+		c.HTML(http.StatusOK, "home.tmpl", gin.H{
 			"title": "Main website",
 		})
 
