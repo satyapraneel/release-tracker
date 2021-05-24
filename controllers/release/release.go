@@ -7,9 +7,8 @@ import (
 	"net/http"
 )
 
-
-func GetListOfReleases (c *gin.Context)  {
-	releases, err := repositories.GetAllReleases(c);
+func GetListOfReleases(c *gin.Context) {
+	releases, err := repositories.GetAllReleases(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": err.Error()})
 		//	return
@@ -20,7 +19,7 @@ func GetListOfReleases (c *gin.Context)  {
 	//	"releases": releases,
 	//})
 	//router.LoadHTMLFiles("./ui/html/release/home.tmpl")
-	c.HTML(http.StatusOK, "release/home.tmpl", gin.H{
+	c.HTML(http.StatusOK, "release/home", gin.H{
 		"releases": releases,
 	})
 }
