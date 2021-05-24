@@ -33,7 +33,7 @@
                         <td>#{{.ID}}</td>
                         <td>{{.Name}}</td>
                         <td>{{.Type}}</td>
-                        <td>{{ .TargetDate}}</td>
+                        <td>{{.TargetDate | formatAsDate}}</td>
                         <td>{{ .Owner}}</td>
                     </tr>
                 {{end}}
