@@ -21,8 +21,8 @@ func RouterGin() *gin.Engine {
 	router.LoadHTMLGlob("ui/html/**/*.tmpl")
 	// router.LoadHTMLGlob("ui/html/*.tmpl")
 	router.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "home/index", gin.H{
-			"title": "Main website",
+		c.HTML(http.StatusOK, "home", gin.H{
+			"title": "Release tracker",
 		})
 	})
 	api := router.Group("/release")

@@ -1,6 +1,6 @@
 module github.com/release-trackers/gin
 
-go 1.13
+go 1.15
 
 require (
 	github.com/gin-gonic/gin v1.7.2
