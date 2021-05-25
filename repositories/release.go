@@ -6,8 +6,6 @@ import (
 	"github.com/release-trackers/gin/database"
 	"github.com/release-trackers/gin/models"
 	"log"
-	"net/http"
-	"time"
 )
 
 var (
@@ -15,40 +13,40 @@ var (
 	errNotExist			= errors.New("No records found")
 	db = database.InitConnection()
 )
-func CreateRelease(c *gin.Context) {
-	log.Print("in create user method")
+func CreateRelease(c *gin.Context, release models.Release) (uint, error){
 	// Get DB from Mysql Config
-	release := models.Release{}
+	//release := models.Release{}
 	err := c.Bind(&release)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": errInvalidBody.Error()})
-		return
+		log.Print(err)
 	}
 	log.Print("in create user method 2")
-	release.ID=4
-	release.Name="may_19_release"
-	release.Type="new"
-	release.Owner="roopa@gmail.com"
-	release.TargetDate=time.Now()
-	log.Print("release", release)
+	//release.ID=4
+	//release.Name="may_19_release"
+	//release.Type="new"
+	//release.Owner="roopa@gmail.com"
+	//release.TargetDate=time.Now()
+	log.Print("release TargetDate", release.TargetDate)
 
 	createdRelease := db.Debug().Create(&release)
 	var errMessage = createdRelease.Error
 	log.Print("error release", errMessage)
 
 	if createdRelease.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": errMessage})
-		return
+		log.Print(errMessage)
+
 	}
-	releaseProjectData := db.Model(&models.ReleaseProject{}).Create([]map[string]interface{}{
+	 db.Model(&models.ReleaseProject{}).Create([]map[string]interface{}{
 		{"ReleaseId": release.ID, "ProjectId": 1},
 		{"ReleaseId": release.ID, "ProjectId": 2},
 	})
-	if releaseProjectData.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": errMessage})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"status": "success", "release created successful": &release})
+
+	return release.ID, nil
+	//if releaseProjectData.Error != nil {
+	//	c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": errMessage})
+	//	return
+	//}
+	//c.JSON(http.StatusOK, gin.H{"status": "success", "release created successful": &release})
 }
 
 func GetAllReleases (c *gin.Context)  ([]*models.Release, error) {
