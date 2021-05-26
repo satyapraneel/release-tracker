@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/database"
 	"github.com/release-trackers/gin/models"
@@ -9,25 +8,14 @@ import (
 )
 
 var (
-	errInvalidBody     = errors.New("Invalid request body")
-	errNotExist			= errors.New("No records found")
 	db = database.InitConnection()
 )
+
 func CreateRelease(c *gin.Context, release models.Release) (uint, error){
-	// Get DB from Mysql Config
-	//release := models.Release{}
 	err := c.Bind(&release)
 	if err != nil {
 		log.Print(err)
 	}
-	log.Print("in create user method 2")
-	//release.ID=4
-	//release.Name="may_19_release"
-	//release.Type="new"
-	//release.Owner="roopa@gmail.com"
-	//release.TargetDate=time.Now()
-	log.Print("release TargetDate", release.TargetDate)
-
 	createdRelease := db.Debug().Create(&release)
 	var errMessage = createdRelease.Error
 	log.Print("error release", errMessage)
@@ -49,7 +37,7 @@ func CreateRelease(c *gin.Context, release models.Release) (uint, error){
 	//c.JSON(http.StatusOK, gin.H{"status": "success", "release created successful": &release})
 }
 
-func GetAllReleases (c *gin.Context)  ([]*models.Release, error) {
+func  GetAllReleases (c *gin.Context)  ([]*models.Release, error) {
 	var release []models.Release
 	records := db.Debug().Find(&release)
 	if records.Error != nil {
@@ -71,7 +59,7 @@ func GetAllReleases (c *gin.Context)  ([]*models.Release, error) {
 			log.Fatalln(err)
 		}
 
-		log.Printf("%+v\n", release)
+		//log.Printf("%+v\n", release)
 		releaseArr=append(releaseArr, release)
 	}
 	return releaseArr, nil

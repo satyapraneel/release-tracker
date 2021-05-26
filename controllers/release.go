@@ -1,15 +1,25 @@
-package release
+package controllers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/release-trackers/gin/cmd"
 	"github.com/release-trackers/gin/models"
 	"github.com/release-trackers/gin/repositories"
 	"log"
 	"net/http"
 	"time"
 )
+type App struct {
+	*cmd.Application
+}
 
-func GetListOfReleases(c *gin.Context) {
+// NewReleaseHandler ..
+func NewReleaseHandler(server *cmd.Application) App {
+	return App{server}
+}
+
+func (app App) GetListOfReleases(c *gin.Context) {
 	releases, err := repositories.GetAllReleases(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": err.Error()})
@@ -25,13 +35,13 @@ func GetListOfReleases(c *gin.Context) {
 	})
 }
 
-func CreateReleaseForm(c *gin.Context) {
+func (app App) CreateReleaseForm(c *gin.Context) {
 	c.HTML(http.StatusOK, "release/create", gin.H{
 		"title": "Create release",
 	})
 }
 
-func CreateRelease(c *gin.Context) {
+func (app App) CreateRelease(c *gin.Context) {
 	err := c.Request.ParseForm()
 	if err != nil {
 		http.Error(c.Writer, "Bad Request", http.StatusBadRequest)
@@ -47,8 +57,11 @@ func CreateRelease(c *gin.Context) {
 	release_type := c.Request.PostForm.Get("type")
 	target_date := c.Request.PostForm.Get("target_date")
 	owner := c.Request.PostForm.Get("owner")
-	layout := "2021-05-24 18:43:31"
-	target_format, _ := time.Parse(layout, target_date)
+	//layout := "2006-01-02 15:04:05"
+	target_format, err := time.Parse(time.RFC3339, target_date+"T15:04:05Z")
+	if err != nil {
+		fmt.Println(err)
+	}
 	log.Printf("form date string ", c.Request.PostForm.Get("target_date"))
 	log.Printf("form title ", target_format)
 	var release = models.Release{
