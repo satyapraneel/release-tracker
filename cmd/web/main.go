@@ -2,11 +2,12 @@ package main
 
 import (
 	"github.com/joho/godotenv"
+	"github.com/release-trackers/gin/cmd"
+	"github.com/release-trackers/gin/database"
 	"github.com/release-trackers/gin/routes"
 	"os"
 )
 
-type Handler struct{}
 
 func main() {
 	// load .env environment variables
@@ -14,7 +15,11 @@ func main() {
 		panic(err)
 	}
 	//bitbucket.GetPr()
-	r := routes.RouterGin()
+	app := &cmd.Application{
+		Db:      database.InitConnection(),
+		Name: "roopa",
+	}
+	r := routes.RouterGin(app)
 	r.Run(os.Getenv("PORT"))
 
 }

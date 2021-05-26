@@ -1,10 +1,11 @@
 package routes
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
-	"github.com/release-trackers/gin/controllers/release"
+	"github.com/release-trackers/gin/cmd"
+	"github.com/release-trackers/gin/controllers"
+	"log"
+	"net/http"
 )
 
 // Config will hold repositories that will eventually be injected into this
@@ -13,9 +14,11 @@ type Config struct {
 	R *gin.Engine
 }
 
-//RouterGin function
-func RouterGin() *gin.Engine {
 
+//RouterGin function
+func RouterGin(app *cmd.Application) *gin.Engine {
+	log.Println("****name*******: ", app.Name)
+	releaseHandler := controllers.NewReleaseHandler(app)
 	router := gin.Default()
 	router.Static("/assets", "./ui/assets")
 	router.LoadHTMLGlob("ui/html/**/*.tmpl")
@@ -27,9 +30,9 @@ func RouterGin() *gin.Engine {
 	})
 	api := router.Group("/release")
 	{
-		api.GET("/list", release.GetListOfReleases)
-		api.GET("/create", release.CreateReleaseForm)
-		api.POST("/store", release.CreateRelease)
+		api.GET("/list", releaseHandler.GetListOfReleases)
+		api.GET("/create", releaseHandler.CreateReleaseForm)
+		api.POST("/store", releaseHandler.CreateRelease)
 		//api.GET("/users/:id", user.GetUser)
 		//api.PUT("/users/:id", user.UpdateUser)
 		//api.DELETE("/users/:id", user.DeleteUser)
