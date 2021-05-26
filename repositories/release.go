@@ -1,57 +1,43 @@
 package repositories
 
 import (
-	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/database"
 	"github.com/release-trackers/gin/models"
 	"log"
-	"net/http"
-	"time"
 )
 
 var (
-	errInvalidBody     = errors.New("Invalid request body")
-	errNotExist			= errors.New("No records found")
 	db = database.InitConnection()
 )
-func CreateRelease(c *gin.Context) {
-	log.Print("in create user method")
-	// Get DB from Mysql Config
-	release := models.Release{}
+
+func CreateRelease(c *gin.Context, release models.Release) (uint, error){
 	err := c.Bind(&release)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": errInvalidBody.Error()})
-		return
+		log.Print(err)
 	}
-	log.Print("in create user method 2")
-	release.ID=4
-	release.Name="may_19_release"
-	release.Type="new"
-	release.Owner="roopa@gmail.com"
-	release.TargetDate=time.Now()
-	log.Print("release", release)
-
 	createdRelease := db.Debug().Create(&release)
 	var errMessage = createdRelease.Error
 	log.Print("error release", errMessage)
 
 	if createdRelease.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": errMessage})
-		return
+		log.Print(errMessage)
+
 	}
-	releaseProjectData := db.Model(&models.ReleaseProject{}).Create([]map[string]interface{}{
+	 db.Model(&models.ReleaseProject{}).Create([]map[string]interface{}{
 		{"ReleaseId": release.ID, "ProjectId": 1},
 		{"ReleaseId": release.ID, "ProjectId": 2},
 	})
-	if releaseProjectData.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": errMessage})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"status": "success", "release created successful": &release})
+
+	return release.ID, nil
+	//if releaseProjectData.Error != nil {
+	//	c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": errMessage})
+	//	return
+	//}
+	//c.JSON(http.StatusOK, gin.H{"status": "success", "release created successful": &release})
 }
 
-func GetAllReleases (c *gin.Context)  ([]*models.Release, error) {
+func  GetAllReleases (c *gin.Context)  ([]*models.Release, error) {
 	var release []models.Release
 	records := db.Debug().Find(&release)
 	if records.Error != nil {
@@ -73,7 +59,7 @@ func GetAllReleases (c *gin.Context)  ([]*models.Release, error) {
 			log.Fatalln(err)
 		}
 
-		log.Printf("%+v\n", release)
+		//log.Printf("%+v\n", release)
 		releaseArr=append(releaseArr, release)
 	}
 	return releaseArr, nil

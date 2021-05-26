@@ -1,4 +1,4 @@
-{{ define "top" }}
+{{ define "layout/top" }}
 <!doctype html>
 <html lang="en">
 
@@ -52,12 +52,12 @@
 
   <div class="container-fluid">
     <div class="row">
-      {{template "layout/sidebar"}}
+      {{ template "layout/sidebar" }}
 {{ end }}
-{{ define "bottom" }}
+{{ define "layout/bottom" }}
     </div>
   </div>
-  {{template "scripts" .}}
+  {{ template "layout/scripts" }}
 </body>
 
 </html>
