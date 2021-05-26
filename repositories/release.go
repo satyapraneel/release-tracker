@@ -1,22 +1,33 @@
 package repositories
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/release-trackers/gin/database"
-	"github.com/release-trackers/gin/models"
 	"log"
+
+	"github.com/gin-gonic/gin"
+	"github.com/release-trackers/gin/cmd"
+	"github.com/release-trackers/gin/models"
 )
 
-var (
-	db = database.InitConnection()
-)
+// var (
+// 	db = database.InitConnection()
+// )
 
-func CreateRelease(c *gin.Context, release models.Release) (uint, error){
+type App struct {
+	*cmd.Application
+}
+
+// NewReleaseHandler ..
+func NewReleaseHandler(app *cmd.Application) *App {
+	return &App{app}
+}
+
+func (app *App) CreateRelease(c *gin.Context, release models.Release) (uint, error) {
+	println(app)
 	err := c.Bind(&release)
 	if err != nil {
 		log.Print(err)
 	}
-	createdRelease := db.Debug().Create(&release)
+	createdRelease := app.Db.Debug().Create(&release)
 	var errMessage = createdRelease.Error
 	log.Print("error release", errMessage)
 
@@ -24,7 +35,7 @@ func CreateRelease(c *gin.Context, release models.Release) (uint, error){
 		log.Print(errMessage)
 
 	}
-	 db.Model(&models.ReleaseProject{}).Create([]map[string]interface{}{
+	app.Db.Model(&models.ReleaseProject{}).Create([]map[string]interface{}{
 		{"ReleaseId": release.ID, "ProjectId": 1},
 		{"ReleaseId": release.ID, "ProjectId": 2},
 	})
@@ -37,9 +48,9 @@ func CreateRelease(c *gin.Context, release models.Release) (uint, error){
 	//c.JSON(http.StatusOK, gin.H{"status": "success", "release created successful": &release})
 }
 
-func  GetAllReleases (c *gin.Context)  ([]*models.Release, error) {
+func (app *App) GetAllReleases(c *gin.Context) ([]*models.Release, error) {
 	var release []models.Release
-	records := db.Debug().Find(&release)
+	records := app.Db.Debug().Find(&release)
 	if records.Error != nil {
 		log.Fatalln(records.Error)
 	}
@@ -53,14 +64,14 @@ func  GetAllReleases (c *gin.Context)  ([]*models.Release, error) {
 	releaseArr := []*models.Release{}
 
 	for rows.Next() {
-		release:= &models.Release{}
-		err := db.Debug().ScanRows(rows, &release)
+		release := &models.Release{}
+		err := app.Db.Debug().ScanRows(rows, &release)
 		if err != nil {
 			log.Fatalln(err)
 		}
 
 		//log.Printf("%+v\n", release)
-		releaseArr=append(releaseArr, release)
+		releaseArr = append(releaseArr, release)
 	}
 	return releaseArr, nil
 }

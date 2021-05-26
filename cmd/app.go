@@ -1,11 +1,10 @@
 package cmd
 
-
 import "gorm.io/gorm"
 
 type Application struct {
 	Db   *gorm.DB
-	Name  string
+	Name string
 }
 
 type App struct {

@@ -2,25 +2,30 @@ package controllers
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/cmd"
 	"github.com/release-trackers/gin/models"
 	"github.com/release-trackers/gin/repositories"
-	"log"
-	"net/http"
-	"time"
 )
+
 type App struct {
 	*cmd.Application
 }
 
 // NewReleaseHandler ..
-func NewReleaseHandler(server *cmd.Application) App {
-	return App{server}
+func NewReleaseHandler(app *cmd.Application) *App {
+	return &App{app}
 }
 
-func (app App) GetListOfReleases(c *gin.Context) {
-	releases, err := repositories.GetAllReleases(c)
+func (app *App) GetListOfReleases(c *gin.Context) {
+	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
+	println("++++++app.Name++++++")
+	println(app.Name)
+	releases, err := releaseRepsitoryHandler.GetAllReleases(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": err.Error()})
 		//	return
@@ -35,13 +40,14 @@ func (app App) GetListOfReleases(c *gin.Context) {
 	})
 }
 
-func (app App) CreateReleaseForm(c *gin.Context) {
+func (app *App) CreateReleaseForm(c *gin.Context) {
 	c.HTML(http.StatusOK, "release/create", gin.H{
 		"title": "Create release",
 	})
 }
 
-func (app App) CreateRelease(c *gin.Context) {
+func (app *App) CreateRelease(c *gin.Context) {
+
 	err := c.Request.ParseForm()
 	if err != nil {
 		http.Error(c.Writer, "Bad Request", http.StatusBadRequest)
@@ -68,11 +74,11 @@ func (app App) CreateRelease(c *gin.Context) {
 		Name:       title,
 		Type:       release_type,
 		TargetDate: target_format,
-		Owner: owner,
+		Owner:      owner,
 	}
-
+	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
 	log.Printf("%v release info", release)
-	createReleaseData, err := repositories.CreateRelease(c, release)
+	createReleaseData, err := releaseRepsitoryHandler.CreateRelease(c, release)
 	if err != nil {
 		log.Print(err)
 	}
