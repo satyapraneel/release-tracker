@@ -20,7 +20,7 @@ func NewReleaseHandler(server *cmd.Application) App {
 }
 
 func (app App) GetListOfReleases(c *gin.Context) {
-	releases, err := repositories.GetAllReleases(c, app)
+	releases, err := repositories.GetAllReleases(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": err.Error()})
 		//	return
@@ -72,7 +72,7 @@ func (app App) CreateRelease(c *gin.Context) {
 	}
 
 	log.Printf("%v release info", release)
-	createReleaseData, err := repositories.CreateRelease(c, release, app)
+	createReleaseData, err := repositories.CreateRelease(c, release)
 	if err != nil {
 		log.Print(err)
 	}
