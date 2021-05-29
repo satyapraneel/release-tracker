@@ -1,12 +1,7 @@
 $(document).ready(function () {
-
+    window.$reviewerList = $('#reviewers');
     $('#type').select2();
     $('.reviewers').hide()
-    $('#projects').change(function(){
-        projectsVal = $(this).val()
-        alert(projectsVal)
-        getReviwers(projectsVal)
-    });
 
 
     $('#projects').select2({
@@ -14,19 +9,30 @@ $(document).ready(function () {
         allowClear: true
     });
 
+    $('#projects').on('change', function () {
+        var str = [];
+        $("#projects option:selected").each(function () {
+            str.push(this.value);
+        });
+        getReviwers(str);
+    });
+
+
+
+
     var getReviwers = function (projectsVal) {
         $.ajax({
-            url: "/release/getReviewers",
+            url: "/release/getReviewers?ids="+projectsVal,
             type:"get",
-            data: {'ids': projectsVal},
             context: document.body
         })
         .done(function (res) {
-            $('#reviewers').append(projectsVal);
+            alert(res.data)
+            $('#reviewers').val(res.data);
             $('.reviewers').show()
         })
         .fail(function (response) {
-            $('#reviewers').val("failed");
+            $('#reviewers').val(response.message);
             $('.reviewers').show()
         });
     }

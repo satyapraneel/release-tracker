@@ -1,11 +1,12 @@
 package routes
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/cmd"
 	"github.com/release-trackers/gin/controllers"
-	"log"
-	"net/http"
 )
 
 // Config will hold repositories that will eventually be injected into this
@@ -13,7 +14,6 @@ import (
 type Config struct {
 	R *gin.Engine
 }
-
 
 //RouterGin function
 func RouterGin(app *cmd.Application) *gin.Engine {
@@ -33,6 +33,7 @@ func RouterGin(app *cmd.Application) *gin.Engine {
 		api.GET("/list", releaseHandler.GetListOfReleases)
 		api.GET("/create", releaseHandler.CreateReleaseForm)
 		api.POST("/store", releaseHandler.CreateRelease)
+		api.GET("/getReviewers", releaseHandler.GetProjectReviewerList)
 		//api.GET("/users/:id", user.GetUser)
 		//api.PUT("/users/:id", user.UpdateUser)
 		//api.DELETE("/users/:id", user.DeleteUser)

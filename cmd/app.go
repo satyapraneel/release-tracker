@@ -6,7 +6,7 @@ import (
 
 type Application struct {
 	Db   *gorm.DB
-	Name  string
+	Name string
 }
 
 type App struct {

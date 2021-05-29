@@ -2,39 +2,32 @@ package controllers
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/cmd"
 	"github.com/release-trackers/gin/models"
-	repositories "github.com/release-trackers/gin/repositories"
-	"log"
-	"net/http"
+	"github.com/release-trackers/gin/repositories"
 	"strconv"
-	"time"
 )
+
 type App struct {
 	*cmd.Application
 }
 
 // NewReleaseHandler ..
-func NewReleaseHandler(server *cmd.Application) App {
-	return App{server}
+func NewReleaseHandler(app *cmd.Application) *App {
+	return &App{ app}
 }
 
-func formatAsDate(t time.Time) string {
-	year, month, day := t.Date()
-	return fmt.Sprintf("%d%02d/%02d", year, month, day)
-}
-
-type BlogPost struct {
-	Date time.Time
-}
-
-func (post *BlogPost) formattedDate() string {
-	return post.Date.Format(time.RFC822)
-}
-
-func (app App) GetListOfReleases(c *gin.Context) {
-	releases, err := repositories.GetAllReleases(c)
+func (app *App) GetListOfReleases(c *gin.Context) {
+	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
+	println("++++++app.Name++++++")
+	println(app.Name)
+	releases, err := releaseRepsitoryHandler.GetAllReleases(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": err.Error()})
 		//	return
@@ -51,8 +44,10 @@ func (app App) GetListOfReleases(c *gin.Context) {
 	})
 }
 
-func (app App) CreateReleaseForm(c *gin.Context) {
-	projects, err := repositories.GetProjects(c)
+
+func (app *App) CreateReleaseForm(c *gin.Context) {
+	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
+	projects, err := releaseRepsitoryHandler.GetProjects(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": err.Error()})
 		//	return
@@ -63,7 +58,7 @@ func (app App) CreateReleaseForm(c *gin.Context) {
 	})
 }
 
-func (app App) CreateRelease(c *gin.Context) {
+func (app *App) CreateRelease(c *gin.Context) {
 	err := c.Request.ParseForm()
 	if err != nil {
 		http.Error(c.Writer, "Bad Request", http.StatusBadRequest)
@@ -80,9 +75,28 @@ func (app App) CreateRelease(c *gin.Context) {
 	target_date := c.Request.PostForm.Get("target_date")
 	owner := c.Request.PostForm.Get("owner")
 	projectIds := c.Request.PostForm["projects"]
-	log.Printf("projectIds %v", projectIds)
+	convertedProjectIds := app.covertStringToIntArray(projectIds)
+	target_format, err := time.Parse(time.RFC3339, target_date+"T15:04:05Z")
+	if err != nil {
+		fmt.Println(err)
+	}
+	var release = models.Release{
+		Name:       title,
+		Type:       release_type,
+		TargetDate: target_format,
+		Owner:      owner,
+	}
+	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
+	createReleaseData, err := releaseRepsitoryHandler.CreateRelease(c, release, convertedProjectIds)
+	if err != nil {
+		log.Print(err)
+	}
+	log.Print(createReleaseData)
+	c.Redirect(http.StatusFound, "/release/list")
+}
+
+func (app *App) covertStringToIntArray(projectIds []string) []int {
 	var convertedProjectIds = []int{}
-	log.Printf("convertedProjectIds %v", convertedProjectIds)
 	for _, i := range projectIds {
 		j, err := strconv.Atoi(i)
 		if err != nil {
@@ -90,27 +104,17 @@ func (app App) CreateRelease(c *gin.Context) {
 		}
 		convertedProjectIds = append(convertedProjectIds, j)
 	}
+	return convertedProjectIds
+}
 
-	log.Printf("after loop convertedProjectIds %v", convertedProjectIds)
-	//layout := "2006-01-02 15:04:05"
-	target_format, err := time.Parse(time.RFC3339, target_date+"T15:04:05Z")
+func (app *App) GetProjectReviewerList(c *gin.Context)  {
+	projects := c.Query("ids")
+	s := strings.Split(projects, ",")
+	convertedProjectIds := app.covertStringToIntArray(s)
+	revList, err := repositories.GetReviewers(c, convertedProjectIds)
 	if err != nil {
-		fmt.Println(err)
+		c.JSON(http.StatusNoContent, gin.H{"status": "failed", "message": "No list found"})
 	}
-	log.Printf("form date string ", c.Request.PostForm.Get("target_date"))
-	log.Printf("form title ", target_format)
-	var release = models.Release{
-		Name:       title,
-		Type:       release_type,
-		TargetDate: target_format,
-		Owner: owner,
-	}
-
-	log.Printf("%v release info", release)
-	createReleaseData, err := repositories.CreateRelease(c, release, convertedProjectIds)
-	if err != nil {
-		log.Print(err)
-	}
-	log.Print(createReleaseData)
-	c.Redirect(http.StatusFound, "/release/list")
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "No list found", "data":revList})
+	return
 }

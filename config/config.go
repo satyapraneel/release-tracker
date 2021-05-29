@@ -3,8 +3,6 @@ package config
 import (
 	"os"
 	"strconv"
-
-	"github.com/joho/godotenv"
 )
 
 //https://dev.to/craicoverflow/a-no-nonsense-guide-to-environment-variables-in-go-a2f
@@ -13,7 +11,7 @@ type Config struct {
 }
 
 func New() *Config {
-	godotenv.Load() //@todo check how to load only once
+	// godotenv.Load() //@todo check how to load only once
 	return &Config{
 		Database: getDBConfig(),
 	}
