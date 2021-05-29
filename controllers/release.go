@@ -115,6 +115,6 @@ func (app *App) GetProjectReviewerList(c *gin.Context)  {
 	if err != nil {
 		c.JSON(http.StatusNoContent, gin.H{"status": "failed", "message": "No list found"})
 	}
-	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "No list found", "data":revList})
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "List found", "data":revList})
 	return
 }
