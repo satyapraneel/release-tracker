@@ -1,7 +1,8 @@
 package cmd
 
-
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Application struct {
 	Db   *gorm.DB

@@ -28,13 +28,15 @@
             <tbody>
             <tr>
                 {{range .releases}}
+
                     <tr>
                         <td>#{{.ID}}</td>
                         <td>{{.Name}}</td>
                         <td>{{.Type}}</td>
-                        <td>{{.TargetDate | formatAsDate}}</td>
+                        <td>{{.TargetDate.Format "02 Jan 2006"}}</td>
                         <td>{{ .Owner}}</td>
                     </tr>
+
                 {{end}}
             </tr>
             </tbody>
