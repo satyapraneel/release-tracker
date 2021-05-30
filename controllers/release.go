@@ -23,25 +23,23 @@ func NewReleaseHandler(app *cmd.Application) *App {
 	return &App{ app}
 }
 
+func (app *App) GetIndex(c *gin.Context) {
+	c.HTML(http.StatusOK, "release/home", gin.H{
+	})
+}
 func (app *App) GetListOfReleases(c *gin.Context) {
+	c.Request.ParseForm();
+	dtValues := models.DataTableValues{
+		Offset: QueryOffset(c),
+		Limit: QueryLimit(c),
+		Search: SearchScope(c),
+	}
+	log.Printf("length %v: ", c.Request.PostForm.Get("length"))
 	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
 	println("++++++app.Name++++++")
 	println(app.Name)
-	releases, err := releaseRepsitoryHandler.GetAllReleases(c)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": err.Error()})
-		//	return
-	}
-	//router := gin.Default()
-	//router.Delims("{[{", "}]}")
-	//router.SetFuncMap(template.FuncMap{
-	//	"formatAsDate": formatAsDate,
-	//})
-	//router.LoadHTMLFiles("ui/html/release/home.tmpl")
-	c.HTML(http.StatusOK, "release/home", gin.H{
-		"releases": releases,
-
-	})
+	releases := releaseRepsitoryHandler.GetAllReleases(c, dtValues)
+	c.JSON(http.StatusOK, releases)
 }
 
 
@@ -92,7 +90,7 @@ func (app *App) CreateRelease(c *gin.Context) {
 		log.Print(err)
 	}
 	log.Print(createReleaseData)
-	c.Redirect(http.StatusFound, "/release/list")
+	c.Redirect(http.StatusFound, "/release/index")
 }
 
 func (app *App) covertStringToIntArray(projectIds []string) []int {

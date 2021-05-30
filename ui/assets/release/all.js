@@ -1,3 +1,4 @@
+var $releasesTable;
 $(document).ready(function () {
     window.$reviewerList = $('#reviewers');
     $('#type').select2();
@@ -17,9 +18,6 @@ $(document).ready(function () {
         getReviwers(str);
     });
 
-
-
-
     var getReviwers = function (projectsVal) {
         $.ajax({
             url: "/release/getReviewers?ids="+projectsVal,
@@ -36,4 +34,63 @@ $(document).ready(function () {
             $('.reviewers').show()
         });
     }
+
+    $releasesTable = $('#releases_table');
+    if ($releasesTable.length) {
+        var additionalOptions = {
+            order: [[0, "desc"]],
+            language: {
+                searchPlaceholder: "Search Releases"
+            },
+            bInfo:false,
+            // pagingType: "simple",
+            responsive: true,
+        };
+        var releaseDt = initDatatable($releasesTable, [
+            {data: 'ID', name: 'ID', 'visible': true, searchable: false},
+            {data: 'Name', name: 'Name', orderable:true,searchable: true},
+            {data: 'type', name: 'type', 'orderable': false},
+            {data: 'target_date', name: 'target_date', 'orderable': false, searchable: false},
+            {data: 'owner', name: 'owner', 'orderable': false, searchable: false},
+        ], additionalOptions);
+        $releasesTable.data('dt', releaseDt);
+    }
+
 })
+
+var initDatatable = function ($table, $columns, additionalOptions) {
+    var options = {
+        dom: 'lfrtip',
+        processing: true,
+        serverSide: true,
+        autoWidth: false,
+        ajax: {
+            url: $table.data('get_action'),
+            type: 'post',
+            error: function (xhr, err) {
+                if (err === 'parsererror')
+                    location.reload();
+            }
+        },
+        "pageLength": $('.admin.dashboard').length ? 5 : 10,
+        "pagingType": "full_numbers",
+        columns: $columns,
+        drawCallback: function (settings) {
+            var $dtContainer = $($(this).data('dt').table().container());
+
+            var message = $dtContainer.data('dt_message');
+            if (message) {
+                $dtContainer.data('dt_message', '');
+                swal(message.header, message.text, message.type);
+            }
+        }
+    };
+
+    //Es6 merging of options
+    var options = Object.assign(options, additionalOptions);
+
+    var $dt = $table.DataTable(options);
+
+    $table.data('dt', $dt);
+    return $dt;
+}

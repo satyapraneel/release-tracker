@@ -1,12 +1,11 @@
 package repositories
 
 import (
-	"github.com/release-trackers/gin/database"
-	"log"
-
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/cmd"
+	"github.com/release-trackers/gin/database"
 	"github.com/release-trackers/gin/models"
+	"log"
 )
 
 var (
@@ -44,32 +43,34 @@ func (a *App) CreateRelease(c *gin.Context, release models.Release, projectIds [
 	return release.ID, errMessage
 }
 
-func (app *App) GetAllReleases(c *gin.Context) ([]*models.Release, error) {
+func (app *App) GetAllReleases(c *gin.Context, dt models.DataTableValues)  (models.DataResult) {
+	table := "releases"
+	var total, filtered int64
 	var release []models.Release
-	records := db.Debug().Find(&release)
-	if records.Error != nil {
-		log.Fatalln(records.Error)
-	}
-	log.Printf("%d rows found.", records.RowsAffected)
-	rows, err := records.Rows()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	defer rows.Close()
+	query := db.Table(table)
+	query = query.Offset(dt.Offset)
+	query = query.Limit(dt.Limit)
+	query = query.Scopes(dt.Search)
 
-	releaseArr := []*models.Release{}
-	//projectArr := []*models.Project{}
-
-	for rows.Next() {
-		release := &models.Release{}
-		err := db.Debug().ScanRows(rows, &release)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		//projectArr = getReleaseProjects(release, err)
-		releaseArr = append(releaseArr, release)
+	if err := query.Find(&release).Error; err != nil {
+		c.AbortWithStatus(404)
+		log.Println(err)
 	}
-	return releaseArr, err
+
+	// Filtered data count
+	query.Table(table).Count(&filtered)
+
+	// Total data count
+	db.Table(table).Count(&total)
+
+	result := models.DataResult{
+		total,
+		filtered,
+		release,
+	}
+
+	return result
+
 }
 
 func (app *App) getReleaseProjects(release *models.Release, err error)  ([]*models.Project) {
@@ -112,7 +113,6 @@ func (app *App) GetProjects(c *gin.Context) ([]*models.Project, error) {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		//log.Printf("%+v\n", project)
 		projectArr=append(projectArr, project)
 	}
 	return projectArr, err
@@ -120,8 +120,6 @@ func (app *App) GetProjects(c *gin.Context) ([]*models.Project, error) {
 
 
 func GetReviewers(c *gin.Context, projectIds []int) ([]string , error) {
-	log.Printf("release Id : %+v", projectIds)
-	//projectRecords := db.Debug().Exec("select reviewer_list from projects where project_id IN (?)", projectIds)
 	projectRecords := db.Table("projects").Select("reviewer_list").Where("id in (?)", projectIds)
 	rows, err := projectRecords.Rows()
 	if err != nil {
@@ -136,7 +134,6 @@ func GetReviewers(c *gin.Context, projectIds []int) ([]string , error) {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		//log.Printf("%+v\n", project)
 		reviewers=append(reviewers, project.ReviewerList)
 	}
 	return reviewers, err
