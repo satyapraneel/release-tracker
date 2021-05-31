@@ -30,9 +30,11 @@ func RouterGin(app *cmd.Application) *gin.Engine {
 	})
 	api := router.Group("/release")
 	{
-		api.GET("/list", releaseHandler.GetListOfReleases)
+		api.GET("/index", releaseHandler.GetIndex)
+		api.POST("/list", releaseHandler.GetListOfReleases)
 		api.GET("/create", releaseHandler.CreateReleaseForm)
 		api.POST("/store", releaseHandler.CreateRelease)
+		api.GET("/getReviewers", releaseHandler.GetProjectReviewerList)
 		//api.GET("/users/:id", user.GetUser)
 		//api.PUT("/users/:id", user.UpdateUser)
 		//api.DELETE("/users/:id", user.DeleteUser)
