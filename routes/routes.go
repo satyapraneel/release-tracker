@@ -35,7 +35,7 @@ func RouterGin(app *cmd.Application) *gin.Engine {
 		api.GET("/create", releaseHandler.CreateReleaseForm)
 		api.POST("/store", releaseHandler.CreateRelease)
 		api.GET("/getReviewers", releaseHandler.GetProjectReviewerList)
-		//api.GET("/users/:id", user.GetUser)
+		api.GET("/show/:id", releaseHandler.ViewReleaseForm)
 		//api.PUT("/users/:id", user.UpdateUser)
 		//api.DELETE("/users/:id", user.DeleteUser)
 	}
