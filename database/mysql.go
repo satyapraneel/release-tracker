@@ -38,13 +38,13 @@ func InitConnection() *gorm.DB {
 }
 
 func getDbConnectionString() string {
-	conf := config.New()
+	conf := config.New().Database
 	return fmt.Sprintf(
 		"%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
-		conf.Database.User,
-		conf.Database.Password,
-		conf.Database.Host,
-		conf.Database.Port,
-		conf.Database.DBName,
+		conf.User,
+		conf.Password,
+		conf.Host,
+		conf.Port,
+		conf.DBName,
 	)
 }

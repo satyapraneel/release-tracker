@@ -7,7 +7,7 @@ import (
 
 //https://dev.to/craicoverflow/a-no-nonsense-guide-to-environment-variables-in-go-a2f
 type Config struct {
-	Database DatabaseConfig
+	Database *DatabaseConfig
 }
 
 func New() *Config {
