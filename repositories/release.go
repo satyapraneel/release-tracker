@@ -1,16 +1,16 @@
 package repositories
 
 import (
-	"log"
-
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/cmd"
+	"github.com/release-trackers/gin/database"
 	"github.com/release-trackers/gin/models"
+	"log"
 )
 
-// var (
-// 	db = database.InitConnection()
-// )
+var (
+	db = database.InitConnection()
+)
 
 type App struct {
 	*cmd.Application
@@ -21,13 +21,12 @@ func NewReleaseHandler(app *cmd.Application) *App {
 	return &App{app}
 }
 
-func (app *App) CreateRelease(c *gin.Context, release models.Release) (uint, error) {
-	println(app)
+func (a *App) CreateRelease(c *gin.Context, release models.Release, projectIds []int) (uint, error) {
 	err := c.Bind(&release)
 	if err != nil {
 		log.Print(err)
 	}
-	createdRelease := app.Db.Debug().Create(&release)
+	createdRelease := db.Debug().Create(&release)
 	var errMessage = createdRelease.Error
 	log.Print("error release", errMessage)
 
@@ -35,43 +34,107 @@ func (app *App) CreateRelease(c *gin.Context, release models.Release) (uint, err
 		log.Print(errMessage)
 
 	}
-	app.Db.Model(&models.ReleaseProject{}).Create([]map[string]interface{}{
-		{"ReleaseId": release.ID, "ProjectId": 1},
-		{"ReleaseId": release.ID, "ProjectId": 2},
-	})
 
-	return release.ID, nil
-	//if releaseProjectData.Error != nil {
-	//	c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": errMessage})
-	//	return
-	//}
-	//c.JSON(http.StatusOK, gin.H{"status": "success", "release created successful": &release})
+	for _, projectId := range projectIds {
+		db.Create(&models.ReleaseProject{
+			ReleaseId: release.ID, ProjectId: uint(projectId),
+		})
+	}
+	return release.ID, errMessage
 }
 
-func (app *App) GetAllReleases(c *gin.Context) ([]*models.Release, error) {
+func (app *App) GetAllReleases(c *gin.Context, dt models.DataTableValues)  (models.DataResult) {
+	table := "releases"
+	var total, filtered int64
 	var release []models.Release
-	records := app.Db.Debug().Find(&release)
+	query := db.Table(table)
+	query = query.Offset(dt.Offset)
+	query = query.Limit(dt.Limit)
+	query = query.Scopes(dt.Search)
+
+	if err := query.Find(&release).Error; err != nil {
+		c.AbortWithStatus(404)
+		log.Println(err)
+	}
+
+	// Filtered data count
+	query.Table(table).Count(&filtered)
+
+	// Total data count
+	db.Table(table).Count(&total)
+
+	result := models.DataResult{
+		total,
+		filtered,
+		release,
+	}
+
+	return result
+
+}
+
+func (app *App) getReleaseProjects(release *models.Release, err error)  ([]*models.Project) {
+	projects := []models.ReleaseProject{}
+	log.Printf("release Id : %+v", release.ID)
+	projectRecords := db.Debug().Where("release_id = ?", release.ID).Find(&projects)
+	projrows, err := projectRecords.Rows()
+	log.Printf("project %+v\n", projrows)
+	projectArr := []*models.Project{}
+
+	for projrows.Next() {
+		project:= &models.Project{}
+		err := db.Debug().ScanRows(projrows, &project)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		projectArr = append(projectArr, project)
+	}
+
+	return projectArr
+}
+
+func (app *App) GetProjects(c *gin.Context) ([]*models.Project, error) {
+	var project []models.Project
+	records := db.Debug().Find(&project)
 	if records.Error != nil {
 		log.Fatalln(records.Error)
 	}
-	log.Printf("%d rows found.", records.RowsAffected)
+	//log.Printf("%d project rows found.", records.RowsAffected)
 	rows, err := records.Rows()
 	if err != nil {
 		log.Fatalln(err)
 	}
 	defer rows.Close()
 
-	releaseArr := []*models.Release{}
-
+	projectArr := []*models.Project{}
 	for rows.Next() {
-		release := &models.Release{}
-		err := app.Db.Debug().ScanRows(rows, &release)
+		project:= &models.Project{}
+		err := db.Debug().ScanRows(rows, &project)
 		if err != nil {
 			log.Fatalln(err)
 		}
-
-		//log.Printf("%+v\n", release)
-		releaseArr = append(releaseArr, release)
+		projectArr=append(projectArr, project)
 	}
-	return releaseArr, nil
+	return projectArr, err
+}
+
+
+func GetReviewers(c *gin.Context, projectIds []int) ([]string , error) {
+	projectRecords := db.Table("projects").Select("reviewer_list").Where("id in (?)", projectIds)
+	rows, err := projectRecords.Rows()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer rows.Close()
+
+	var reviewers []string
+	for rows.Next() {
+		project:= &models.Project{}
+		err := db.Debug().ScanRows(rows, &project)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		reviewers=append(reviewers, project.ReviewerList)
+	}
+	return reviewers, err
 }

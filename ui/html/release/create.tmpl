@@ -6,23 +6,62 @@
     </div>
 
 <!--    <h2>Section title</h2>-->
+
     <div class="table-responsive">
         <form action='/release/store' method='POST' >
             <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
-            <div>
-                <label>Release Name:</label>
-                <input type='text' name='name' class="form-control" id="name"> </div>
-            <div>
-                <label>Release Type:</label>
-                <input type='text' name='type' class="form-control" id="type"> </div>
-            <div>
-                <label>Release Date:</label>
-                <input type="date" class="form-control" name="target_date" id="target_date" format></div>
-            <div>
-                <label>Owner:</label>
-                <input type='text' name='owner' class="form-control" id="owner"> </div>
-            <div>
-                <input type='submit' value='Save' class="btn btn-sm btn-outline-secondary">
+            <div class="form-group row">
+                <label for="name" class="col-sm-3 col-form-label">Release Name:</label>
+                <div class="col-sm-6">
+                    <input type='text' name='name' class="form-control" id="name" required>
+                </div>
+            </div></br>
+            <div class="form-group row">
+                <label for="type" class="col-sm-3 col-form-label">Release Type:</label>
+                <div class="col-sm-6">
+                    <select name='type' class="form-control" id="type" required>
+                        <option value="hotfix"> Hotfix</option>
+                        <option value="feature"> Feature</option>
+                        <option value="release"> Release</option>
+                    </select>
+                </div>
+            </div></br>
+            <div class="form-group row">
+                <label for="projects" class="col-sm-3 control-label">Project:</label>
+                <div class="col-sm-6">
+                    <select name='projects' class="form-control" id="projects" multiple="multiple" required>
+                        {{range .projects}}
+                            <option value="{{ .ID}}"> {{ .Name}}</option>
+                        {{end}}
+                    </select>
+                </div>
+            </div></br>
+            <div class="form-group row reviewers" >
+                <label for="reviewers" class="col-sm-3 col-form-label">Reviewers:</label>
+                <div class="col-sm-6">
+                    <textarea id="reviewers" name="reviewers" rows="3" cols="78" readonly></textarea>
+{{/*                    <input type='textarea' name='reviewers' class="form-control" id="reviewers" required readonly>*/}}
+                </div>
+            </div></br>
+            <div class="form-group row">
+                <label for="target_date" class="col-sm-3 control-label">Release Date:</label>
+                <div class="col-sm-6">
+                    <input type="date" class="form-control" name="target_date" id="target_date" required></div>
+                </div>
+            </br>
+            <div class="form-group row">
+                <label for="owner" class="col-sm-3 control-label">Owner:</label>
+                <div class="col-sm-6">
+                    <input type='email' name='owner' class="form-control" id="owner" pattern=".+@landmarkgroup.in" required>
+                    <small>Please enter landmarkgroup email</small>
+                </div>
+            </div>
+                <br><br>
+            <div class="form-group row">
+                <div class="col-sm-2 control-label"></div>
+                <div class="col-sm-6">
+                    <input type='submit' value='Save Changes' class="btn btn-success me-2">
+                </div>
             </div>
         </form>
     </div>
