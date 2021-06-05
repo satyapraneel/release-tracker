@@ -13,7 +13,7 @@
             <div class="form-group row">
                 <label for="name" class="col-sm-3 col-form-label">Release Name:</label>
                 <div class="col-sm-6">
-                    <input type='text' name='name' class="form-control" id="name" required>
+                    <input type='text' name='name' class="form-control" id="name" value="{{.Name}}" required>
                 </div>
             </div></br>
             <div class="form-group row">
@@ -46,7 +46,7 @@
             <div class="form-group row">
                 <label for="target_date" class="col-sm-3 control-label">Release Date:</label>
                 <div class="col-sm-6">
-                    <input type="date" class="form-control" name="target_date" id="target_date" required></div>
+                    <input type="date" class="form-control" name="target_date" id="target_date" value="{{ .TargetDate}}" required></div>
                 </div>
             </br>
             <div class="form-group row">
@@ -57,10 +57,13 @@
                 </div>
             </div>
                 <br><br>
-            <div class="form-group row">
-                <div class="col-sm-2 control-label"></div>
-                <div class="col-sm-6">
-                    <input type='submit' value='Save Changes' class="btn btn-success me-2">
+            <div class="form-group">
+                <div class="col-sm-4 col-sm-offset-2">
+                    <button
+                            class="btn btn-primary"
+                            type="submit">Save changes
+                    </button>
+                    <button type='button'  class="btn btn-outline-secondary" onclick="window.location.href='/release/index'"> Cancel </button>
                 </div>
             </div>
         </form>
