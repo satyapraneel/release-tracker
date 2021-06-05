@@ -56,6 +56,25 @@ func (app *App) CreateReleaseForm(c *gin.Context) {
 	})
 }
 
+func (app *App) ViewReleaseForm(c *gin.Context) {
+	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
+	releases, projects, reviewers, err := releaseRepsitoryHandler.GetReleases(c)
+	for _, project := range projects {
+		log.Printf("project in loop : %v", project.Name)
+	}
+	log.Printf("after loop : %v", releases.Name)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": err.Error()})
+		//	return
+	}
+	c.HTML(http.StatusOK, "release/view", gin.H{
+		"title": "View release",
+		"projects" : projects,
+		"releases" : releases,
+		"reviewers":reviewers,
+	})
+}
+
 func (app *App) CreateRelease(c *gin.Context) {
 	err := c.Request.ParseForm()
 	if err != nil {
@@ -109,7 +128,8 @@ func (app *App) GetProjectReviewerList(c *gin.Context)  {
 	projects := c.Query("ids")
 	s := strings.Split(projects, ",")
 	convertedProjectIds := app.covertStringToIntArray(s)
-	revList, err := repositories.GetReviewers(c, convertedProjectIds)
+	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
+	revList, err := releaseRepsitoryHandler.GetReviewers(c, convertedProjectIds)
 	if err != nil {
 		c.JSON(http.StatusNoContent, gin.H{"status": "failed", "message": "No list found"})
 	}
