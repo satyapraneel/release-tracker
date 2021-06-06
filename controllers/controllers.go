@@ -24,6 +24,16 @@ func QueryLimit(c *gin.Context) int {
 	return limitInt
 }
 
+func QueryOrder(c *gin.Context, columnOrder string) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		query := db
+		if columnOrder != "" {
+			query = query.Order("id "+columnOrder)
+		}
+		return query
+	}
+}
+
 func SearchScope(c *gin.Context) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		query := db

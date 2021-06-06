@@ -33,14 +33,23 @@ func (app *App) CreateRelease(c *gin.Context, release models.Release, projectIds
 		log.Print(errMessage)
 
 	}
-
+	project := &models.Project{}
 	for _, projectId := range projectIds {
 		app.Db.Create(&models.ReleaseProject{
 			ReleaseId: release.ID, ProjectId: uint(projectId),
 		})
+		fetchProject := app.Db.Debug().Where("id = ?", projectId).Find(project)
+		if fetchProject.Error != nil {
+			log.Print(errMessage)
+		}
+		log.Printf("reviewws : %v", project.ReviewerList)
+		cmd.TriggerMail(project.ReviewerList, release.Name, project.Name)
 	}
+
 	return release.ID, errMessage
 }
+
+
 
 func (app *App) GetAllReleases(c *gin.Context, dt models.DataTableValues)  (models.DataResult) {
 	table := "releases"
@@ -51,8 +60,9 @@ func (app *App) GetAllReleases(c *gin.Context, dt models.DataTableValues)  (mode
 	query = query.Offset(dt.Offset)
 	query = query.Limit(dt.Limit)
 	query = query.Scopes(dt.Search)
+	query = query.Order("id "+dt.Order)
 
-	if err := query.Find(&release).Error; err != nil {
+	if err := query.Debug().Find(&release).Error; err != nil {
 		c.AbortWithStatus(404)
 		log.Println(err)
 	}

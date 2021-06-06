@@ -6,17 +6,16 @@
         </div>
 
         <!--    <h2>Section title</h2>-->
-
-        <div class="table-responsive">
+        <div class="table-responsive row">
             <form>
                 <div class="form-group row">
-                    <label for="name" class="col-sm-3 col-form-label">Release Name:</label>
+                    <label for="name" class="col-sm-2 col-form-label">Release Name:</label>
                     <div class="col-sm-6">
                         <input type='text' name='name' class="form-control" id="name" value="{{.releases.Name}}" readonly>
                     </div>
                 </div></br>
                 <div class="form-group row">
-                    <label for="type" class="col-sm-3 col-form-label">Release Type:</label>
+                    <label for="type" class="col-sm-2 col-form-label">Release Type:</label>
                     <div class="col-sm-6">
                         <select name='type' class="form-control" id="type" readonly="">
                             <option value="{{.releases.Type}}" selected> {{.releases.Type}}</option>
@@ -24,7 +23,7 @@
                     </div>
                 </div></br>
                 <div class="form-group row">
-                    <label for="projects" class="col-sm-3 control-label">Project:</label>
+                    <label for="projects" class="col-sm-2 control-label">Project:</label>
                     <div class="col-sm-6">
                         <select name='projects' class="form-control" id="projects" multiple="multiple" readonly="">
                             {{range $project := .projects}}
@@ -34,26 +33,26 @@
                     </div>
                 </div></br>
                 <div class="form-group row reviewers_view" >
-                    <label for="reviewers" class="col-sm-3 col-form-label">Reviewers:</label>
+                    <label for="reviewers" class="col-sm-2 col-form-label">Reviewers:</label>
                     <div class="col-sm-6">
                         <textarea id="reviewers_view" name="reviewers_view" rows="3" cols="78" readonly>{{.reviewers}}</textarea>
                     </div>
                 </div></br>
                 <div class="form-group row">
-                    <label for="target_date" class="col-sm-3 control-label">Release Date:</label>
+                    <label for="target_date" class="col-sm-2 control-label">Release Date:</label>
                     <div class="col-sm-6">
                         <input type="date" class="form-control" name="target_date" id="target_date" value="{{ .releases.TargetDate.Format "2006-01-02"}}"></div>
                 </div>
                 </br>
                 <div class="form-group row">
-                    <label for="owner" class="col-sm-3 control-label">Owner:</label>
+                    <label for="owner" class="col-sm-2 control-label">Owner:</label>
                     <div class="col-sm-6">
                         <input type='email' name='owner' class="form-control" id="owner" value="{{.releases.Owner}}" readonly>
                     </div>
                 </div>
                 <br><br>
-                <div class="form-group">
-                    <div class="col-sm-4 col-sm-offset-2">
+                <div class="form-group row">
+                    <div class="col-sm-4 col-sm-offset-4">
                         <button type='button'  class="btn btn-outline-secondary" onclick="window.location.href='/release/index'"> Cancel </button>
                     </div>
                 </div>
