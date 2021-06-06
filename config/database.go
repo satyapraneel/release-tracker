@@ -8,8 +8,8 @@ type DatabaseConfig struct {
 	Host     string
 }
 
-func getDBConfig() DatabaseConfig {
-	return DatabaseConfig{
+func getDBConfig() *DatabaseConfig {
+	return &DatabaseConfig{
 		User:     getEnv("DB_USERNAME", "root"),
 		Password: getEnv("DB_PASSWORD", "secret"),
 		Port:     getEnvAsInt("DB_PORT", 3307),
