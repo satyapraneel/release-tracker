@@ -28,13 +28,22 @@ func (app *App) GetIndex(c *gin.Context) {
 	})
 }
 func (app *App) GetListOfReleases(c *gin.Context) {
-	c.Request.ParseForm();
+	var columnOrder string
+	columnOrder = "desc"
+	c.Request.ParseForm()
+	order := c.PostFormMap("order")
+	for _, value := range order { // Order not specified
+		if value == "asc" || value == "desc" {
+			columnOrder = value
+		}
+	}
 	dtValues := models.DataTableValues{
 		Offset: QueryOffset(c),
 		Limit: QueryLimit(c),
 		Search: SearchScope(c),
+		Order: columnOrder,
 	}
-	log.Printf("length %v: ", c.Request.PostForm.Get("length"))
+	log.Printf("length %v: ", dtValues.Order)
 	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
 	println("++++++app.Name++++++")
 	println(app.Name)
@@ -108,9 +117,18 @@ func (app *App) CreateRelease(c *gin.Context) {
 	if err != nil {
 		log.Print(err)
 	}
+	//if createReleaseData != 0 {
+	//	SendEmailWithProjectCreated(createReleaseData)
+	//}
 	log.Print(createReleaseData)
 	c.Redirect(http.StatusFound, "/release/index")
 }
+
+//func (app *App)SendEmailWithProjectCreated(releaseId uint)  {
+//		release := &models.Release{}
+//
+//
+//}
 
 func (app *App) covertStringToIntArray(projectIds []string) []int {
 	var convertedProjectIds = []int{}

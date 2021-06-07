@@ -26,6 +26,8 @@ func main() {
 		panic(err)
 	}
 	//bitbucket.GetPr()
+	//bitbucket.CreatePr()
+	//cmd.TriggerMail()
 	app := &cmd.Application{
 		Db:   database.InitConnection(),
 		Name: "roopa",

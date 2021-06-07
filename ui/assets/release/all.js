@@ -25,7 +25,6 @@ $(document).ready(function () {
             context: document.body
         })
         .done(function (res) {
-            alert(res.data)
             $('#reviewers').val(res.data);
             $('.reviewers').show()
         })
@@ -48,9 +47,9 @@ $(document).ready(function () {
         };
         var releaseDt = initDatatable($releasesTable, [
             {data: 'ID', name: 'ID', 'visible': true, searchable: false},
-            {data: 'Name', name: 'Name', searchable: true},
-            {data: 'type', name: 'type'},
-            {data: 'target_date', name: 'target_date',
+            {data: 'Name', name: 'Name', searchable: true,'orderable': false},
+            {data: 'type', name: 'type','orderable': false},
+            {data: 'target_date', name: 'target_date','orderable': false,
                 "render": function (data) {
                     var date = new Date(data);
                     var month = date.getMonth() + 1;
@@ -61,11 +60,12 @@ $(document).ready(function () {
                     //return date format like 2000/01/01;
                 },
             },
-            {data: 'owner', name: 'owner'},
+            {data: 'owner', name: 'owner', 'orderable': false},
             {
                 "mData": "ID",
+                'orderable': false,
                 "mRender": function (data, type, row) {
-                    return "<a href='/release/show/" + data + "'><i class='far fa-eye'></i></a>";
+                    return "<a href='/release/show/" + data + "'><i class='fa fa-eye fa-2x'></i></a>";
                 }
             },
         ], additionalOptions);

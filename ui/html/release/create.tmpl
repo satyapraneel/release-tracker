@@ -6,17 +6,17 @@
     </div>
 
 <!--    <h2>Section title</h2>-->
-
-    <div class="table-responsive">
+    <div class="container" >
+    <div class="table-responsive row justify-content-md-center">
         <form action='/release/store' method='POST' >
             <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
-            <div class="form-group row">
+            <div class="form-group col-md-auto">
                 <label for="name" class="col-sm-3 col-form-label">Release Name:</label>
                 <div class="col-sm-6">
                     <input type='text' name='name' class="form-control" id="name" value="{{.Name}}" required>
                 </div>
             </div></br>
-            <div class="form-group row">
+            <div class="form-group col-md-auto">
                 <label for="type" class="col-sm-3 col-form-label">Release Type:</label>
                 <div class="col-sm-6">
                     <select name='type' class="form-control" id="type" required>
@@ -26,7 +26,7 @@
                     </select>
                 </div>
             </div></br>
-            <div class="form-group row">
+            <div class="form-group col-md-auto">
                 <label for="projects" class="col-sm-3 control-label">Project:</label>
                 <div class="col-sm-6">
                     <select name='projects' class="form-control" id="projects" multiple="multiple" required>
@@ -36,20 +36,20 @@
                     </select>
                 </div>
             </div></br>
-            <div class="form-group row reviewers" >
+            <div class="form-group col-md-auto reviewers" >
                 <label for="reviewers" class="col-sm-3 col-form-label">Reviewers:</label>
                 <div class="col-sm-6">
                     <textarea id="reviewers" name="reviewers" rows="3" cols="78" readonly></textarea>
 {{/*                    <input type='textarea' name='reviewers' class="form-control" id="reviewers" required readonly>*/}}
                 </div>
             </div></br>
-            <div class="form-group row">
+            <div class="form-group col-md-auto">
                 <label for="target_date" class="col-sm-3 control-label">Release Date:</label>
                 <div class="col-sm-6">
                     <input type="date" class="form-control" name="target_date" id="target_date" value="{{ .TargetDate}}" required></div>
                 </div>
             </br>
-            <div class="form-group row">
+            <div class="form-group col-md-auto">
                 <label for="owner" class="col-sm-3 control-label">Owner:</label>
                 <div class="col-sm-6">
                     <input type='email' name='owner' class="form-control" id="owner" pattern=".+@landmarkgroup.in" required>
@@ -60,13 +60,14 @@
             <div class="form-group">
                 <div class="col-sm-4 col-sm-offset-2">
                     <button
-                            class="btn btn-primary"
+                            class="btn btn-outline-success"
                             type="submit">Save changes
                     </button>
                     <button type='button'  class="btn btn-outline-secondary" onclick="window.location.href='/release/index'"> Cancel </button>
                 </div>
             </div>
         </form>
+    </div>
     </div>
 </main>
 {{template "layout/bottom" }}
