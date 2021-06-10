@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -20,7 +19,6 @@ func (app *App) Login(c *gin.Context) {
 		c.HTML(http.StatusUnauthorized, "auth/login", gin.H{"error": "Unauthorized"})
 		c.Abort()
 	}
-	log.Print(user.Email, user.Password)
 	session.Set("id", user.ID)
 	session.Set("email", user.Email)
 	session.Save()

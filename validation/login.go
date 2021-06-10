@@ -2,7 +2,6 @@ package validation
 
 import (
 	"errors"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,7 +17,6 @@ func ValidateLoginForm(c *gin.Context) {
 	var form LoginFields
 	// This will infer what binder to use depending on the content-type header.
 	if err := c.ShouldBind(&form); err != nil {
-		log.Print(form)
 		var verr validator.ValidationErrors
 		if errors.As(err, &verr) {
 			// c.JSON(http.StatusBadRequest, gin.H{"errors": Descriptive(verr)})
