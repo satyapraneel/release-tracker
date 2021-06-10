@@ -1,18 +1,18 @@
 package main
 
 import (
+	"flag"
 	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/release-trackers/gin/cmd"
 	"github.com/release-trackers/gin/database"
 	"github.com/release-trackers/gin/routes"
-	"github.com/release-trackers/gin/workers"
 )
 
 func main() {
 
-	defer workers.Wait()
+	// defer workers.Wait()
 	//sample is given below
 	// job := workers.Job{
 	// 	Action: workers.PrintPayload,
@@ -25,6 +25,25 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		panic(err)
 	}
+	handle()
+
+}
+
+func handle() {
+	flag.Parse()
+	args := flag.Args()
+
+	if len(args) >= 1 {
+		switch args[0] {
+		case "seed":
+			database.DbSeed()
+			os.Exit(0)
+		case "migrate":
+			database.DbMigrate()
+			os.Exit(0)
+		}
+	}
+
 	//bitbucket.GetPr()
 	//bitbucket.CreatePr()
 	//cmd.TriggerMail()
@@ -32,7 +51,5 @@ func main() {
 		Db:   database.InitConnection(),
 		Name: "roopa",
 	}
-	r := routes.RouterGin(app)
-	r.Run(os.Getenv("PORT"))
-
+	routes.RouterGin(app)
 }

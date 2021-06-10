@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/cmd"
 	"github.com/release-trackers/gin/models"
-	"github.com/release-trackers/gin/workers"
+	"github.com/release-trackers/gin/notifications/mails"
 )
 
 // NewReleaseHandler ..
@@ -38,7 +38,7 @@ func (app *App) CreateRelease(c *gin.Context, release models.Release, projectIds
 		}
 		log.Printf("reviewws : %v", project.ReviewerList)
 		// cmd.TriggerMail(project.ReviewerList, release.Name, project.Name)
-		workers.SendReleaseCreatedMail(&release, project)
+		go mails.SendReleaseCreatedMail(&release, project)
 		// mails.SendReleaseCreatedMail(&release, project)
 	}
 

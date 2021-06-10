@@ -1,0 +1,42 @@
+{{ define "auth/login" }}
+{{template "layout/headerscript" }}
+
+<body style="height: 100%;">
+    <div class="login-container">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-4 container justify-content-center">
+                    <div class="card p-4">
+                        <div class="card-body">
+                            <h3 class="text-center">LOGIN</h4>
+                            {{with .error }}
+                            <h5 class="text-center text-danger">{{.}}</h5>
+                            {{ end }}
+                            <form action='/login' method="POST">
+                                <div class="form-group mb-3">
+                                    <label for="login_email">Email address</label>
+                                    <input type="text" class="form-control" name="email" value="{{.values.Email}}">
+                                    {{with .errors.Email }}
+                                        <small class="form-text text-danger">{{.}}</small>
+                                    {{ end }}
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="login_password">Password</label>
+                                    <input type="password" class="form-control" name="password">
+                                    {{with .errors.Password }}
+                                        <small class="form-text text-danger">{{.}}</small>
+                                    {{ end }}
+                                </div>
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-outline-info">Submit</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+{{ end }}
