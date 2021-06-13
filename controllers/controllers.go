@@ -1,10 +1,17 @@
 package controllers
 
 import (
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/release-trackers/gin/cmd"
+	"gorm.io/gorm"
 )
+
+// NewReleaseHandler ..
+func NewHandler(app *cmd.Application) *App {
+	return &App{app}
+}
 
 func QueryOffset(c *gin.Context) int {
 	offset := c.Request.PostForm.Get("start")
@@ -16,7 +23,7 @@ func QueryOffset(c *gin.Context) int {
 }
 
 func QueryLimit(c *gin.Context) int {
-	limit :=  c.Request.PostForm.Get("length")
+	limit := c.Request.PostForm.Get("length")
 	limitInt, err := strconv.Atoi(limit)
 	if err != nil {
 		limitInt = 25
@@ -28,7 +35,7 @@ func QueryOrder(c *gin.Context, columnOrder string) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		query := db
 		if columnOrder != "" {
-			query = query.Order("id "+columnOrder)
+			query = query.Order("id " + columnOrder)
 		}
 		return query
 	}

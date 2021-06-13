@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/providers/bitbucket"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 )
 type Sessions struct {
 	*bitbucket.Session
@@ -28,7 +30,7 @@ type BranchRestriction struct{
 	Kind     string            `json:"kind"`
 	FullSlug string            `json:"full_slug"`
 	Name     string            `json:"name"`
-	Users    []Users          `json:"users"`
+	Users    []Users          	`json:"users"`
 	Pattern  string				`json:"pattern"`
 }
 type Users struct {
@@ -68,14 +70,16 @@ func GetAccessToken(token_code string) *bitbucket.Session {
 	return se
 }
 
-func (se *Sessions)CreateBranch(c *gin.Context, branchType string, name string)  {
-	log.Printf("acess ---- %+v : ", se.AccessToken)
+func CreateBranch(c *gin.Context, branchType string, name string, reviewers string) {
+	session := sessions.Default(c)
+	AccessToken :=  fmt.Sprintf("%v", session.Get("access_token"))
+	log.Printf("acess ---- %+v : ", AccessToken)
 	branch := branchType+"/"+name
 	request := Payload{Name: branch, Target: Target{Hash: "b678d75ac143df62c6371d2f1cd01ea6d3585d31"}}
 	apiUrl := baseURL+branchCreationUrl
 	payloadBytes, _ := json.Marshal(request)
 	body := bytes.NewReader(payloadBytes)
-	resp := PostRequest(apiUrl, body, se.AccessToken)
+	resp := PostRequest(apiUrl, body, AccessToken)
 	defer resp.Body.Close()
 	if resp.StatusCode != 201 {
 		fmt.Errorf("unknown error, status code: %d", resp.StatusCode)
@@ -86,20 +90,19 @@ func (se *Sessions)CreateBranch(c *gin.Context, branchType string, name string) 
 		log.Print(errs)
 	}
 	log.Printf("branch Name %+v : ", createdBranch)
-	branchRestrictions(se.AccessToken, branch)
+	branchRestrictions(AccessToken, branch, reviewers)
 }
 
-func branchRestrictions(token string, branchName string)  {
+func branchRestrictions(token string, branchName string, ReviewerList string)  {
 	apiUrl := baseURL+branchRestriction
-	a := Users{
-		Username: "roopa1118",
-	}
-	b := Users{
-		Username: "satyapraneelh",
-	}
+	reviewers := strings.Split(ReviewerList, ",")
 	var arrayOfUsers  []Users
-	arrayOfUsers =append(arrayOfUsers, a)
-	arrayOfUsers =append(arrayOfUsers, b)
+	for _, reviewer := range reviewers {
+		user := Users{Username: reviewer}
+		log.Printf("user detail %v", user)
+		arrayOfUsers = append(arrayOfUsers, user)
+	}
+	log.Printf(" array of users %+v", arrayOfUsers)
 	request := BranchRestriction{
 		Kind: "restrict_merges",
 		Owner: "roopajoshyam",

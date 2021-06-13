@@ -1,19 +1,14 @@
 package repositories
 
 import (
+	"github.com/release-trackers/gin/cmd/bitbucket"
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/cmd"
 	"github.com/release-trackers/gin/models"
-	"log"
+	"github.com/release-trackers/gin/notifications/mails"
 )
-
-var (
-	//db = database.InitConnection()
-)
-
-type App struct {
-	*cmd.Application
-}
 
 // NewReleaseHandler ..
 func NewReleaseHandler(app *cmd.Application) *App {
@@ -43,15 +38,17 @@ func (app *App) CreateRelease(c *gin.Context, release models.Release, projectIds
 			log.Print(errMessage)
 		}
 		log.Printf("reviewws : %v", project.ReviewerList)
-		cmd.TriggerMail(project.ReviewerList, release.Name, project.Name)
+		// cmd.TriggerMail(project.ReviewerList, release.Name, project.Name)
+		go mails.SendReleaseCreatedMail(&release, project)
+		// mails.SendReleaseCreatedMail(&release, project)
+
+		bitbucket.CreateBranch(c, release.Type, release.Name, project.ReviewerList)
 	}
 
 	return release.ID, errMessage
 }
 
-
-
-func (app *App) GetAllReleases(c *gin.Context, dt models.DataTableValues)  (models.DataResult) {
+func (app *App) GetAllReleases(c *gin.Context, dt models.DataTableValues) models.DataResult {
 	table := "releases"
 	db := app.Db
 	var total, filtered int64
@@ -60,7 +57,7 @@ func (app *App) GetAllReleases(c *gin.Context, dt models.DataTableValues)  (mode
 	query = query.Offset(dt.Offset)
 	query = query.Limit(dt.Limit)
 	query = query.Scopes(dt.Search)
-	query = query.Order("id "+dt.Order)
+	query = query.Order("id " + dt.Order)
 
 	if err := query.Debug().Find(&release).Error; err != nil {
 		c.AbortWithStatus(404)
@@ -91,9 +88,9 @@ func (app *App) GetReleaseProjects(release models.Release) ([]*models.Project, [
 	projrows, err := projectRecords.Rows()
 	projectArr := []*models.Project{}
 	var reviewers []string
-	for  projrows.Next() {
-		releaseProject:= &models.ReleaseProject{}
-		project:= &models.Project{}
+	for projrows.Next() {
+		releaseProject := &models.ReleaseProject{}
+		project := &models.Project{}
 		err := db.Debug().ScanRows(projrows, releaseProject)
 		app.Db.Debug().First(project, releaseProject.ProjectId)
 		if err != nil {
@@ -123,18 +120,17 @@ func (app *App) GetProjects(c *gin.Context) ([]*models.Project, error) {
 
 	projectArr := []*models.Project{}
 	for rows.Next() {
-		project:= &models.Project{}
+		project := &models.Project{}
 		err := db.Debug().ScanRows(rows, &project)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		projectArr=append(projectArr, project)
+		projectArr = append(projectArr, project)
 	}
 	return projectArr, err
 }
 
-
-func (app *App)GetReviewers(c *gin.Context, projectIds []int) ([]string , error) {
+func (app *App) GetReviewers(c *gin.Context, projectIds []int) ([]string, error) {
 	db := app.Db
 	projectRecords := db.Table("projects").Select("reviewer_list").Where("id in (?)", projectIds)
 	rows, err := projectRecords.Rows()
@@ -145,12 +141,12 @@ func (app *App)GetReviewers(c *gin.Context, projectIds []int) ([]string , error)
 
 	var reviewers []string
 	for rows.Next() {
-		project:= &models.Project{}
+		project := &models.Project{}
 		err := db.Debug().ScanRows(rows, &project)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		reviewers=append(reviewers, project.ReviewerList)
+		reviewers = append(reviewers, project.ReviewerList)
 	}
 	return reviewers, err
 }
@@ -161,5 +157,5 @@ func (app *App) GetReleases(c *gin.Context) (models.Release, []*models.Project, 
 	app.Db.First(&release, id)
 	log.Printf("id : %v", release.Name)
 	releaseProjects, reviewerList, errs := app.GetReleaseProjects(release)
-	return release, releaseProjects, reviewerList,errs
+	return release, releaseProjects, reviewerList, errs
 }

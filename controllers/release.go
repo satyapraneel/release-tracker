@@ -2,26 +2,23 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/gin-contrib/sessions"
 	"github.com/release-trackers/gin/cmd/bitbucket"
 	"log"
 	"net/http"
 	"strings"
 	"time"
 
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/cmd"
 	"github.com/release-trackers/gin/models"
 	"github.com/release-trackers/gin/repositories"
-	"strconv"
 )
 
 type App struct {
 	*cmd.Application
-}
-
-// NewReleaseHandler ..
-func NewReleaseHandler(app *cmd.Application) *App {
-	return &App{ app}
 }
 
 func (app *App) GetIndex(c *gin.Context) {
@@ -42,9 +39,9 @@ func (app *App) GetListOfReleases(c *gin.Context) {
 	}
 	dtValues := models.DataTableValues{
 		Offset: QueryOffset(c),
-		Limit: QueryLimit(c),
+		Limit:  QueryLimit(c),
 		Search: SearchScope(c),
-		Order: columnOrder,
+		Order:  columnOrder,
 	}
 	log.Printf("length %v: ", dtValues.Order)
 	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
@@ -54,7 +51,6 @@ func (app *App) GetListOfReleases(c *gin.Context) {
 	c.JSON(http.StatusOK, releases)
 }
 
-
 func (app *App) CreateReleaseForm(c *gin.Context) {
 	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
 	projects, err := releaseRepsitoryHandler.GetProjects(c)
@@ -63,8 +59,8 @@ func (app *App) CreateReleaseForm(c *gin.Context) {
 		//	return
 	}
 	c.HTML(http.StatusOK, "release/create", gin.H{
-		"title": "Create release",
-		"projects" : projects,
+		"title":    "Create release",
+		"projects": projects,
 	})
 }
 
@@ -80,10 +76,10 @@ func (app *App) ViewReleaseForm(c *gin.Context) {
 		//	return
 	}
 	c.HTML(http.StatusOK, "release/view", gin.H{
-		"title": "View release",
-		"projects" : projects,
-		"releases" : releases,
-		"reviewers":reviewers,
+		"title":     "View release",
+		"projects":  projects,
+		"releases":  releases,
+		"reviewers": reviewers,
 	})
 }
 
@@ -140,7 +136,7 @@ func (app *App) covertStringToIntArray(projectIds []string) []int {
 	return convertedProjectIds
 }
 
-func (app *App) GetProjectReviewerList(c *gin.Context)  {
+func (app *App) GetProjectReviewerList(c *gin.Context) {
 	projects := c.Query("ids")
 	s := strings.Split(projects, ",")
 	convertedProjectIds := app.covertStringToIntArray(s)
@@ -149,7 +145,7 @@ func (app *App) GetProjectReviewerList(c *gin.Context)  {
 	if err != nil {
 		c.JSON(http.StatusNoContent, gin.H{"status": "failed", "message": "No list found"})
 	}
-	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "List found", "data":revList})
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "List found", "data": revList})
 	return
 }
 
@@ -161,12 +157,15 @@ func (app *App) GetAccessToken(c *gin.Context)  {
 	}
 	code := c.Request.PostForm.Get("code")
 	fmt.Printf("code entered %v", code)
-	accessToken := bitbucket.GetAccessToken(code)
-	fmt.Printf("access token controller %v", accessToken)
-	session := &bitbucket.Sessions{Session: accessToken}
-	session.CreateBranch(c,"hotfix", "bug_fix_13")
-	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "access token", "data":accessToken})
-	return
+	tokenSession := bitbucket.GetAccessToken(code)
+	fmt.Printf("access token controller %v", tokenSession.AccessToken)
+	session := sessions.Default(c)
+	session.Set("access_token", tokenSession.AccessToken)
+	session.Save()
+	//session.CreateBranch(c,"hotfix", "bug_fix_13")
+	//c.JSON(http.StatusOK, gin.H{"status": "success", "message": "access token", "data":tokenSession.AccessToken})
+	//return
+	c.Redirect(http.StatusFound, "/release/index")
 }
 
 func (app *App)GetAuthCode(c *gin.Context)  {

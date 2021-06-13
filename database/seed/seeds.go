@@ -1,65 +1,84 @@
 package seed
 
-import "gorm.io/gorm"
+import (
+	"github.com/release-trackers/gin/repositories"
+	"gorm.io/gorm"
+)
+
+type Seed struct {
+	Name string
+	Run  func(*gorm.DB) error
+}
 
 func All() []Seed {
 	return []Seed{
-		Seed{
+		{
 			Name: "CreateProject  Ecommerce",
 			Run: func(db *gorm.DB) error {
 				CreateProject(db,
 					"Ecommerce",
 					"http://bitbucket",
 					"roopa@gmail.com",
-					"T-1",
-					"T-2",
-					"T-3",
-					"T-5",
-					)
+					"1",
+					"2",
+					"3",
+					"5",
+				)
 				return nil
 			},
 		},
-		Seed{
+		{
 			Name: "CreateProject ReactNative",
 			Run: func(db *gorm.DB) error {
 				CreateProject(db,
 					"ReactNative",
 					"http://bitbucket",
 					"roopa@gmail.com",
-					"T-1",
-					"T-2",
-					"T-3",
-					"T-5",
+					"1",
+					"2",
+					"3",
+					"5",
 				)
 				return nil
 			},
 		},
-		Seed{
+		{
 			Name: "CreateProject React",
 			Run: func(db *gorm.DB) error {
 				CreateProject(db,
 					"React",
 					"http://bitbucket",
 					"roopa@gmail.com",
-					"T-1",
-					"T-2",
-					"T-3",
-					"T-5",
+					"1",
+					"2",
+					"3",
+					"5",
 				)
 				return nil
 			},
 		},
-		Seed{
+		{
 			Name: "CreateProject Hybris",
 			Run: func(db *gorm.DB) error {
 				CreateProject(db,
 					"Hybris",
 					"http://bitbucket",
 					"roopa@gmail.com",
-					"T-1",
-					"T-2",
-					"T-3",
-					"T-5",
+					"1",
+					"2",
+					"3",
+					"5",
+				)
+				return nil
+			},
+		},
+		{
+			Name: "CreateUser Admin User",
+			Run: func(db *gorm.DB) error {
+				CreateUser(db,
+					"admin",
+					"admin@admin.com",
+					repositories.PasswordHash("password"),
 				)
 				return nil
 			},
