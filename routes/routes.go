@@ -30,6 +30,7 @@ func RouterGin(app *cmd.Application) *gin.Engine {
 	})
 	api := router.Group("/release")
 	{
+		//api.Any("/bitbuket", releaseHandler.GetBitbucket)
 		api.GET("/index", releaseHandler.GetIndex)
 		api.POST("/list", releaseHandler.GetListOfReleases)
 		api.GET("/create", releaseHandler.CreateReleaseForm)
@@ -38,6 +39,12 @@ func RouterGin(app *cmd.Application) *gin.Engine {
 		api.GET("/show/:id", releaseHandler.ViewReleaseForm)
 		//api.PUT("/users/:id", user.UpdateUser)
 		//api.DELETE("/users/:id", user.DeleteUser)
+	}
+
+	oauthapi := router.Group("/oauth")
+	{
+		oauthapi.GET("/index", releaseHandler.GetAuthCode)
+		oauthapi.POST("/code", releaseHandler.GetAccessToken)
 	}
 	router.NoRoute(func(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)

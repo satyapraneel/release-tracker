@@ -1,0 +1,33 @@
+{{ define "oauth/create" }}
+    {{template "layout/top" }}
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Verify Oauth</h1>
+        </div>
+
+        <!--    <h2>Section title</h2>-->
+        <div class="container" >
+            <div class="table-responsive row justify-content-md-center">
+                <form action='/oauth/code' method='POST' >
+                    <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+                    <div class="form-group col-md-auto">
+                        <label for="code" class="col-sm-3 col-form-label">Enter Code:</label>
+                        <div class="col-sm-6">
+                            <input type='text' name="code" class="form-control" id="code" value="{{.code}}" readonly />
+                        </div>
+                    </div></br>
+                    <div class="form-group">
+                        <div class="col-sm-4 col-sm-offset-2">
+                            <button
+                                    class="btn btn-outline-success"
+                                    type="submit">Authorize Bitbucket
+                            </button>
+                            <button type='button'  class="btn btn-outline-secondary" onclick="window.location.href='/release/index'"> Cancel </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    {{template "layout/bottom" }}
+{{ end }}
