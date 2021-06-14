@@ -1,0 +1,63 @@
+{{ define "release/view" }}
+    {{template "layout/top" }}
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">View Release</h1>
+        </div>
+
+        <!--    <h2>Section title</h2>-->
+        <div class="table-responsive row">
+            <form>
+                <div class="form-group row">
+                    <label for="name" class="col-sm-2 col-form-label">Release Name:</label>
+                    <div class="col-sm-6">
+                        <input type='text' name='name' class="form-control" id="name" value="{{.releases.Name}}" readonly>
+                    </div>
+                </div></br>
+                <div class="form-group row">
+                    <label for="type" class="col-sm-2 col-form-label">Release Type:</label>
+                    <div class="col-sm-6">
+                        <select name='type' class="form-control" id="type" readonly="">
+                            <option value="{{.releases.Type}}" selected> {{.releases.Type}}</option>
+                        </select>
+                    </div>
+                </div></br>
+                <div class="form-group row">
+                    <label for="projects" class="col-sm-2 control-label">Project:</label>
+                    <div class="col-sm-6">
+                        <select name='projects' class="form-control" id="projects" multiple="multiple" readonly="">
+                            {{range $project := .projects}}
+                                <option value="{{ $project.ID}}" selected> {{$project.Name}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                </div></br>
+                <div class="form-group row reviewers_view" >
+                    <label for="reviewers" class="col-sm-2 col-form-label">Reviewers:</label>
+                    <div class="col-sm-6">
+                        <textarea id="reviewers_view" name="reviewers_view" rows="3" cols="78" readonly>{{.reviewers}}</textarea>
+                    </div>
+                </div></br>
+                <div class="form-group row">
+                    <label for="target_date" class="col-sm-2 control-label">Release Date:</label>
+                    <div class="col-sm-6">
+                        <input type="date" class="form-control" name="target_date" id="target_date" value="{{ .releases.TargetDate.Format "2006-01-02"}}"></div>
+                </div>
+                </br>
+                <div class="form-group row">
+                    <label for="owner" class="col-sm-2 control-label">Owner:</label>
+                    <div class="col-sm-6">
+                        <input type='email' name='owner' class="form-control" id="owner" value="{{.releases.Owner}}" readonly>
+                    </div>
+                </div>
+                <br><br>
+                <div class="form-group row">
+                    <div class="col-sm-4 col-sm-offset-4">
+                        <button type='button'  class="btn btn-outline-secondary" onclick="window.location.href='/release/index'"> Cancel </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+    {{template "layout/bottom" }}
+{{ end }}

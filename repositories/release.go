@@ -1,80 +1,169 @@
 package repositories
 
 import (
-	"errors"
-	"github.com/gin-gonic/gin"
-	"github.com/release-trackers/gin/database"
-	"github.com/release-trackers/gin/models"
+	"github.com/release-trackers/gin/cmd/bitbucket"
 	"log"
-	"net/http"
-	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/release-trackers/gin/cmd"
+	"github.com/release-trackers/gin/models"
+	"github.com/release-trackers/gin/notifications/mails"
 )
 
-var (
-	errInvalidBody     = errors.New("Invalid request body")
-	errNotExist			= errors.New("No records found")
-	db = database.InitConnection()
-)
-func CreateRelease(c *gin.Context) {
-	log.Print("in create user method")
-	// Get DB from Mysql Config
-	release := models.Release{}
+// NewReleaseHandler ..
+func NewReleaseHandler(app *cmd.Application) *App {
+	return &App{app}
+}
+
+func (app *App) CreateRelease(c *gin.Context, release models.Release, projectIds []int) (uint, error) {
 	err := c.Bind(&release)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": errInvalidBody.Error()})
-		return
+		log.Print(err)
 	}
-	log.Print("in create user method 2")
-	release.ID=4
-	release.Name="may_19_release"
-	release.Type="new"
-	release.Owner="roopa@gmail.com"
-	release.TargetDate=time.Now()
-	log.Print("release", release)
-
-	createdRelease := db.Debug().Create(&release)
+	createdRelease := app.Db.Debug().Create(&release)
 	var errMessage = createdRelease.Error
 	log.Print("error release", errMessage)
 
 	if createdRelease.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": errMessage})
-		return
+		log.Print(errMessage)
+
 	}
-	releaseProjectData := db.Model(&models.ReleaseProject{}).Create([]map[string]interface{}{
-		{"ReleaseId": release.ID, "ProjectId": 1},
-		{"ReleaseId": release.ID, "ProjectId": 2},
-	})
-	if releaseProjectData.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": errMessage})
-		return
+	project := &models.Project{}
+	for _, projectId := range projectIds {
+		app.Db.Create(&models.ReleaseProject{
+			ReleaseId: release.ID, ProjectId: uint(projectId),
+		})
+		fetchProject := app.Db.Debug().Where("id = ?", projectId).Find(project)
+		if fetchProject.Error != nil {
+			log.Print(errMessage)
+		}
+		log.Printf("reviewws : %v", project.ReviewerList)
+		// cmd.TriggerMail(project.ReviewerList, release.Name, project.Name)
+		go mails.SendReleaseCreatedMail(&release, project)
+		// mails.SendReleaseCreatedMail(&release, project)
+
+		bitbucket.CreateBranch(c, release.Type, release.Name, project.ReviewerList)
 	}
-	c.JSON(http.StatusOK, gin.H{"status": "success", "release created successful": &release})
+
+	return release.ID, errMessage
 }
 
-func GetAllReleases (c *gin.Context)  ([]*models.Release, error) {
+func (app *App) GetAllReleases(c *gin.Context, dt models.DataTableValues) models.DataResult {
+	table := "releases"
+	db := app.Db
+	var total, filtered int64
 	var release []models.Release
-	records := db.Debug().Find(&release)
+	query := db.Table(table)
+	query = query.Offset(dt.Offset)
+	query = query.Limit(dt.Limit)
+	query = query.Scopes(dt.Search)
+	query = query.Order("id " + dt.Order)
+
+	if err := query.Debug().Find(&release).Error; err != nil {
+		c.AbortWithStatus(404)
+		log.Println(err)
+	}
+
+	// Filtered data count
+	query.Table(table).Count(&filtered)
+
+	// Total data count
+	db.Table(table).Count(&total)
+
+	result := models.DataResult{
+		total,
+		filtered,
+		release,
+	}
+
+	return result
+
+}
+
+func (app *App) GetReleaseProjects(release models.Release) ([]*models.Project, []string, error) {
+	db := app.Db
+	projects := []models.ReleaseProject{}
+	log.Printf("release Id : %+v", release.ID)
+	projectRecords := db.Debug().Where("release_id = ?", release.ID).Find(&projects)
+	projrows, err := projectRecords.Rows()
+	projectArr := []*models.Project{}
+	var reviewers []string
+	for projrows.Next() {
+		releaseProject := &models.ReleaseProject{}
+		project := &models.Project{}
+		err := db.Debug().ScanRows(projrows, releaseProject)
+		app.Db.Debug().First(project, releaseProject.ProjectId)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		log.Printf("%+v\n", project.Name)
+		projectArr = append(projectArr, project)
+		reviewers = append(reviewers, project.ReviewerList)
+	}
+
+	return projectArr, reviewers, err
+}
+
+func (app *App) GetProjects(c *gin.Context) ([]*models.Project, error) {
+	db := app.Db
+	var project []models.Project
+	records := db.Debug().Find(&project)
 	if records.Error != nil {
 		log.Fatalln(records.Error)
 	}
-	log.Printf("%d rows found.", records.RowsAffected)
+	//log.Printf("%d project rows found.", records.RowsAffected)
 	rows, err := records.Rows()
 	if err != nil {
 		log.Fatalln(err)
 	}
 	defer rows.Close()
 
-	releaseArr := []*models.Release{}
-
+	projectArr := []*models.Project{}
 	for rows.Next() {
-		release:= &models.Release{}
-		err := db.Debug().ScanRows(rows, &release)
+		project := &models.Project{}
+		err := db.Debug().ScanRows(rows, &project)
 		if err != nil {
 			log.Fatalln(err)
 		}
-
-		log.Printf("%+v\n", release)
-		releaseArr=append(releaseArr, release)
+		projectArr = append(projectArr, project)
 	}
-	return releaseArr, nil
+	return projectArr, err
+}
+
+func (app *App) GetReviewers(c *gin.Context, projectIds []int) ([]string, error) {
+	db := app.Db
+	projectRecords := db.Table("projects").Select("reviewer_list").Where("id in (?)", projectIds)
+	rows, err := projectRecords.Rows()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer rows.Close()
+
+	var reviewers []string
+	for rows.Next() {
+		project := &models.Project{}
+		err := db.Debug().ScanRows(rows, &project)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		reviewers = append(reviewers, project.ReviewerList)
+	}
+	return reviewers, err
+}
+
+func (app *App) GetReleases(c *gin.Context) (models.Release, []*models.Project, []string, error) {
+	id := c.Param("id")
+	release := models.Release{}
+	app.Db.First(&release, id)
+	log.Printf("id : %v", release.Name)
+	releaseProjects, reviewerList, errs := app.GetReleaseProjects(release)
+	return release, releaseProjects, reviewerList, errs
+}
+
+func (app *App) GetLatestReleases() (models.Release, []*models.Project, []string, error) {
+	release := models.Release{}
+	app.Db.Last(&release)
+	log.Printf("id : %v", release.Name)
+	releaseProjects, reviewerList, errs := app.GetReleaseProjects(release)
+	return release, releaseProjects, reviewerList, errs
 }

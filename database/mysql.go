@@ -5,46 +5,64 @@ import (
 	"log"
 
 	"github.com/release-trackers/gin/config"
+	"github.com/release-trackers/gin/database/seed"
 	"github.com/release-trackers/gin/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 func InitConnection() *gorm.DB {
-	dsn := getDbConnectionString()
+	dsn := GetDbConnectionString()
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("DB connection error")
 	}
-
-	log.Print("DB Connection successful")
-	// Migrate the schema
-	db.AutoMigrate(
-		&models.Users{},
-		&models.Release{},
-		&models.Project{},
-		&models.ReleaseProject{},
-	)
+	// log.Print("DB Connection successful")
 
 	//For running project seeder
 	//comment the code after seeding
-	// for _, seeds := range seed.All() {
-	// 	if err := seeds.Run(db); err != nil {
-	// 		log.Fatalf("Running seed '%s', failed with error: %s", seeds.Name, err)
-	// 	}
-	// }
 
 	return db
 }
 
-func getDbConnectionString() string {
-	conf := config.New()
+func DbMigrate() {
+	db := InitConnection()
+	// Migrate the schema
+	err := db.AutoMigrate(
+		&models.Users{},
+		&models.Release{},
+		&models.Project{},
+		&models.ReleaseProject{},
+		&models.DLS{},
+		&models.DlsProjects{},
+	)
+
+	if err != nil {
+		log.Printf("%s", err)
+		return
+	}
+	log.Printf("Migration is successful!")
+
+}
+
+func DbSeed() {
+	db := InitConnection()
+	for _, seeds := range seed.All() {
+		if err := seeds.Run(db); err != nil {
+			log.Fatalf("Running seed '%s', failed with error: %s", seeds.Name, err)
+		}
+	}
+	log.Printf("Seeding is successful!")
+}
+
+func GetDbConnectionString() string {
+	conf := config.New().Database
 	return fmt.Sprintf(
 		"%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
-		conf.Database.User,
-		conf.Database.Password,
-		conf.Database.Host,
-		conf.Database.Port,
-		conf.Database.DBName,
+		conf.User,
+		conf.Password,
+		conf.Host,
+		conf.Port,
+		conf.DBName,
 	)
 }
