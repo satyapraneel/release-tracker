@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"github.com/release-trackers/gin/cmd/bitbucket"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -40,6 +41,8 @@ func (app *App) CreateRelease(c *gin.Context, release models.Release, projectIds
 		// cmd.TriggerMail(project.ReviewerList, release.Name, project.Name)
 		go mails.SendReleaseCreatedMail(&release, project)
 		// mails.SendReleaseCreatedMail(&release, project)
+
+		bitbucket.CreateBranch(c, release.Type, release.Name, project.ReviewerList)
 	}
 
 	return release.ID, errMessage

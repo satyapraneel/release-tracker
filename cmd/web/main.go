@@ -46,7 +46,7 @@ func handle() {
 	}
 
 	//bitbucket.GetPr()
-	//bitbucket.CreatePr()
+	//bitbucket.AuthCredentials(nil)
 	//cmd.TriggerMail()
 	app := &cmd.Application{
 		Db:   database.InitConnection(),

@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/gin-contrib/sessions"
+	"github.com/release-trackers/gin/cmd/bitbucket"
 	"log"
 	"net/http"
 	"strings"
@@ -20,7 +22,10 @@ type App struct {
 }
 
 func (app *App) GetIndex(c *gin.Context) {
-	c.HTML(http.StatusOK, "release/home", gin.H{})
+	oauthUrl := bitbucket.Authrorize()
+	c.HTML(http.StatusOK, "release/home", gin.H{
+		"url":oauthUrl,
+	})
 }
 func (app *App) GetListOfReleases(c *gin.Context) {
 	var columnOrder string
@@ -118,11 +123,6 @@ func (app *App) CreateRelease(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/release/index")
 }
 
-//func (app *App)SendEmailWithProjectCreated(releaseId uint)  {
-//		release := &models.Release{}
-//
-//
-//}
 
 func (app *App) covertStringToIntArray(projectIds []string) []int {
 	var convertedProjectIds = []int{}
@@ -147,4 +147,30 @@ func (app *App) GetProjectReviewerList(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "List found", "data": revList})
 	return
+}
+
+func (app *App) GetAccessToken(c *gin.Context)  {
+	err := c.Request.ParseForm()
+	if err != nil {
+		http.Error(c.Writer, "Bad Request", http.StatusBadRequest)
+		return
+	}
+	code := c.Request.PostForm.Get("code")
+	fmt.Printf("code entered %v", code)
+	tokenSession := bitbucket.GetAccessToken(code)
+	fmt.Printf("access token controller %v", tokenSession.AccessToken)
+	session := sessions.Default(c)
+	session.Set("access_token", tokenSession.AccessToken)
+	session.Save()
+	//session.CreateBranch(c,"hotfix", "bug_fix_13")
+	//c.JSON(http.StatusOK, gin.H{"status": "success", "message": "access token", "data":tokenSession.AccessToken})
+	//return
+	c.Redirect(http.StatusFound, "/release/index")
+}
+
+func (app *App)GetAuthCode(c *gin.Context)  {
+	code := c.Query("code")
+	c.HTML(http.StatusOK, "oauth/create", gin.H{
+		"code" : code,
+	})
 }

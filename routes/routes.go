@@ -33,7 +33,6 @@ func RouterGin(app *cmd.Application) {
 	router.Use(middleware.ParseForm()).POST("/login", handler.Login)
 	router.GET("/logout", controllers.Logout)
 	auth := router.Group("/")
-
 	auth.Use(middleware.Authentication())
 	{
 		auth.GET("/", func(c *gin.Context) {
@@ -45,17 +44,23 @@ func RouterGin(app *cmd.Application) {
 				"flashes": flashes,
 			})
 		})
-		api := auth.Group("/release")
-		{
-			api.GET("/index", handler.GetIndex)
-			api.POST("/list", handler.GetListOfReleases)
-			api.GET("/create", handler.CreateReleaseForm)
-			api.POST("/store", handler.CreateRelease)
-			api.GET("/getReviewers", handler.GetProjectReviewerList)
-			api.GET("/show/:id", handler.ViewReleaseForm)
-			//api.PUT("/users/:id", user.UpdateUser)
-			//api.DELETE("/users/:id", user.DeleteUser)
-		}
+	}
+	api := auth.Group("/release")
+	{
+		api.GET("/index", handler.GetIndex)
+		api.POST("/list", handler.GetListOfReleases)
+		api.GET("/create", handler.CreateReleaseForm)
+		api.POST("/store", handler.CreateRelease)
+		api.GET("/getReviewers", handler.GetProjectReviewerList)
+		api.GET("/show/:id", handler.ViewReleaseForm)
+		//api.PUT("/users/:id", user.UpdateUser)
+		//api.DELETE("/users/:id", user.DeleteUser)
+	}
+
+	oauthapi := auth.Group("/oauth")
+	{
+		oauthapi.GET("/index", handler.GetAuthCode)
+		oauthapi.POST("/code", handler.GetAccessToken)
 	}
 	router.NoRoute(func(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
