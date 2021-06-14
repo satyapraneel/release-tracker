@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/cmd"
 	"github.com/release-trackers/gin/controllers"
@@ -33,12 +34,17 @@ func RouterGin(app *cmd.Application) {
 	router.GET("/logout", controllers.Logout)
 	auth := router.Group("/")
 	auth.Use(middleware.Authentication())
-
-	auth.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "home", gin.H{
-			"title": "Release tracker",
+	{
+		auth.GET("/", func(c *gin.Context) {
+			session := sessions.Default(c)
+			flashes := session.Flashes()
+			session.Save()
+			c.HTML(http.StatusOK, "home", gin.H{
+				"title":   "Release tracker",
+				"flashes": flashes,
+			})
 		})
-	})
+	}
 	api := auth.Group("/release")
 	{
 		api.GET("/index", handler.GetIndex)

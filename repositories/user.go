@@ -16,8 +16,7 @@ func PasswordHash(password string) string {
 func (app *App) AuthenticateUser(email string, password string) (models.Users, bool) {
 	user := models.Users{}
 	app.Db.Where("email = ?", email).First(&user)
-	var hashedPassword []byte
-	hashedPassword = []byte(user.Password)
+	hashedPassword := []byte(user.Password)
 	err := bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
 	if err != nil {
 		return models.Users{}, true

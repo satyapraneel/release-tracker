@@ -21,6 +21,7 @@ func (app *App) Login(c *gin.Context) {
 	}
 	session.Set("id", user.ID)
 	session.Set("email", user.Email)
+	session.AddFlash("Logged in successful.")
 	session.Save()
 	c.Redirect(http.StatusFound, "/")
 

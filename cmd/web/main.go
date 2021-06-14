@@ -8,6 +8,7 @@ import (
 	"github.com/release-trackers/gin/cmd"
 	"github.com/release-trackers/gin/database"
 	"github.com/release-trackers/gin/routes"
+	"github.com/release-trackers/gin/schedular"
 )
 
 func main() {
@@ -48,5 +49,6 @@ func handle() {
 		Db:   database.InitConnection(),
 		Name: "roopa",
 	}
+	schedular.Run(app)
 	routes.RouterGin(app)
 }

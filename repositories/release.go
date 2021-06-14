@@ -179,3 +179,10 @@ func (app *App) GetReviewerUserNames(c *gin.Context, reviewerList string) ([]str
 	}
 	return usernames
 }
+func (app *App) GetLatestReleases() (models.Release, []*models.Project, []string, error) {
+	release := models.Release{}
+	app.Db.Last(&release)
+	log.Printf("id : %v", release.Name)
+	releaseProjects, reviewerList, errs := app.GetReleaseProjects(release)
+	return release, releaseProjects, reviewerList, errs
+}

@@ -7,6 +7,10 @@
               <div class="container justify-content-center">
                   <div class="card p-4">
                       <div class="card-body">
+
+                        {{ range $f := .flashes }}
+                          <div class="alert alert-success">{{ $f }}</div>
+                          {{ end }}
                         <h3>Welcome to Release Tracker</h3>
                       </div>
                   </div>
