@@ -44,9 +44,6 @@ func handle() {
 		}
 	}
 
-	//bitbucket.GetPr()
-	//bitbucket.AuthCredentials(nil)
-	//cmd.TriggerMail()
 	app := &cmd.Application{
 		Db:   database.InitConnection(),
 		Name: "roopa",
