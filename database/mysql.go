@@ -33,6 +33,8 @@ func DbMigrate() {
 		&models.Release{},
 		&models.Project{},
 		&models.ReleaseProject{},
+		&models.DLS{},
+		&models.DlsProjects{},
 	)
 
 	if err != nil {

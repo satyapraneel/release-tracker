@@ -83,5 +83,25 @@ func All() []Seed {
 				return nil
 			},
 		},
+		{
+			Name: "Create DLs User",
+			Run: func(db *gorm.DB) error {
+				CreateDls(db,
+					"satyapraneel",
+					"satyapraneel@gmail.com",
+				)
+				return nil
+			},
+		},
+		{
+			Name: "Map DLs User",
+			Run: func(db *gorm.DB) error {
+				CreateDlsProject(db,
+					1,
+					1,
+				)
+				return nil
+			},
+		},
 	}
 }

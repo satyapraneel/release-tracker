@@ -156,3 +156,11 @@ func (app *App) GetReleases(c *gin.Context) (models.Release, []*models.Project, 
 	releaseProjects, reviewerList, errs := app.GetReleaseProjects(release)
 	return release, releaseProjects, reviewerList, errs
 }
+
+func (app *App) GetLatestReleases() (models.Release, []*models.Project, []string, error) {
+	release := models.Release{}
+	app.Db.Last(&release)
+	log.Printf("id : %v", release.Name)
+	releaseProjects, reviewerList, errs := app.GetReleaseProjects(release)
+	return release, releaseProjects, reviewerList, errs
+}
