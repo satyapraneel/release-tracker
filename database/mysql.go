@@ -9,11 +9,19 @@ import (
 	"github.com/release-trackers/gin/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func InitConnection() *gorm.DB {
 	dsn := GetDbConnectionString()
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	enableDbLog := config.New().Database.DBLog
+	gormConfig := &gorm.Config{}
+	if enableDbLog == 1 {
+		gormConfig = &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Info),
+		}
+	}
+	db, err := gorm.Open(mysql.Open(dsn), gormConfig)
 	if err != nil {
 		log.Fatal("DB connection error")
 	}
