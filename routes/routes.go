@@ -28,11 +28,11 @@ func RouterGin(app *cmd.Application) {
 	router.Static("/assets", "./ui/assets")
 	router.LoadHTMLGlob("ui/html/**/*.tmpl")
 	// router.LoadHTMLGlob("ui/html/*.tmpl")
-
 	router.GET("/login", handler.LoginForm)
 	router.Use(middleware.ParseForm()).POST("/login", handler.Login)
 	router.GET("/logout", controllers.Logout)
 	auth := router.Group("/")
+
 	auth.Use(middleware.Authentication())
 	{
 		auth.GET("/", func(c *gin.Context) {
@@ -53,8 +53,6 @@ func RouterGin(app *cmd.Application) {
 		api.POST("/store", handler.CreateRelease)
 		api.GET("/getReviewers", handler.GetProjectReviewerList)
 		api.GET("/show/:id", handler.ViewReleaseForm)
-		//api.PUT("/users/:id", user.UpdateUser)
-		//api.DELETE("/users/:id", user.DeleteUser)
 	}
 
 	oauthapi := auth.Group("/oauth")

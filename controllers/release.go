@@ -113,13 +113,15 @@ func (app *App) CreateRelease(c *gin.Context) {
 	}
 	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
 	createReleaseData, err := releaseRepsitoryHandler.CreateRelease(c, release, convertedProjectIds)
+	session := sessions.Default(c)
 	if err != nil {
 		log.Print(err)
+		session.AddFlash(err, "error")
 	}
-	//if createReleaseData != 0 {
-	//	SendEmailWithProjectCreated(createReleaseData)
-	//}
-	log.Print(createReleaseData)
+	if createReleaseData != 0 {
+		session.AddFlash("Release created successfully", "success")
+	}
+	session.Save()
 	c.Redirect(http.StatusFound, "/release/index")
 }
 

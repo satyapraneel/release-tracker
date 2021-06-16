@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 )
 type Sessions struct {
 	*bitbucket.Session
@@ -70,7 +69,7 @@ func GetAccessToken(token_code string) *bitbucket.Session {
 	return se
 }
 
-func CreateBranch(c *gin.Context, branchType string, name string, reviewers string) {
+func CreateBranch(c *gin.Context, branchType string, name string, reviewers []string) {
 	session := sessions.Default(c)
 	AccessToken :=  fmt.Sprintf("%v", session.Get("access_token"))
 	log.Printf("acess ---- %+v : ", AccessToken)
@@ -93,16 +92,13 @@ func CreateBranch(c *gin.Context, branchType string, name string, reviewers stri
 	branchRestrictions(AccessToken, branch, reviewers)
 }
 
-func branchRestrictions(token string, branchName string, ReviewerList string)  {
+func branchRestrictions(token string, branchName string, ReviewerList []string)  {
 	apiUrl := baseURL+branchRestriction
-	reviewers := strings.Split(ReviewerList, ",")
 	var arrayOfUsers  []Users
-	for _, reviewer := range reviewers {
+	for _, reviewer := range ReviewerList {
 		user := Users{Username: reviewer}
-		log.Printf("user detail %v", user)
 		arrayOfUsers = append(arrayOfUsers, user)
 	}
-	log.Printf(" array of users %+v", arrayOfUsers)
 	request := BranchRestriction{
 		Kind: "restrict_merges",
 		Owner: "roopajoshyam",

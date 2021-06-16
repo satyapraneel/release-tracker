@@ -83,12 +83,35 @@ func All() []Seed {
 				return nil
 			},
 		},
+
+		{
+			Name: "Create Reviewer",
+			Run: func(db *gorm.DB) error {
+				CreateReviwers(db,
+					"Roopa J",
+					"roopa.j@landmarkgroup.in",
+					"roopa1118",
+				)
+				return nil
+			},
+		},
 		{
 			Name: "Create DLs User",
 			Run: func(db *gorm.DB) error {
 				CreateDls(db,
 					"satyapraneel",
 					"satyapraneel@gmail.com",
+				)
+				return nil
+			},
+		},
+		{
+			Name: "Create Reviewer 2",
+			Run: func(db *gorm.DB) error {
+				CreateReviwers(db,
+					"Satya P H",
+					"satyapraneelh@yahoo.com",
+					"satyapraneelh",
 				)
 				return nil
 			},
