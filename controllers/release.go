@@ -151,28 +151,29 @@ func (app *App) GetProjectReviewerList(c *gin.Context) {
 	return
 }
 
-func (app *App) GetAccessToken(c *gin.Context)  {
-	err := c.Request.ParseForm()
-	if err != nil {
-		http.Error(c.Writer, "Bad Request", http.StatusBadRequest)
-		return
-	}
-	code := c.Request.PostForm.Get("code")
-	fmt.Printf("code entered %v", code)
-	tokenSession := bitbucket.GetAccessToken(code)
-	fmt.Printf("access token controller %v", tokenSession.AccessToken)
-	session := sessions.Default(c)
-	session.Set("access_token", tokenSession.AccessToken)
-	session.Save()
-	//session.CreateBranch(c,"hotfix", "bug_fix_13")
-	//c.JSON(http.StatusOK, gin.H{"status": "success", "message": "access token", "data":tokenSession.AccessToken})
-	//return
-	c.Redirect(http.StatusFound, "/release/index")
-}
+//func (app *App) GetAccessToken(c *gin.Context)  {
+//	err := c.Request.ParseForm()
+//	if err != nil {
+//		http.Error(c.Writer, "Bad Request", http.StatusBadRequest)
+//		return
+//	}
+//	code := c.Request.PostForm.Get("code")
+//	fmt.Printf("code entered %v", code)
+//	//tokenSession := bitbucket.GetAccessToken(code)
+//	tokenSession := bitbucket.GetAccessToken(c)
+//	fmt.Printf("access token controller %v", tokenSession.AccessToken)
+//	session := sessions.Default(c)
+//	session.Set("access_token", tokenSession.AccessToken)
+//	session.Save()
+//	//session.CreateBranch(c,"hotfix", "bug_fix_13")
+//	//c.JSON(http.StatusOK, gin.H{"status": "success", "message": "access token", "data":tokenSession.AccessToken})
+//	//return
+//	c.Redirect(http.StatusFound, "/release/index")
+//}
 
-func (app *App)GetAuthCode(c *gin.Context)  {
-	code := c.Query("code")
-	c.HTML(http.StatusOK, "oauth/create", gin.H{
-		"code" : code,
-	})
-}
+//func (app *App)GetAuthCode(c *gin.Context)  {
+//	code := c.Query("code")
+//	c.HTML(http.StatusOK, "oauth/create", gin.H{
+//		"code" : code,
+//	})
+//}

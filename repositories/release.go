@@ -41,6 +41,8 @@ func (app *App) CreateRelease(c *gin.Context, release models.Release, projectIds
 		log.Printf("reviewws : %v", project.ReviewerList)
 		// cmd.TriggerMail(project.ReviewerList, release.Name, project.Name)
 		go mails.SendReleaseCreatedMail(&release, project)
+		//set bitbucket access token in session
+		bitbucket.GetAccessToken(c)
 		// mails.SendReleaseCreatedMail(&release, project)
 		reviewerUserNames := app.GetReviewerUserNames(c, project.ReviewerList)
 		bitbucket.CreateBranch(c, release.Type, release.Name, reviewerUserNames)
