@@ -1,8 +1,10 @@
 package repositories
 
 import (
-	"github.com/release-trackers/gin/cmd/bitbucket"
 	"log"
+	"strings"
+
+	"github.com/release-trackers/gin/cmd/bitbucket"
 
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/cmd"
@@ -41,8 +43,8 @@ func (app *App) CreateRelease(c *gin.Context, release models.Release, projectIds
 		// cmd.TriggerMail(project.ReviewerList, release.Name, project.Name)
 		go mails.SendReleaseCreatedMail(&release, project)
 		// mails.SendReleaseCreatedMail(&release, project)
-
-		bitbucket.CreateBranch(c, release.Type, release.Name, project.ReviewerList)
+		reviewerUserNames := app.GetReviewerUserNames(c, project.ReviewerList)
+		bitbucket.CreateBranch(c, release.Type, release.Name, reviewerUserNames)
 	}
 
 	return release.ID, errMessage
@@ -160,10 +162,41 @@ func (app *App) GetReleases(c *gin.Context) (models.Release, []*models.Project, 
 	return release, releaseProjects, reviewerList, errs
 }
 
-func (app *App) GetLatestReleases() (models.Release, []*models.Project, []string, error) {
-	release := models.Release{}
-	app.Db.Last(&release)
-	log.Printf("id : %v", release.Name)
-	releaseProjects, reviewerList, errs := app.GetReleaseProjects(release)
-	return release, releaseProjects, reviewerList, errs
+func (app *App) GetReviewerUserNames(c *gin.Context, reviewerList string) []string {
+	revi := strings.Split(reviewerList, ",")
+	db := app.Db
+	projectRecords := db.Table("reviewers").Select("user_name").Where("email in (?)", revi)
+	rows, _ := projectRecords.Rows()
+	defer rows.Close()
+
+	var usernames []string
+	for rows.Next() {
+		reviewer := &models.Reviewers{}
+		err := db.Debug().ScanRows(rows, &reviewer)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		usernames = append(usernames, reviewer.UserName)
+	}
+	return usernames
+}
+
+func (app *App) GetLatestReleases() ([]models.Release, error) {
+	releases := []models.Release{}
+	releaseRecords := app.Db.Table("releases").Where("id IN (?)", app.Db.Table("releases").Select("MAX(id)").Group("type"))
+	releaseRows, err := releaseRecords.Rows()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer releaseRows.Close()
+
+	for releaseRows.Next() {
+		release := models.Release{}
+		err := app.Db.Debug().ScanRows(releaseRows, &release)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		releases = append(releases, release)
+	}
+	return releases, err
 }

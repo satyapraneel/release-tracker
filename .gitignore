@@ -8,3 +8,4 @@ tmp.out
 .env
 .idea/
 .vscode
+go.sum

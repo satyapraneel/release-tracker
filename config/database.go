@@ -6,6 +6,7 @@ type DatabaseConfig struct {
 	Port     int
 	DBName   string
 	Host     string
+	DBLog    int
 }
 
 func getDBConfig() *DatabaseConfig {
@@ -15,5 +16,6 @@ func getDBConfig() *DatabaseConfig {
 		Port:     getEnvAsInt("DB_PORT", 3307),
 		Host:     getEnv("DB_HOST", "localhost"),
 		DBName:   getEnv("DB_NAME", "release_tracker"),
+		DBLog:    getEnvAsInt("ENABLE_DB_LOG", 0),
 	}
 }

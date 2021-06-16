@@ -5,30 +5,60 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/release-trackers/gin/models"
 	"github.com/release-trackers/gin/repositories"
 )
 
 func (app *Application) ReleaseDateReminder() {
 	//
 	release := repositories.NewReleaseHandler(app.Application)
-	releases, projects, _, err := release.GetLatestReleases()
+	releases, err := release.GetLatestReleases()
 	if err != nil {
 		log.Println(err.Error())
 		return
 	}
 	//if current date is beta release date send reminder
-
-	for _, project := range projects {
-		log.Printf("project in loop : %v", project.Name)
-		beta, err := strconv.Atoi(project.BetaReleaseDate)
+	for _, releaseRecord := range releases {
+		projects, _, err := release.GetReleaseProjects(releaseRecord)
 		if err != nil {
 			log.Println(err.Error())
 			return
 		}
-		betaReleaseDate := releases.TargetDate.AddDate(0, 0, beta).Truncate(24 * time.Hour)
-		today := time.Now().Truncate(24 * time.Hour)
-		if today.Equal(betaReleaseDate) {
+		for _, project := range projects {
+			app.TriggerReminderMail(releaseRecord, project)
 
 		}
+	}
+}
+
+func (app *Application) TriggerReminderMail(releaseRecord models.Release, project *models.Project) {
+	app.getDate(project.BetaReleaseDate, &releaseRecord, "beta")
+	app.getDate(project.RegressionSignorDate, &releaseRecord, "regression")
+	app.getDate(project.CodeFreezeDate, &releaseRecord, "code_freeze")
+	app.getDate(project.DevCompletionDate, &releaseRecord, "dev_completion")
+}
+
+func (app *Application) getDate(days string, releaseRecord *models.Release, typeOfRelease string) {
+	daysToSubtract, err := strconv.Atoi(days)
+	if err != nil {
+		log.Println(err)
+	}
+	releaseDate := releaseRecord.TargetDate.AddDate(0, 0, -daysToSubtract).Truncate(24 * time.Hour)
+	today := time.Now().Truncate(24 * time.Hour)
+	if today.Equal(releaseDate) {
+		app.TriggerMailIfDate(typeOfRelease, releaseRecord)
+	}
+}
+
+func (app *Application) TriggerMailIfDate(typeOfRelease string, releaseRecord *models.Release) {
+	switch typeOfRelease {
+	case "beta":
+		log.Println("its working")
+	case "regression":
+		log.Println("Regression")
+	case "code_freeze":
+		log.Println("its freeze")
+	case "dev_completion":
+		log.Println("its devcompletion")
 	}
 }
