@@ -55,11 +55,11 @@ func RouterGin(app *cmd.Application) {
 		api.GET("/show/:id", handler.ViewReleaseForm)
 	}
 
-	oauthapi := auth.Group("/oauth")
-	{
-		oauthapi.GET("/index", handler.GetAuthCode)
-		oauthapi.POST("/code", handler.GetAccessToken)
-	}
+	//oauthapi := auth.Group("/oauth")
+	//{
+	//	oauthapi.GET("/index", handler.GetAuthCode)
+	//	oauthapi.POST("/code", handler.GetAccessToken)
+	//}
 	router.NoRoute(func(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
 	})

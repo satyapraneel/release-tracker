@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 )
 type Sessions struct {
 	*bitbucket.Session
@@ -21,6 +22,12 @@ type Payload struct {
 }
 type Target struct {
 	Hash string `json:"hash"`
+}
+
+type BBAccessToken struct {
+	AccessToken string `json:"access_token"`
+	ExpiresIn   int    `json:"expires_in"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 type BranchRestriction struct{
@@ -51,7 +58,7 @@ func Authrorize() string {
 	return s.AuthURL
 }
 
-func GetAccessToken(token_code string) *bitbucket.Session {
+func TestGetAccessToken(token_code string) *bitbucket.Session {
 	provider := bitbucketProvider()
 	se := &bitbucket.Session{}
 	urlParams := url.Values{}
@@ -67,6 +74,34 @@ func GetAccessToken(token_code string) *bitbucket.Session {
 	fmt.Printf("session storeed: %+v \n", se)
 	fmt.Printf("session token: %+v \n", token)
 	return se
+}
+
+func GetAccessToken(c *gin.Context)  {
+	params := url.Values{}
+	params.Add("grant_type", `client_credentials`)
+	body := strings.NewReader(params.Encode())
+
+	req, err := http.NewRequest("POST", "https://bitbucket.org/site/oauth2/access_token", body)
+	if err != nil {
+		// handle err
+	}
+	req.SetBasicAuth(os.Getenv("BITBUCKET_KEY"), os.Getenv("BITBUCKET_SECRET"))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		// handle err
+	}
+	defer resp.Body.Close()
+	access := new(BBAccessToken)
+	errs := json.NewDecoder(resp.Body).Decode(access)
+	if errs != nil {
+		log.Print(errs)
+	}
+	log.Printf("access token %+v : ", access.AccessToken)
+	session := sessions.Default(c)
+	session.Set("access_token", access.AccessToken)
+	session.Save()
 }
 
 func CreateBranch(c *gin.Context, branchType string, name string, reviewers []string) {
