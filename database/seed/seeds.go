@@ -101,6 +101,7 @@ func All() []Seed {
 				CreateDls(db,
 					"satyapraneel",
 					"satyapraneel@gmail.com",
+					"qa",
 				)
 				return nil
 			},
