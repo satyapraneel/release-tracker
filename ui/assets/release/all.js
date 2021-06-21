@@ -86,18 +86,20 @@ $(document).ready(function () {
             ],
         };
         var releaseDt = initDatatable($releasesTable, [
-            {data: 'ID', name: 'ID', 'visible': true, searchable: false},
             {data: 'Name', name: 'Project name', searchable: true,'orderable': false},
             {data: 'bitbucket_url', name: 'Bitbucket Url', searchable: false,'orderable': false},
             {data: 'beta_release_date', name: 'Beta Release', searchable: false,'orderable': false},
             {data: 'regression_signor_date', name: 'Regression Signor', searchable: false,'orderable': false},
             {data: 'code_freeze_date', name: 'Code Freeze', searchable: false,'orderable': false},
             {data: 'dev_completion_date', name: 'Dev Completion','orderable': false},
+            {data: 'Status', name: 'Status', 'visible': true, searchable: false, "render": function (data) {
+                return data == 1 ? "Active" : "Inactive"
+            }},
             {
                 "mData": "ID",
                 'orderable': false,
                 "mRender": function (data, type, row) {
-                    return "<a href='/projects/edit/" + data + "'><i class='fa fa-edit'></i></a>";
+                    return "<a href='/projects/show/" + data + "'><i class='fa fa-edit'></i></a>";
                 }
             },
         ], additionalOptions);

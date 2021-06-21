@@ -95,9 +95,12 @@ func (app *App) GetReleaseProjects(release models.Release) ([]*models.Project, [
 		releaseProject := &models.ReleaseProject{}
 		project := &models.Project{}
 		err := db.ScanRows(projrows, releaseProject)
-		app.Db.First(project, releaseProject.ProjectId)
+		result := app.Db.Where("status = ?", "1").First(project, releaseProject.ProjectId)
 		if err != nil {
 			log.Fatalln(err)
+		}
+		if result.Error != nil {
+			continue
 		}
 		log.Printf("%+v\n", project.Name)
 		projectArr = append(projectArr, project)

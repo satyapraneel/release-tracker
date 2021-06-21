@@ -15,6 +15,7 @@ type ProjectFields struct {
 	RegressionSignorDate string `form:"regression_signor_date" json:"regression_signor_date" binding:"required,number"`
 	CodeFreezeDate       string `form:"code_freeze_date" json:"code_freeze_date" binding:"required,number"`
 	DevCompletionDate    string `form:"dev_completion_date" json:"dev_completion_date" binding:"required,number"`
+	Status               string `form:"status" json:"status" binding:"required,number"`
 }
 
 func ValidateProjectCreate(c *gin.Context) {

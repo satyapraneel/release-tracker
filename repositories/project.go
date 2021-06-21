@@ -80,3 +80,24 @@ func (app *App) CreateProject(c *gin.Context, project models.Project) (uint, err
 	}
 	return project.ID, errMessage
 }
+
+func (app *App) GetProject(c *gin.Context) (models.Project, error) {
+	id := c.Param("id")
+	project := models.Project{}
+	result := app.Db.First(&project, id)
+	return project, result.Error
+}
+
+func (app *App) UpdateProject(c *gin.Context, projectData models.Project) (uint, error) {
+	project, err := app.GetProject(c)
+	if err != nil {
+		return 0, err
+	}
+	updatedProject := app.Db.Model(&project).Updates(&projectData)
+	var errMessage = updatedProject.Error
+	if updatedProject.Error != nil {
+		log.Print(errMessage)
+
+	}
+	return project.ID, errMessage
+}
