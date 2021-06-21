@@ -45,6 +45,7 @@ func handle() {
 			os.Exit(0)
 		}
 	}
+	jira.Setup()
 	jira.GetIssuesByLabel()
 	app := &cmd.Application{
 		Db:   database.InitConnection(),

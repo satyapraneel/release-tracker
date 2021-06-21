@@ -12,10 +12,11 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 )
-type Sessions struct {
-	*bitbucket.Session
-}
+//type Sessions struct {
+//	*bitbucket.Session
+//}
 type Payload struct {
 	Name   string `json:"name"`
 	Target Target `json:"target"`
@@ -25,8 +26,8 @@ type Target struct {
 }
 
 type BBAccessToken struct {
-	AccessToken string `json:"access_token"`
-	ExpiresIn   int    `json:"expires_in"`
+	AccessToken  string `json:"access_token"`
+	ExpiresIn    int    `json:"expires_in"`
 	RefreshToken string `json:"refresh_token"`
 }
 
@@ -45,8 +46,6 @@ type Users struct {
 
 const callbackUrl = "http://localhost:4000/oauth/index"
 const baseURL  =  "https://api.bitbucket.org/2.0"
-const branchCreationUrl = "/repositories/roopajoshyam/test-pro/refs/branches"
-const branchRestriction = "/repositories/roopajoshyam/test-pro/branch-restrictions"
 
 func Authrorize() string {
 	provider := bitbucketProvider()
@@ -77,40 +76,57 @@ func TestGetAccessToken(token_code string) *bitbucket.Session {
 }
 
 func GetAccessToken(c *gin.Context)  {
-	params := url.Values{}
-	params.Add("grant_type", `client_credentials`)
-	body := strings.NewReader(params.Encode())
-
-	req, err := http.NewRequest("POST", "https://bitbucket.org/site/oauth2/access_token", body)
-	if err != nil {
-		// handle err
-	}
-	req.SetBasicAuth(os.Getenv("BITBUCKET_KEY"), os.Getenv("BITBUCKET_SECRET"))
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		// handle err
-	}
-	defer resp.Body.Close()
-	access := new(BBAccessToken)
-	errs := json.NewDecoder(resp.Body).Decode(access)
-	if errs != nil {
-		log.Print(errs)
-	}
-	log.Printf("access token %+v : ", access.AccessToken)
+	t := time.Now()
 	session := sessions.Default(c)
-	session.Set("access_token", access.AccessToken)
-	session.Save()
+	log.Printf("acess session %+v : ", fmt.Sprintf("%v", session.Get("access_token")))
+	log.Printf("expires session %+v : ", fmt.Sprintf("%v", session.Get("expires_in")))
+	accessToken := session.Get("access_token")
+	//expiryToken := session.Get("expires_in")
+	if accessToken == nil {   //|| t >= expiryToken
+		params := url.Values{}
+		params.Add("grant_type", `client_credentials`)
+		body := strings.NewReader(params.Encode())
+
+		req, err := http.NewRequest("POST", "https://bitbucket.org/site/oauth2/access_token", body)
+		if err != nil {
+			// handle err
+		}
+		req.SetBasicAuth(os.Getenv("BITBUCKET_KEY"), os.Getenv("BITBUCKET_SECRET"))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			// handle err
+		}
+		defer resp.Body.Close()
+		access := new(BBAccessToken)
+		errs := json.NewDecoder(resp.Body).Decode(access)
+		if errs != nil {
+			log.Print(errs)
+		}
+		log.Printf("access token %+v : ", access.AccessToken)
+		//Add 7200 sec
+		newT := t.Add(time.Second * time.Duration(access.ExpiresIn))
+		fmt.Printf("Adding 7200 sec\n: %s\n", newT)
+		fmt.Printf("current time sec\n: %s\n", t)
+		sess := sessions.Default(c)
+		sess.Set("access_token", access.AccessToken)
+		sess.Set("expires_in", newT)
+		sess.Save()
+	}
+	fmt.Printf("expires in\n: %s\n", session.Get("expires_in"))
+	fmt.Printf("access in\n: %s\n", session.Get("access_token"))
+
 }
 
-func CreateBranch(c *gin.Context, branchType string, name string, reviewers []string) {
+func CreateBranch(c *gin.Context, branchType string, name string, reviewers []string, projectRepoName string) {
 	session := sessions.Default(c)
 	AccessToken :=  fmt.Sprintf("%v", session.Get("access_token"))
-	log.Printf("acess ---- %+v : ", AccessToken)
 	branch := branchType+"/"+name
-	request := Payload{Name: branch, Target: Target{Hash: "b678d75ac143df62c6371d2f1cd01ea6d3585d31"}}
+	request := Payload{Name: branch, Target: Target{Hash: "master"}}
+	branchCreationUrl := "/repositories/"+os.Getenv("BITBUCKET_OWNER")+"/"+projectRepoName+"/refs/branches"
 	apiUrl := baseURL+branchCreationUrl
+	log.Printf("API URL ---- %+v : ", apiUrl)
 	payloadBytes, _ := json.Marshal(request)
 	body := bytes.NewReader(payloadBytes)
 	resp := PostRequest(apiUrl, body, AccessToken)
@@ -124,10 +140,12 @@ func CreateBranch(c *gin.Context, branchType string, name string, reviewers []st
 		log.Print(errs)
 	}
 	log.Printf("branch Name %+v : ", createdBranch)
-	branchRestrictions(AccessToken, branch, reviewers)
+	branchRestrictions(AccessToken, branch, reviewers, projectRepoName)
+
 }
 
-func branchRestrictions(token string, branchName string, ReviewerList []string)  {
+func branchRestrictions(token string, branchName string, ReviewerList []string, projectRepoName string)  {
+	branchRestriction := "/repositories/"+os.Getenv("BITBUCKET_OWNER")+"/"+projectRepoName+"/branch-restrictions"
 	apiUrl := baseURL+branchRestriction
 	var arrayOfUsers  []Users
 	for _, reviewer := range ReviewerList {
@@ -136,8 +154,8 @@ func branchRestrictions(token string, branchName string, ReviewerList []string) 
 	}
 	request := BranchRestriction{
 		Kind: "restrict_merges",
-		Owner: "roopajoshyam",
-		RepoSlug: "test-pro",
+		Owner: os.Getenv("BITBUCKET_OWNER"),
+		RepoSlug: projectRepoName,
 		Pattern: "*"+branchName+"*",
 		Users: arrayOfUsers,
 	}

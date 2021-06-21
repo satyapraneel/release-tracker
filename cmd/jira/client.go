@@ -9,14 +9,14 @@ import (
 )
 
 func Setup(){
-	base := "https://release123.atlassian.net/"
+	base := "https://landmark.atlassian.net/"
 	tp := jira.BasicAuthTransport{
-		Username: "jroopanov11@gmail.com",
-		Password: "MIjRCG1iztxW6yU8Xk754F98",
+		Username: "roopa.j@landmarkgroup.in",  //"jroopanov11@gmail.com",
+		Password: "xJLYCGN824LujriDRPv868AC",   //"MIjRCG1iztxW6yU8Xk754F98",
 	}
 
 	jiraClient, err := jira.NewClient(tp.Client(), base)
-	req, _ := jiraClient.NewRequest("GET", "rest/api/2/issue/RT-02", nil)
+	req, _ := jiraClient.NewRequest("GET", "rest/api/2/issue/LOYAL-4643", nil)
 
 	issue := new(jira.Issue)
 	_, err = jiraClient.Do(req, issue)
