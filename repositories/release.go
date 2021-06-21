@@ -1,15 +1,13 @@
 package repositories
 
 import (
+	"github.com/release-trackers/gin/cmd/bitbucket"
 	"log"
 	"strings"
-
-	"github.com/release-trackers/gin/cmd/bitbucket"
 
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/cmd"
 	"github.com/release-trackers/gin/models"
-	"github.com/release-trackers/gin/notifications/mails"
 )
 
 // NewReleaseHandler ..
@@ -18,6 +16,8 @@ func NewReleaseHandler(app *cmd.Application) *App {
 }
 
 func (app *App) CreateRelease(c *gin.Context, release models.Release, projectIds []int) (uint, error) {
+	//set bitbucket access token in session
+	bitbucket.GetAccessToken(c)
 	err := c.Bind(&release)
 	if err != nil {
 		log.Print(err)
@@ -30,23 +30,23 @@ func (app *App) CreateRelease(c *gin.Context, release models.Release, projectIds
 		log.Print(errMessage)
 
 	}
-	project := &models.Project{}
+	project := models.Project{}
 	for _, projectId := range projectIds {
+		log.Printf("projectIds : %v", projectId)
 		app.Db.Create(&models.ReleaseProject{
 			ReleaseId: release.ID, ProjectId: uint(projectId),
 		})
-		fetchProject := app.Db.Debug().Where("id = ?", projectId).Find(project)
+		fetchProject := app.Db.Debug().Where("id = ?", projectId).Find(&project)
 		if fetchProject.Error != nil {
 			log.Print(errMessage)
 		}
-		log.Printf("reviewws : %v", project.ReviewerList)
+		log.Printf("project.RepoName : %v", project.RepoName)
 		// cmd.TriggerMail(project.ReviewerList, release.Name, project.Name)
-		go mails.SendReleaseCreatedMail(&release, project)
-		//set bitbucket access token in session
-		bitbucket.GetAccessToken(c)
+		//go mails.SendReleaseCreatedMail(&release, &project)
 		// mails.SendReleaseCreatedMail(&release, project)
-		reviewerUserNames := app.GetReviewerUserNames(c, project.ReviewerList)
-		bitbucket.CreateBranch(c, release.Type, release.Name, reviewerUserNames)
+		//reviewerUserNames := app.GetReviewerUserNames(c, project.ReviewerList)
+		//go bitbucket.CreateBranch(c, release.Type, release.Name, reviewerUserNames, project.RepoName)
+		project = models.Project{}
 	}
 
 	return release.ID, errMessage
