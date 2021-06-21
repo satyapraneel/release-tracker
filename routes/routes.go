@@ -55,6 +55,19 @@ func RouterGin(app *cmd.Application) {
 		api.GET("/show/:id", handler.ViewReleaseForm)
 	}
 
+	projects := auth.Group("/projects")
+	{
+		projects.GET("/", handler.GetProjects)
+		projects.POST("/list", handler.GetListOfProjects)
+		projects.GET("/create", handler.CreateProjectForm)
+		projects.GET("/store", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, "/projects/create")
+		})
+		projects.POST("/store", handler.CreateProject)
+		projects.GET("/getReviewers", handler.GetProjectReviewerList)
+		projects.GET("/show/:id", handler.ViewReleaseForm)
+	}
+
 	//oauthapi := auth.Group("/oauth")
 	//{
 	//	oauthapi.GET("/index", handler.GetAuthCode)

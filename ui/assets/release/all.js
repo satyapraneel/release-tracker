@@ -72,6 +72,38 @@ $(document).ready(function () {
         $releasesTable.data('dt', releaseDt);
     }
 
+    $releasesTable = $('#projects_table');
+    if ($releasesTable.length) {
+        var additionalOptions = {
+            order: [[0, "desc"]],
+            language: {
+                searchPlaceholder: "Search Projects"
+            },
+            bInfo:false,
+            responsive: true,
+            columnDefs: [
+                { className: 'text-center', targets: [0,1,2,3,4,5,6,7] },
+            ],
+        };
+        var releaseDt = initDatatable($releasesTable, [
+            {data: 'ID', name: 'ID', 'visible': true, searchable: false},
+            {data: 'Name', name: 'Project name', searchable: true,'orderable': false},
+            {data: 'bitbucket_url', name: 'Bitbucket Url', searchable: false,'orderable': false},
+            {data: 'beta_release_date', name: 'Beta Release', searchable: false,'orderable': false},
+            {data: 'regression_signor_date', name: 'Regression Signor', searchable: false,'orderable': false},
+            {data: 'code_freeze_date', name: 'Code Freeze', searchable: false,'orderable': false},
+            {data: 'dev_completion_date', name: 'Dev Completion','orderable': false},
+            {
+                "mData": "ID",
+                'orderable': false,
+                "mRender": function (data, type, row) {
+                    return "<a href='/projects/edit/" + data + "'><i class='fa fa-edit'></i></a>";
+                }
+            },
+        ], additionalOptions);
+        $releasesTable.data('dt', releaseDt);
+    }
+
 })
 
 var initDatatable = function ($table, $columns, additionalOptions) {
