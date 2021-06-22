@@ -3,6 +3,7 @@ package controllers
 import (
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -37,8 +38,11 @@ func (app *App) GetListOfProjects(c *gin.Context) {
 }
 
 func (app *App) CreateProjectForm(c *gin.Context) {
+	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
+	reviewers, _ := releaseRepsitoryHandler.GetAllReviewersList(c)
 	c.HTML(http.StatusOK, "projects/create", gin.H{
-		"title": "Create Project",
+		"title":     "Create Project",
+		"reviewers": reviewers,
 	})
 }
 
@@ -59,6 +63,10 @@ func (app *App) CreateProject(c *gin.Context) {
 		CodeFreezeDate:       c.Request.PostForm.Get("code_freeze_date"),
 		DevCompletionDate:    c.Request.PostForm.Get("dev_completion_date"),
 		Status:               c.Request.PostForm.Get("status"),
+	}
+	reviewersList := c.PostFormArray("reviewers")
+	if len(reviewersList) > 0 {
+		project.ReviewerList = strings.Join(reviewersList, ",")
 	}
 	repsitoryHandler := repositories.NewRepositoryHandler(app.Application)
 	createProject, err := repsitoryHandler.CreateProject(c, project)

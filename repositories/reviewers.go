@@ -83,3 +83,29 @@ func (app *App) DeleteReviewer(c *gin.Context) (uint, error) {
 	app.Db.Unscoped().Delete(&reviewer)
 	return 1, nil
 }
+
+func (app *App) GetAllReviewersList(c *gin.Context) ([]*models.Reviewers, error) {
+	db := app.Db
+	var reviewersList []models.Reviewers
+	records := db.Find(&reviewersList)
+	if records.Error != nil {
+		log.Fatalln(records.Error)
+	}
+	//log.Printf("%d project rows found.", records.RowsAffected)
+	rows, err := records.Rows()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer rows.Close()
+
+	reviewerArr := []*models.Reviewers{}
+	for rows.Next() {
+		reviewer := &models.Reviewers{}
+		err := db.ScanRows(rows, &reviewer)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		reviewerArr = append(reviewerArr, reviewer)
+	}
+	return reviewerArr, err
+}

@@ -149,6 +149,18 @@ $('#reviewer_removal_yes').on('click', function () {
     
 });
 
+$('#reviewers').select2({
+    placeholder: 'Select Reviewers',
+    allowClear: true
+});
+
+$('#reviewers').on('change', function () {
+    var str = [];
+    $("#reviewers option:selected").each(function () {
+        str.push(this.value);
+    });
+});
+
 var initDatatable = function ($table, $columns, additionalOptions) {
     var options = {
         dom: 'lfrtip',
