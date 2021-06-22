@@ -72,8 +72,8 @@ $(document).ready(function () {
         $releasesTable.data('dt', releaseDt);
     }
 
-    $releasesTable = $('#projects_table');
-    if ($releasesTable.length) {
+    $projectsTable = $('#projects_table');
+    if ($projectsTable.length) {
         var additionalOptions = {
             order: [[0, "desc"]],
             language: {
@@ -85,7 +85,7 @@ $(document).ready(function () {
                 { className: 'text-center', targets: [0,1,2,3,4,5,6,7] },
             ],
         };
-        var releaseDt = initDatatable($releasesTable, [
+        var projectDt = initDatatable($projectsTable, [
             {data: 'Name', name: 'Project name', searchable: true,'orderable': false},
             {data: 'repo_name', name: 'Repo name', searchable: false,'orderable': false},
             {data: 'beta_release_date', name: 'Beta Release', searchable: false,'orderable': false},
@@ -103,7 +103,35 @@ $(document).ready(function () {
                 }
             },
         ], additionalOptions);
-        $releasesTable.data('dt', releaseDt);
+        $projectsTable.data('dt', projectDt);
+    }
+
+    $reviewersTable = $('#reviewers_table');
+    if ($reviewersTable.length) {
+        var additionalOptions = {
+            order: [[0, "desc"]],
+            language: {
+                searchPlaceholder: "Search Reviewer"
+            },
+            bInfo:false,
+            responsive: true,
+            columnDefs: [
+                { className: 'text-center', targets: [0,1,2,3] },
+            ],
+        };
+        var reviewersDt = initDatatable($reviewersTable, [
+            {data: 'name', name: 'Reviewer name', searchable: true,'orderable': false},
+            {data: 'Email', name: 'Email', searchable: true,'orderable': false},
+            {data: 'username', name: 'User name', searchable: true,'orderable': false},
+            {
+                "mData": "ID",
+                'orderable': false,
+                "mRender": function (data, type, row) {
+                    return "<a href='/reviewers/show/" + data + "'><i class='fa fa-edit'></i></a>";
+                }
+            },
+        ], additionalOptions);
+        $reviewersTable.data('dt', reviewersDt);
     }
 
 })

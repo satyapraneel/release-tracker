@@ -71,6 +71,22 @@ func RouterGin(app *cmd.Application) {
 		})
 	}
 
+	reviewers := auth.Group("/reviewers")
+	{
+		reviewers.GET("/", handler.GetReviewers)
+		reviewers.POST("/list", handler.GetListOfReviewers)
+		reviewers.GET("/create", handler.CreateReviewersForm)
+		reviewers.GET("/store", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, "/reviewers/create")
+		})
+		reviewers.POST("/store", handler.CreateReviewer)
+		reviewers.GET("/show/:id", handler.ViewReviewerForm)
+		reviewers.POST("/update/:id", handler.UpdateReviewer)
+		reviewers.GET("/update/:id", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, "/reviewers")
+		})
+	}
+
 	//oauthapi := auth.Group("/oauth")
 	//{
 	//	oauthapi.GET("/index", handler.GetAuthCode)
