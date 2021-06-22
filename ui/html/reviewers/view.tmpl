@@ -28,6 +28,22 @@
 
         </table>
     </div>
+
+
+
+    <div id="reviewer_removal_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body" id="reviewer_removal_body">
+                Are you sure you want to remove?
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="reviewer_removal_yes" data-id="">Yes</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal" id="reviewer_removal_modal_close">Close</button>
+            </div>
+        </div>
+        </div>
+   </div>
 </main>
 {{template "layout/bottom" }}
 {{end}}

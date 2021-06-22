@@ -106,3 +106,18 @@ func (app *App) UpdateReviewer(c *gin.Context) {
 	session.Save()
 	c.Redirect(http.StatusFound, "/reviewers")
 }
+
+func (app *App) DeleteReviewer(c *gin.Context) {
+	repsitoryHandler := repositories.NewRepositoryHandler(app.Application)
+	deleteRecord, err := repsitoryHandler.DeleteReviewer(c)
+	session := sessions.Default(c)
+	if err != nil {
+		log.Print(err)
+		session.AddFlash(err, "error")
+	}
+	if deleteRecord != 0 {
+		session.AddFlash("Reviewer deleted successfully", "success")
+	}
+	session.Save()
+	c.Redirect(http.StatusFound, "/reviewers")
+}

@@ -127,14 +127,27 @@ $(document).ready(function () {
                 "mData": "ID",
                 'orderable': false,
                 "mRender": function (data, type, row) {
-                    return "<a href='/reviewers/show/" + data + "'><i class='fa fa-edit'></i></a>";
+                    return "<a class='btn btn-sm' href='/reviewers/show/" + data + "'><i class='fa fa-edit text-primary'></i></a><button data-id="+row.ID+" class='reviewer_removal btn btn-sm' data-target='#reviewer_removal_modal'><i class='fa fa-trash text-danger'></i></a>";
                 }
             },
         ], additionalOptions);
+        $reviewersTable.on('click', '.reviewer_removal', function () {
+            $('#reviewer_removal_modal').modal('show');
+            $('#reviewer_removal_yes').attr("data-id",$(this).data('id'));
+        });
         $reviewersTable.data('dt', reviewersDt);
     }
-
 })
+
+$('#reviewer_removal_modal_close').on('click', function () {
+    $('#reviewer_removal_modal').modal("hide")
+});
+
+$('#reviewer_removal_yes').on('click', function () {
+    $('#reviewer_removal_modal').modal("hide")
+    window.location.href = "/reviewers/delete/" + $(this).data('id')
+    
+});
 
 var initDatatable = function ($table, $columns, additionalOptions) {
     var options = {

@@ -82,6 +82,7 @@ func RouterGin(app *cmd.Application) {
 		reviewers.POST("/store", handler.CreateReviewer)
 		reviewers.GET("/show/:id", handler.ViewReviewerForm)
 		reviewers.POST("/update/:id", handler.UpdateReviewer)
+		reviewers.GET("/delete/:id", handler.DeleteReviewer)
 		reviewers.GET("/update/:id", func(c *gin.Context) {
 			c.Redirect(http.StatusFound, "/reviewers")
 		})

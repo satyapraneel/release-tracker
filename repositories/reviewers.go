@@ -74,3 +74,12 @@ func (app *App) CreateReviewer(c *gin.Context, reviewer models.Reviewers) (uint,
 	}
 	return reviewer.ID, errMessage
 }
+
+func (app *App) DeleteReviewer(c *gin.Context) (uint, error) {
+	reviewer, err := app.GetReviewer(c)
+	if err != nil {
+		return 0, err
+	}
+	app.Db.Unscoped().Delete(&reviewer)
+	return 1, nil
+}
