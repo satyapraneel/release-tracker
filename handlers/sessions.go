@@ -7,7 +7,7 @@ import (
 	"github.com/release-trackers/gin/config"
 )
 
-func SetupSession(router *gin.Engine) {
+func SetupSession(router *gin.Engine, sessionName string) {
 	store := cookie.NewStore([]byte(config.SessionDetails().Secret))
-	router.Use(sessions.Sessions("mysession", store))
+	router.Use(sessions.Sessions(sessionName, store))
 }

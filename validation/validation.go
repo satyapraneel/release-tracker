@@ -27,9 +27,8 @@ func DescriptiveError(verr validator.ValidationErrors) map[string]string {
 func getMessage(fieldName string, errorMessage string) string {
 	switch errorMessage {
 	case "required":
-		return fieldName + "is required"
-	case "email":
-		return "Please provide the valid email id"
+		return fieldName + " is required"
+	default:
+		return "Please enter the valid " + errorMessage
 	}
-	return errorMessage
 }
