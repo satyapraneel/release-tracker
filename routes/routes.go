@@ -24,7 +24,7 @@ func RouterGin(app *cmd.Application) {
 	log.Println("****name*******: ", app.Name)
 	handler := controllers.NewHandler(app)
 	router := gin.Default()
-	handlers.SetupSession(router)
+	handlers.SetupSession(router, "release_tracker")
 	router.Static("/assets", "./ui/assets")
 	router.LoadHTMLGlob("ui/html/**/*.tmpl")
 	// router.LoadHTMLGlob("ui/html/*.tmpl")

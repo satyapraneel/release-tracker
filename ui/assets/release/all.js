@@ -87,7 +87,7 @@ $(document).ready(function () {
         };
         var releaseDt = initDatatable($releasesTable, [
             {data: 'Name', name: 'Project name', searchable: true,'orderable': false},
-            {data: 'bitbucket_url', name: 'Bitbucket Url', searchable: false,'orderable': false},
+            {data: 'repo_name', name: 'Repo name', searchable: false,'orderable': false},
             {data: 'beta_release_date', name: 'Beta Release', searchable: false,'orderable': false},
             {data: 'regression_signor_date', name: 'Regression Signor', searchable: false,'orderable': false},
             {data: 'code_freeze_date', name: 'Code Freeze', searchable: false,'orderable': false},

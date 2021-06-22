@@ -9,7 +9,6 @@ type Project struct {
 	gorm.Model
 	Name                 string `gorm:"type:varchar(100);index:,unique"`
 	RepoName             string `json:"repo_name"`
-	BitbucketUrl         string `json:"bitbucket_url"`
 	ReviewerList         string `json:"reviewer_list"`
 	BetaReleaseDate      string `json:"beta_release_date"`
 	RegressionSignorDate string `json:"regression_signor_date"`

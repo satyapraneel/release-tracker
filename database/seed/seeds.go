@@ -17,7 +17,7 @@ func All() []Seed {
 			Run: func(db *gorm.DB) error {
 				CreateProject(db,
 					"Ecommerce",
-					"http://bitbucket",
+					"ecom",
 					"roopa@gmail.com",
 					"1",
 					"2",
@@ -33,7 +33,7 @@ func All() []Seed {
 			Run: func(db *gorm.DB) error {
 				CreateProject(db,
 					"ReactNative",
-					"http://bitbucket",
+					"react",
 					"roopa@gmail.com",
 					"1",
 					"2",
@@ -49,7 +49,7 @@ func All() []Seed {
 			Run: func(db *gorm.DB) error {
 				CreateProject(db,
 					"React",
-					"http://bitbucket",
+					"react",
 					"roopa@gmail.com",
 					"1",
 					"2",
@@ -65,7 +65,7 @@ func All() []Seed {
 			Run: func(db *gorm.DB) error {
 				CreateProject(db,
 					"Hybris",
-					"http://bitbucket",
+					"hybris",
 					"roopa@gmail.com",
 					"1",
 					"2",

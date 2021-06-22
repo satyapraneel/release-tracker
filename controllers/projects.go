@@ -52,7 +52,7 @@ func (app *App) CreateProject(c *gin.Context) {
 
 	project := models.Project{
 		Name:                 c.Request.PostForm.Get("name"),
-		BitbucketUrl:         c.Request.PostForm.Get("bitbucket_url"),
+		RepoName:             c.Request.PostForm.Get("repo_name"),
 		ReviewerList:         c.Request.PostForm.Get("reviewer_list"),
 		BetaReleaseDate:      c.Request.PostForm.Get("beta_release_date"),
 		RegressionSignorDate: c.Request.PostForm.Get("regression_signor_date"),
@@ -95,7 +95,7 @@ func (app *App) UpdateProject(c *gin.Context) {
 
 	project := models.Project{
 		Name:                 c.Request.PostForm.Get("name"),
-		BitbucketUrl:         c.Request.PostForm.Get("bitbucket_url"),
+		RepoName:             c.Request.PostForm.Get("repo_name"),
 		ReviewerList:         c.Request.PostForm.Get("reviewer_list"),
 		BetaReleaseDate:      c.Request.PostForm.Get("beta_release_date"),
 		RegressionSignorDate: c.Request.PostForm.Get("regression_signor_date"),

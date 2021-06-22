@@ -10,7 +10,7 @@ import (
 
 type ProjectFields struct {
 	Name                 string `form:"name" json:"name" binding:"required"`
-	BitbucketUrl         string `form:"bitbucket_url" json:"bitbucket_url" binding:"required,url"`
+	Reponame             string `form:"repo_name" json:"repo_name" binding:"required"`
 	BetaReleaseDate      string `form:"beta_release_date" json:"beta_release_date" binding:"required,number"`
 	RegressionSignorDate string `form:"regression_signor_date" json:"regression_signor_date" binding:"required,number"`
 	CodeFreezeDate       string `form:"code_freeze_date" json:"code_freeze_date" binding:"required,number"`
