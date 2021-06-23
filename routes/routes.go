@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"github.com/release-trackers/gin/cmd/bitbucket"
 	"log"
 	"net/http"
 	"os"
@@ -24,7 +25,7 @@ func RouterGin(app *cmd.Application) {
 	log.Println("****name*******: ", app.Name)
 	handler := controllers.NewHandler(app)
 	router := gin.Default()
-	handlers.SetupSession(router)
+	handlers.SetupSession(router, "release_tracker")
 	router.Static("/assets", "./ui/assets")
 	router.LoadHTMLGlob("ui/html/**/*.tmpl")
 	// router.LoadHTMLGlob("ui/html/*.tmpl")
@@ -39,6 +40,8 @@ func RouterGin(app *cmd.Application) {
 			session := sessions.Default(c)
 			flashes := session.Flashes()
 			session.Save()
+			//set bitbucket access token in session
+			bitbucket.GetAccessToken(c)
 			c.HTML(http.StatusOK, "home", gin.H{
 				"title":   "Release tracker",
 				"flashes": flashes,
@@ -53,6 +56,56 @@ func RouterGin(app *cmd.Application) {
 		api.POST("/store", handler.CreateRelease)
 		api.GET("/getReviewers", handler.GetProjectReviewerList)
 		api.GET("/show/:id", handler.ViewReleaseForm)
+	}
+
+	projects := auth.Group("/projects")
+	{
+		projects.GET("/", handler.GetProjects)
+		projects.POST("/list", handler.GetListOfProjects)
+		projects.GET("/create", handler.CreateProjectForm)
+		projects.GET("/store", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, "/projects/create")
+		})
+		projects.POST("/store", handler.CreateProject)
+		projects.GET("/show/:id", handler.ViewProjectForm)
+		projects.POST("/update/:id", handler.UpdateProject)
+		projects.GET("/update/:id", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, "/projects")
+		})
+	}
+
+	reviewers := auth.Group("/reviewers")
+	{
+		reviewers.GET("/", handler.GetReviewers)
+		reviewers.POST("/list", handler.GetListOfReviewers)
+		reviewers.GET("/create", handler.CreateReviewersForm)
+		reviewers.GET("/store", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, "/reviewers/create")
+		})
+		reviewers.POST("/store", handler.CreateReviewer)
+		reviewers.GET("/show/:id", handler.ViewReviewerForm)
+		reviewers.POST("/update/:id", handler.UpdateReviewer)
+		reviewers.GET("/delete/:id", handler.DeleteReviewer)
+		reviewers.GET("/update/:id", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, "/reviewers")
+		})
+	}
+
+	dls := auth.Group("/dls")
+	{
+		dls.GET("/", handler.GetDLs)
+		dls.POST("/list", handler.GetListOfDLs)
+		dls.GET("/create", handler.CreateDLsForm)
+		dls.GET("/store", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, "/dls/create")
+		})
+		dls.POST("/store", handler.CreateDL)
+		dls.GET("/show/:id", handler.ViewDLForm)
+		dls.POST("/update/:id", handler.UpdateDL)
+		dls.GET("/delete/:id", handler.DeleteDL)
+		dls.GET("/update/:id", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, "/dls")
+		})
 	}
 
 	//oauthapi := auth.Group("/oauth")

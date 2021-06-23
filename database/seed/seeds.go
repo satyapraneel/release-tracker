@@ -17,12 +17,13 @@ func All() []Seed {
 			Run: func(db *gorm.DB) error {
 				CreateProject(db,
 					"Ecommerce",
-					"http://bitbucket",
+					"ecom",
 					"roopa@gmail.com",
 					"1",
 					"2",
 					"3",
 					"5",
+					"1",
 				)
 				return nil
 			},
@@ -32,12 +33,13 @@ func All() []Seed {
 			Run: func(db *gorm.DB) error {
 				CreateProject(db,
 					"ReactNative",
-					"http://bitbucket",
+					"react",
 					"roopa@gmail.com",
 					"1",
 					"2",
 					"3",
 					"5",
+					"1",
 				)
 				return nil
 			},
@@ -47,12 +49,13 @@ func All() []Seed {
 			Run: func(db *gorm.DB) error {
 				CreateProject(db,
 					"React",
-					"http://bitbucket",
+					"react",
 					"roopa@gmail.com",
 					"1",
 					"2",
 					"3",
 					"5",
+					"1",
 				)
 				return nil
 			},
@@ -62,12 +65,13 @@ func All() []Seed {
 			Run: func(db *gorm.DB) error {
 				CreateProject(db,
 					"Hybris",
-					"http://bitbucket",
+					"hybris",
 					"roopa@gmail.com",
 					"1",
 					"2",
 					"3",
 					"5",
+					"1",
 				)
 				return nil
 			},
@@ -99,8 +103,8 @@ func All() []Seed {
 			Name: "Create DLs User",
 			Run: func(db *gorm.DB) error {
 				CreateDls(db,
-					"satyapraneel",
 					"satyapraneel@gmail.com",
+					"qa",
 				)
 				return nil
 			},
