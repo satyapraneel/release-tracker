@@ -108,3 +108,29 @@ func (app *App) UpdateProject(c *gin.Context, projectData models.Project) (uint,
 	}
 	return project.ID, errMessage
 }
+
+func (app *App) GetAllProjectsList(c *gin.Context) ([]*models.Project, error) {
+	db := app.Db
+	var projectList []models.Project
+	records := db.Find(&projectList)
+	if records.Error != nil {
+		log.Fatalln(records.Error)
+	}
+	//log.Printf("%d project rows found.", records.RowsAffected)
+	rows, err := records.Rows()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer rows.Close()
+
+	projectArr := []*models.Project{}
+	for rows.Next() {
+		project := &models.Project{}
+		err := db.ScanRows(rows, &project)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		projectArr = append(projectArr, project)
+	}
+	return projectArr, err
+}

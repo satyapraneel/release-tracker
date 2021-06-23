@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"log"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/models"
@@ -80,7 +81,7 @@ func (app *App) UpdateDL(c *gin.Context, dlData models.DLS) (uint, error) {
 	return dl.ID, errMessage
 }
 
-func (app *App) CreateDL(c *gin.Context, dl models.DLS) (uint, error) {
+func (app *App) CreateDL(c *gin.Context, dl models.DLS, dlProjectId string) (uint, error) {
 	err := c.Bind(&dl)
 	if err != nil {
 		log.Print(err)
@@ -91,6 +92,18 @@ func (app *App) CreateDL(c *gin.Context, dl models.DLS) (uint, error) {
 	if createdProject.Error != nil {
 		log.Print(errMessage)
 
+	}
+	projectId, err := strconv.ParseUint(dlProjectId, 10, 32)
+	if err != nil {
+		log.Print(errMessage)
+	}
+	dlProjects := models.DlsProjects{
+		DlsId:     dl.ID,
+		ProjectId: uint(projectId),
+	}
+	createDlProjects := app.Db.Create(&dlProjects)
+	if createDlProjects.Error != nil {
+		log.Print(errMessage)
 	}
 	return dl.ID, errMessage
 }
