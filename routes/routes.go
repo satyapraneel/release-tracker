@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"github.com/release-trackers/gin/cmd/bitbucket"
 	"log"
 	"net/http"
 	"os"
@@ -40,8 +39,6 @@ func RouterGin(app *cmd.Application) {
 			session := sessions.Default(c)
 			flashes := session.Flashes()
 			session.Save()
-			//set bitbucket access token in session
-			bitbucket.GetAccessToken(c)
 			c.HTML(http.StatusOK, "home", gin.H{
 				"title":   "Release tracker",
 				"flashes": flashes,
