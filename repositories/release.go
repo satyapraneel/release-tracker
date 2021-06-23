@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"github.com/release-trackers/gin/cmd/bitbucket"
+	"github.com/release-trackers/gin/notifications/mails"
 	"log"
 	"strings"
 
@@ -16,8 +17,6 @@ func NewReleaseHandler(app *cmd.Application) *App {
 }
 
 func (app *App) CreateRelease(c *gin.Context, release models.Release, projectIds []int) (uint, error) {
-	//set bitbucket access token in session
-	bitbucket.GetAccessToken(c)
 	err := c.Bind(&release)
 	if err != nil {
 		log.Print(err)
@@ -40,12 +39,9 @@ func (app *App) CreateRelease(c *gin.Context, release models.Release, projectIds
 		if fetchProject.Error != nil {
 			log.Print(errMessage)
 		}
-		log.Printf("project.RepoName : %v", project.RepoName)
-		// cmd.TriggerMail(project.ReviewerList, release.Name, project.Name)
-		//go mails.SendReleaseCreatedMail(&release, &project)
-		// mails.SendReleaseCreatedMail(&release, project)
-		//reviewerUserNames := app.GetReviewerUserNames(c, project.ReviewerList)
-		//go bitbucket.CreateBranch(c, release.Type, release.Name, reviewerUserNames, project.RepoName)
+		go mails.SendReleaseCreatedMail(&release, &project)
+		reviewerUserNames := app.GetReviewerUserNames(c, project.ReviewerList)
+		go bitbucket.CreateBranch(c, release.Type, release.Name, reviewerUserNames, project.RepoName)
 		project = models.Project{}
 	}
 

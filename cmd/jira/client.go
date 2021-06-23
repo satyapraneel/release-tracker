@@ -4,18 +4,24 @@ import (
 	"fmt"
 	"github.com/andygrunwald/go-jira"
 	"log"
+	"os"
 	"strings"
 	"time"
 )
 
-func Setup(){
-	base := "https://landmark.atlassian.net/"
+func setUpClient() (*jira.Client, error) {
+	base := os.Getenv("JIRA_BASE_URL")
 	tp := jira.BasicAuthTransport{
-		Username: "roopa.j@landmarkgroup.in",  //"jroopanov11@gmail.com",
-		Password: "xJLYCGN824LujriDRPv868AC",   //"MIjRCG1iztxW6yU8Xk754F98",
+		Username: os.Getenv("JIRA_USERNAME"),  //"jroopanov11@gmail.com",
+		Password: os.Getenv("JIRA_SECRET"),   //"MIjRCG1iztxW6yU8Xk754F98",
 	}
 
 	jiraClient, err := jira.NewClient(tp.Client(), base)
+	return jiraClient,err
+}
+
+func GetIssueByName(){
+	jiraClient, err := setUpClient()
 	req, _ := jiraClient.NewRequest("GET", "rest/api/2/issue/LOYAL-4643", nil)
 
 	issue := new(jira.Issue)
@@ -30,13 +36,7 @@ func Setup(){
 }
 
 func GetIssuesByLabel() {
-	base := "https://release123.atlassian.net/"
-	tp := jira.BasicAuthTransport{
-		Username: "jroopanov11@gmail.com",
-		Password: "MIjRCG1iztxW6yU8Xk754F98",
-	}
-
-	jiraClient, err := jira.NewClient(tp.Client(), base)
+	jiraClient, err := setUpClient()
 	var issues []jira.Issue
 
 	// appendFunc will append jira issues to []jira.Issue
