@@ -9,5 +9,6 @@ import (
 
 func SetupSession(router *gin.Engine) {
 	store := cookie.NewStore([]byte(config.SessionDetails().Secret))
+	//store, _ := redis.NewStore(10, "tcp", "localhost:6379", "", []byte("secret"))
 	router.Use(sessions.Sessions("mysession", store))
 }

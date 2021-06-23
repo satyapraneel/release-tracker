@@ -12,7 +12,6 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"time"
 )
 //type Sessions struct {
 //	*bitbucket.Session
@@ -76,13 +75,9 @@ func TestGetAccessToken(token_code string) *bitbucket.Session {
 }
 
 func GetAccessToken(c *gin.Context)  {
-	t := time.Now()
 	session := sessions.Default(c)
-	log.Printf("acess session %+v : ", fmt.Sprintf("%v", session.Get("access_token")))
-	log.Printf("expires session %+v : ", fmt.Sprintf("%v", session.Get("expires_in")))
 	accessToken := session.Get("access_token")
-	//expiryToken := session.Get("expires_in")
-	if accessToken == nil {   //|| t >= expiryToken
+	if accessToken == nil {
 		params := url.Values{}
 		params.Add("grant_type", `client_credentials`)
 		body := strings.NewReader(params.Encode())
@@ -105,16 +100,15 @@ func GetAccessToken(c *gin.Context)  {
 			log.Print(errs)
 		}
 		log.Printf("access token %+v : ", access.AccessToken)
-		//Add 7200 sec
-		newT := t.Add(time.Second * time.Duration(access.ExpiresIn))
-		fmt.Printf("Adding 7200 sec\n: %s\n", newT)
-		fmt.Printf("current time sec\n: %s\n", t)
+		//newT := currentTime.Add(time.Second * time.Duration(access.ExpiresIn))
+		//gob.Register(time.Time{})
 		sess := sessions.Default(c)
 		sess.Set("access_token", access.AccessToken)
-		sess.Set("expires_in", newT)
-		sess.Save()
+		if err := sess.Save(); err != nil {
+			log.Print(err)
+			return
+		}
 	}
-	fmt.Printf("expires in\n: %s\n", session.Get("expires_in"))
 	fmt.Printf("access in\n: %s\n", session.Get("access_token"))
 
 }

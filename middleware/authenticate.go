@@ -9,6 +9,7 @@ import (
 
 func Authentication() gin.HandlerFunc {
 	return func(c *gin.Context) {
+
 		session := sessions.Default(c)
 		sessionID := session.Get("id")
 		if sessionID == nil {
