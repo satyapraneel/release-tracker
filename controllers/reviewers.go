@@ -70,8 +70,8 @@ func (app *App) CreateReviewer(c *gin.Context) {
 }
 
 func (app *App) ViewReviewerForm(c *gin.Context) {
-	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
-	reviewer, err := releaseRepsitoryHandler.GetReviewer(c)
+	repsitoryHandler := repositories.NewReleaseHandler(app.Application)
+	reviewer, err := repsitoryHandler.GetReviewer(c)
 	if err != nil {
 		c.Redirect(http.StatusFound, "reviewers")
 	}

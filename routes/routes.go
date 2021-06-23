@@ -88,6 +88,23 @@ func RouterGin(app *cmd.Application) {
 		})
 	}
 
+	dls := auth.Group("/dls")
+	{
+		dls.GET("/", handler.GetDLs)
+		dls.POST("/list", handler.GetListOfDLs)
+		dls.GET("/create", handler.CreateDLsForm)
+		dls.GET("/store", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, "/dls/create")
+		})
+		dls.POST("/store", handler.CreateDL)
+		dls.GET("/show/:id", handler.ViewDLForm)
+		dls.POST("/update/:id", handler.UpdateDL)
+		dls.GET("/delete/:id", handler.DeleteDL)
+		dls.GET("/update/:id", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, "/dls")
+		})
+	}
+
 	//oauthapi := auth.Group("/oauth")
 	//{
 	//	oauthapi.GET("/index", handler.GetAuthCode)

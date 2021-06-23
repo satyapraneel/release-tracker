@@ -103,7 +103,6 @@ func All() []Seed {
 			Name: "Create DLs User",
 			Run: func(db *gorm.DB) error {
 				CreateDls(db,
-					"satyapraneel",
 					"satyapraneel@gmail.com",
 					"qa",
 				)

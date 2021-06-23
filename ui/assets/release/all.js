@@ -25,12 +25,12 @@ $(document).ready(function () {
             context: document.body
         })
         .done(function (res) {
-            $('#reviewers').val(res.data);
-            $('.reviewers').show()
+            $('#reviewers_values').val(res.data);
+            $('.reviewers_list').show()
         })
         .fail(function (response) {
-            $('#reviewers').val(response.message);
-            $('.reviewers').show()
+            $('#reviewers_values').val(response.message);
+            $('.reviewers_list').show()
         });
     }
 
@@ -137,6 +137,38 @@ $(document).ready(function () {
         });
         $reviewersTable.data('dt', reviewersDt);
     }
+
+    $dlsTable = $('#dls_table');
+    if ($dlsTable.length) {
+        var additionalOptions = {
+            order: [[0, "desc"]],
+            language: {
+                searchPlaceholder: "Search DLS"
+            },
+            bInfo:false,
+            responsive: true,
+            columnDefs: [
+                { className: 'text-center', targets: [0,2] },
+            ],
+        };
+        var dlsDt = initDatatable($dlsTable, [
+            {data: 'ID', name: 'ID', searchable: true,'orderable': false},
+            {data: 'Email', name: 'Email', searchable: true,'orderable': false},
+            {data: 'DlType', name: 'DlType', searchable: true,'orderable': false},
+            {
+                "mData": "ID",
+                'orderable': false,
+                "mRender": function (data, type, row) {
+                    return "<a class='btn btn-sm' href='/dls/show/" + data + "'><i class='fa fa-edit text-primary'></i></a><button data-id="+row.ID+" class='reviewer_removal btn btn-sm' data-target='#reviewer_removal_modal'><i class='fa fa-trash text-danger'></i></a>";
+                }
+            },
+        ], additionalOptions);
+        $dlsTable.on('click', '.reviewer_removal', function () {
+            $('#reviewer_removal_modal').modal('show');
+            $('#reviewer_removal_yes').attr("data-id",$(this).data('id'));
+        });
+        $dlsTable.data('dt', dlsDt);
+    }
 })
 
 $('#reviewer_removal_modal_close').on('click', function () {
@@ -145,7 +177,8 @@ $('#reviewer_removal_modal_close').on('click', function () {
 
 $('#reviewer_removal_yes').on('click', function () {
     $('#reviewer_removal_modal').modal("hide")
-    window.location.href = "/reviewers/delete/" + $(this).data('id')
+    let url = $(this).data('url')
+    window.location.href = "/"+url+"/delete/" + $(this).data('id')
     
 });
 
