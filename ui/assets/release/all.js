@@ -25,12 +25,12 @@ $(document).ready(function () {
             context: document.body
         })
         .done(function (res) {
-            $('#reviewers').val(res.data);
-            $('.reviewers').show()
+            $('#reviewers_values').val(res.data);
+            $('.reviewers_list').show()
         })
         .fail(function (response) {
-            $('#reviewers').val(response.message);
-            $('.reviewers').show()
+            $('#reviewers_values').val(response.message);
+            $('.reviewers_list').show()
         });
     }
 
@@ -72,8 +72,8 @@ $(document).ready(function () {
         $releasesTable.data('dt', releaseDt);
     }
 
-    $releasesTable = $('#projects_table');
-    if ($releasesTable.length) {
+    $projectsTable = $('#projects_table');
+    if ($projectsTable.length) {
         var additionalOptions = {
             order: [[0, "desc"]],
             language: {
@@ -85,7 +85,7 @@ $(document).ready(function () {
                 { className: 'text-center', targets: [0,1,2,3,4,5,6,7] },
             ],
         };
-        var releaseDt = initDatatable($releasesTable, [
+        var projectDt = initDatatable($projectsTable, [
             {data: 'Name', name: 'Project name', searchable: true,'orderable': false},
             {data: 'repo_name', name: 'Repo name', searchable: false,'orderable': false},
             {data: 'beta_release_date', name: 'Beta Release', searchable: false,'orderable': false},
@@ -103,10 +103,102 @@ $(document).ready(function () {
                 }
             },
         ], additionalOptions);
-        $releasesTable.data('dt', releaseDt);
+        $projectsTable.data('dt', projectDt);
     }
 
+    $reviewersTable = $('#reviewers_table');
+    if ($reviewersTable.length) {
+        var additionalOptions = {
+            order: [[0, "desc"]],
+            language: {
+                searchPlaceholder: "Search Reviewer"
+            },
+            bInfo:false,
+            responsive: true,
+            columnDefs: [
+                { className: 'text-center', targets: [0,1,2,3] },
+            ],
+        };
+        var reviewersDt = initDatatable($reviewersTable, [
+            {data: 'name', name: 'Reviewer name', searchable: true,'orderable': false},
+            {data: 'Email', name: 'Email', searchable: true,'orderable': false},
+            {data: 'username', name: 'User name', searchable: true,'orderable': false},
+            {
+                "mData": "ID",
+                'orderable': false,
+                "mRender": function (data, type, row) {
+                    return "<a class='btn btn-sm' href='/reviewers/show/" + data + "'><i class='fa fa-edit text-primary'></i></a><button data-id="+row.ID+" class='reviewer_removal btn btn-sm' data-target='#reviewer_removal_modal'><i class='fa fa-trash text-danger'></i></a>";
+                }
+            },
+        ], additionalOptions);
+        $reviewersTable.on('click', '.reviewer_removal', function () {
+            $('#reviewer_removal_modal').modal('show');
+            $('#reviewer_removal_yes').attr("data-id",$(this).data('id'));
+        });
+        $reviewersTable.data('dt', reviewersDt);
+    }
+
+    $dlsTable = $('#dls_table');
+    if ($dlsTable.length) {
+        var additionalOptions = {
+            order: [[0, "desc"]],
+            language: {
+                searchPlaceholder: "Search DLS"
+            },
+            bInfo:false,
+            responsive: true,
+            columnDefs: [
+                { className: 'text-center', targets: [0,2] },
+            ],
+        };
+        var dlsDt = initDatatable($dlsTable, [
+            {data: 'ID', name: 'ID', searchable: true,'orderable': false},
+            {data: 'Email', name: 'Email', searchable: true,'orderable': false},
+            {data: 'DlType', name: 'DlType', searchable: true,'orderable': false},
+            {
+                "mData": "ID",
+                'orderable': false,
+                "mRender": function (data, type, row) {
+                    return "<a class='btn btn-sm' href='/dls/show/" + data + "'><i class='fa fa-edit text-primary'></i></a><button data-id="+row.ID+" class='reviewer_removal btn btn-sm' data-target='#reviewer_removal_modal'><i class='fa fa-trash text-danger'></i></a>";
+                }
+            },
+        ], additionalOptions);
+        $dlsTable.on('click', '.reviewer_removal', function () {
+            $('#reviewer_removal_modal').modal('show');
+            $('#reviewer_removal_yes').attr("data-id",$(this).data('id'));
+        });
+        $dlsTable.data('dt', dlsDt);
+    }
 })
+
+$('#reviewer_removal_modal_close').on('click', function () {
+    $('#reviewer_removal_modal').modal("hide")
+});
+
+$('#reviewer_removal_yes').on('click', function () {
+    $('#reviewer_removal_modal').modal("hide")
+    let url = $(this).data('url')
+    window.location.href = "/"+url+"/delete/" + $(this).data('id')
+    
+});
+
+$('#reviewers').select2({
+    placeholder: 'Select Reviewers',
+    allowClear: true
+});
+
+$('#reviewers').on('change', function () {
+    var str = [];
+    $("#reviewers option:selected").each(function () {
+        str.push(this.value);
+    });
+});
+
+let selectedReviewers = $("#selected_reviewers")
+if(selectedReviewers.length > 0) {
+    let selectedReviewersListString = selectedReviewers.data("selected_reviewers")
+    $('#reviewers').val(selectedReviewersListString.split(',')).trigger('change');
+}
 
 var initDatatable = function ($table, $columns, additionalOptions) {
     var options = {

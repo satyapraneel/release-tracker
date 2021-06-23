@@ -3,6 +3,7 @@ package controllers
 import (
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -37,8 +38,11 @@ func (app *App) GetListOfProjects(c *gin.Context) {
 }
 
 func (app *App) CreateProjectForm(c *gin.Context) {
+	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
+	reviewers, _ := releaseRepsitoryHandler.GetAllReviewersList(c)
 	c.HTML(http.StatusOK, "projects/create", gin.H{
-		"title": "Create Project",
+		"title":     "Create Project",
+		"reviewers": reviewers,
 	})
 }
 
@@ -60,6 +64,10 @@ func (app *App) CreateProject(c *gin.Context) {
 		DevCompletionDate:    c.Request.PostForm.Get("dev_completion_date"),
 		Status:               c.Request.PostForm.Get("status"),
 	}
+	reviewersList := c.PostFormArray("reviewers")
+	if len(reviewersList) > 0 {
+		project.ReviewerList = strings.Join(reviewersList, ",")
+	}
 	repsitoryHandler := repositories.NewRepositoryHandler(app.Application)
 	createProject, err := repsitoryHandler.CreateProject(c, project)
 	session := sessions.Default(c)
@@ -76,12 +84,15 @@ func (app *App) CreateProject(c *gin.Context) {
 
 func (app *App) ViewProjectForm(c *gin.Context) {
 	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
+	reviewers, _ := releaseRepsitoryHandler.GetAllReviewersList(c)
 	projects, err := releaseRepsitoryHandler.GetProject(c)
 	if err != nil {
 		c.Redirect(http.StatusFound, "projects")
 	}
 	c.HTML(http.StatusOK, "projects/edit", gin.H{
-		"values": projects,
+		"values":             projects,
+		"reviewers":          reviewers,
+		"selected_reviewers": projects.ReviewerList,
 	})
 }
 
@@ -102,6 +113,12 @@ func (app *App) UpdateProject(c *gin.Context) {
 		CodeFreezeDate:       c.Request.PostForm.Get("code_freeze_date"),
 		DevCompletionDate:    c.Request.PostForm.Get("dev_completion_date"),
 		Status:               c.Request.PostForm.Get("status"),
+	}
+	reviewersList := c.PostFormArray("reviewers")
+	if len(reviewersList) > 0 {
+		project.ReviewerList = strings.Join(reviewersList, ",")
+	} else {
+		project.ReviewerList = ""
 	}
 	repsitoryHandler := repositories.NewRepositoryHandler(app.Application)
 	updateProject, err := repsitoryHandler.UpdateProject(c, project)

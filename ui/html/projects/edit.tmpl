@@ -74,6 +74,18 @@
                         {{ end }}
                     </div>
                 </div></br>
+                
+                <div class="form-group col-md-auto">
+                    <span class="hidden" id="selected_reviewers" data-selected_reviewers="{{.selected_reviewers}}"></span>
+                    <label for="reviewers" class="col-sm-3 control-label">Reviewers:</label>
+                    <div class="col-sm-6">
+                        <select name='reviewers' class="form-control" id="reviewers" multiple="multiple">
+                            {{range .reviewers}}
+                                <option value="{{ .Email}}"> {{ .Email}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                </div></br>
                 <div class="form-group col-md-auto">
                     <label for="type" class="col-sm-3 col-form-label">Project status:</label>
                     <div class="col-sm-6">
