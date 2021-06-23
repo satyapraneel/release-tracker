@@ -8,7 +8,12 @@ const DEV = "dev"
 //User struct declaration
 type DLS struct {
 	gorm.Model
-	Name   string `gorm:"type:varchar(100)"`
 	Email  string `gorm:"type:varchar(100)"`
 	DlType string `gorm:"type:varchar(10)"`
+}
+
+type DLSResult struct {
+	Total    int64 `json:"recordsTotal"`
+	Filtered int64 `json:"recordsFiltered"`
+	Data     []DLS `json:"data"`
 }

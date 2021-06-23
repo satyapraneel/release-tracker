@@ -71,6 +71,40 @@ func RouterGin(app *cmd.Application) {
 		})
 	}
 
+	reviewers := auth.Group("/reviewers")
+	{
+		reviewers.GET("/", handler.GetReviewers)
+		reviewers.POST("/list", handler.GetListOfReviewers)
+		reviewers.GET("/create", handler.CreateReviewersForm)
+		reviewers.GET("/store", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, "/reviewers/create")
+		})
+		reviewers.POST("/store", handler.CreateReviewer)
+		reviewers.GET("/show/:id", handler.ViewReviewerForm)
+		reviewers.POST("/update/:id", handler.UpdateReviewer)
+		reviewers.GET("/delete/:id", handler.DeleteReviewer)
+		reviewers.GET("/update/:id", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, "/reviewers")
+		})
+	}
+
+	dls := auth.Group("/dls")
+	{
+		dls.GET("/", handler.GetDLs)
+		dls.POST("/list", handler.GetListOfDLs)
+		dls.GET("/create", handler.CreateDLsForm)
+		dls.GET("/store", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, "/dls/create")
+		})
+		dls.POST("/store", handler.CreateDL)
+		dls.GET("/show/:id", handler.ViewDLForm)
+		dls.POST("/update/:id", handler.UpdateDL)
+		dls.GET("/delete/:id", handler.DeleteDL)
+		dls.GET("/update/:id", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, "/dls")
+		})
+	}
+
 	//oauthapi := auth.Group("/oauth")
 	//{
 	//	oauthapi.GET("/index", handler.GetAuthCode)
