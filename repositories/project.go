@@ -93,11 +93,18 @@ func (app *App) UpdateProject(c *gin.Context, projectData models.Project) (uint,
 	if err != nil {
 		return 0, err
 	}
-	updatedProject := app.Db.Model(&project).Updates(&projectData)
+	updatedProject := app.Db.Debug().Model(&project).Updates(&projectData)
 	var errMessage = updatedProject.Error
 	if updatedProject.Error != nil {
 		log.Print(errMessage)
-
+	}
+	//since empty string was not updating
+	if projectData.ReviewerList == "" && updatedProject.Error == nil {
+		updatedProject = app.Db.Debug().Model(&project).Updates(map[string]interface{}{"reviewer_list": ""})
+	}
+	errMessage = updatedProject.Error
+	if updatedProject.Error != nil {
+		log.Print(errMessage)
 	}
 	return project.ID, errMessage
 }

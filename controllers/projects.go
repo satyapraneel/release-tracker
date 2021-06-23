@@ -84,12 +84,15 @@ func (app *App) CreateProject(c *gin.Context) {
 
 func (app *App) ViewProjectForm(c *gin.Context) {
 	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
+	reviewers, _ := releaseRepsitoryHandler.GetAllReviewersList(c)
 	projects, err := releaseRepsitoryHandler.GetProject(c)
 	if err != nil {
 		c.Redirect(http.StatusFound, "projects")
 	}
 	c.HTML(http.StatusOK, "projects/edit", gin.H{
-		"values": projects,
+		"values":             projects,
+		"reviewers":          reviewers,
+		"selected_reviewers": projects.ReviewerList,
 	})
 }
 
@@ -110,6 +113,12 @@ func (app *App) UpdateProject(c *gin.Context) {
 		CodeFreezeDate:       c.Request.PostForm.Get("code_freeze_date"),
 		DevCompletionDate:    c.Request.PostForm.Get("dev_completion_date"),
 		Status:               c.Request.PostForm.Get("status"),
+	}
+	reviewersList := c.PostFormArray("reviewers")
+	if len(reviewersList) > 0 {
+		project.ReviewerList = strings.Join(reviewersList, ",")
+	} else {
+		project.ReviewerList = ""
 	}
 	repsitoryHandler := repositories.NewRepositoryHandler(app.Application)
 	updateProject, err := repsitoryHandler.UpdateProject(c, project)

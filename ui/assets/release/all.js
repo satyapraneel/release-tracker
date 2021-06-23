@@ -161,6 +161,12 @@ $('#reviewers').on('change', function () {
     });
 });
 
+let selectedReviewers = $("#selected_reviewers")
+if(selectedReviewers.length > 0) {
+    let selectedReviewersListString = selectedReviewers.data("selected_reviewers")
+    $('#reviewers').val(selectedReviewersListString.split(',')).trigger('change');
+}
+
 var initDatatable = function ($table, $columns, additionalOptions) {
     var options = {
         dom: 'lfrtip',
