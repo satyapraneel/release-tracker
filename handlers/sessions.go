@@ -7,8 +7,7 @@ import (
 	"github.com/release-trackers/gin/config"
 )
 
-func SetupSession(router *gin.Engine) {
+func SetupSession(router *gin.Engine, sessionName string) {
 	store := cookie.NewStore([]byte(config.SessionDetails().Secret))
-	//store, _ := redis.NewStore(10, "tcp", "localhost:6379", "", []byte("secret"))
-	router.Use(sessions.Sessions("mysession", store))
+	router.Use(sessions.Sessions(sessionName, store))
 }

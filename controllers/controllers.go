@@ -8,6 +8,10 @@ import (
 	"gorm.io/gorm"
 )
 
+type App struct {
+	*cmd.Application
+}
+
 // NewReleaseHandler ..
 func NewHandler(app *cmd.Application) *App {
 	return &App{app}

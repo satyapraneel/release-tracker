@@ -1,0 +1,100 @@
+{{ define "projects/create" }}
+{{template "layout/top" }}
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+    <div
+        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Create Project</h1>
+    </div>
+
+    <!--    <h2>Section title</h2>-->
+    <div class="container">
+        <div class="table-responsive row justify-content-md-center">
+            <form action='/projects/store' method='POST'>
+                <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+                <div class="form-group col-md-auto">
+                    <label for="name" class="col-sm-3 col-form-label">Project Name:</label>
+                    <div class="col-sm-6">
+                        <input type='text' name='name' class="form-control" id="name" value="{{.values.Name}}" required>
+                        {{with .errors.Name }}
+                        <small class="form-text text-danger">{{.}}</small>
+                        {{ end }}
+                    </div>
+                </div></br>
+                <div class="form-group col-md-auto">
+                    <label for="name" class="col-sm-3 col-form-label">Repo Name:</label>
+                    <div class="col-sm-6">
+                        <input type='text' name='repo_name' class="form-control" id="repo_name"
+                            value="{{.values.RepoName}}" required>
+                        {{with .errors.RepoName }}
+                        <small class="form-text text-danger">{{.}}</small>
+                        {{ end }}
+                    </div>
+                </div></br>
+                <div class="form-group col-md-auto">
+                    <label for="name" class="col-sm-12 col-form-label">Beta release in days(Release date - x
+                        days):</label>
+                    <div class="col-sm-6">
+                        <input type='number' name='beta_release_date' class="form-control" id="beta_release"
+                            value="{{.values.BetaReleaseDate}}" required min="0">
+                        {{with .errors.BetaReleaseDate }}
+                        <small class="form-text text-danger">{{.}}</small>
+                        {{ end }}
+                    </div>
+                </div></br>
+                <div class="form-group col-md-auto">
+                    <label for="name" class="col-sm-12 col-form-label">Regression Completion in days(Release date - x
+                        days):</label>
+                    <div class="col-sm-6">
+                        <input type='number' name='regression_signor_date' class="form-control" id="regression_signor"
+                            value="{{.values.RegressionSignorDate}}" min="0" required>
+                        {{with .errors.RegressionSignorDate }}
+                        <small class="form-text text-danger">{{.}}</small>
+                        {{ end }}
+                    </div>
+                </div></br>
+                <div class="form-group col-md-auto">
+                    <label for="name" class="col-sm-12 col-form-label">Code Freeze in days(Release date - x
+                        days):</label>
+                    <div class="col-sm-6">
+                        <input type='number' name='code_freeze_date' class="form-control" id="code_freeze"
+                            value="{{.values.CodeFreezeDate}}" min="0" required>
+                        {{with .errors.CodeFreezeDate }}
+                        <small class="form-text text-danger">{{.}}</small>
+                        {{ end }}
+                    </div>
+                </div></br>
+                <div class="form-group col-md-auto">
+                    <label for="name" class="col-sm-12 col-form-label">Dev Completion in days(Release date - x
+                        days):</label>
+                    <div class="col-sm-6">
+                        <input type='number' name='dev_completion_date' class="form-control" id="dev_completion"
+                            value="{{.values.DevCompletionDate}}" min="0" required>
+                        {{with .errors.DevCompletionDate }}
+                        <small class="form-text text-danger">{{.}}</small>
+                        {{ end }}
+                    </div>
+                </div></br>
+                <div class="form-group col-md-auto">
+                    <label for="type" class="col-sm-3 col-form-label">Project status:</label>
+                    <div class="col-sm-6">
+                        <select name="status" class="form-control" id="status" required>
+                            <option value="1"> Active</option>
+                            <option value="0">Inactive</option>
+                        </select>
+                    </div>
+                </div></br>
+                <br><br>
+                <div class="form-group">
+                    <div class="col-sm-4 col-sm-offset-2">
+                        <button class="btn btn-outline-success" type="submit">Save project
+                        </button>
+                        <button type='button' class="btn btn-outline-secondary"
+                            onclick="window.location.href='/projects'"> Cancel </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+{{template "layout/bottom" }}
+{{ end }}

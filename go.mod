@@ -3,7 +3,7 @@ module github.com/release-trackers/gin
 go 1.16
 
 require (
-	github.com/andygrunwald/go-jira v1.13.0 // indirect
+	github.com/andygrunwald/go-jira v1.13.0
 	github.com/gin-contrib/sessions v0.0.3
 	github.com/gin-gonic/gin v1.7.2
 	github.com/go-co-op/gocron v1.6.2

@@ -83,18 +83,20 @@ func (app *App) GetAllReleases(c *gin.Context, dt models.DataTableValues) models
 func (app *App) GetReleaseProjects(release models.Release) ([]*models.Project, []string, error) {
 	db := app.Db
 	projects := []models.ReleaseProject{}
-	log.Printf("release Id : %+v", release.ID)
-	projectRecords := db.Debug().Where("release_id = ?", release.ID).Find(&projects)
+	projectRecords := db.Where("release_id = ?", release.ID).Find(&projects)
 	projrows, err := projectRecords.Rows()
 	projectArr := []*models.Project{}
 	var reviewers []string
 	for projrows.Next() {
 		releaseProject := &models.ReleaseProject{}
 		project := &models.Project{}
-		err := db.Debug().ScanRows(projrows, releaseProject)
-		app.Db.Debug().First(project, releaseProject.ProjectId)
+		err := db.ScanRows(projrows, releaseProject)
+		result := app.Db.Where("status = ?", "1").First(project, releaseProject.ProjectId)
 		if err != nil {
 			log.Fatalln(err)
+		}
+		if result.Error != nil {
+			continue
 		}
 		log.Printf("%+v\n", project.Name)
 		projectArr = append(projectArr, project)

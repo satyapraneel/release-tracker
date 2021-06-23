@@ -25,7 +25,7 @@ func RouterGin(app *cmd.Application) {
 	log.Println("****name*******: ", app.Name)
 	handler := controllers.NewHandler(app)
 	router := gin.Default()
-	handlers.SetupSession(router)
+	handlers.SetupSession(router, "release_tracker")
 	router.Static("/assets", "./ui/assets")
 	router.LoadHTMLGlob("ui/html/**/*.tmpl")
 	// router.LoadHTMLGlob("ui/html/*.tmpl")
@@ -56,6 +56,22 @@ func RouterGin(app *cmd.Application) {
 		api.POST("/store", handler.CreateRelease)
 		api.GET("/getReviewers", handler.GetProjectReviewerList)
 		api.GET("/show/:id", handler.ViewReleaseForm)
+	}
+
+	projects := auth.Group("/projects")
+	{
+		projects.GET("/", handler.GetProjects)
+		projects.POST("/list", handler.GetListOfProjects)
+		projects.GET("/create", handler.CreateProjectForm)
+		projects.GET("/store", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, "/projects/create")
+		})
+		projects.POST("/store", handler.CreateProject)
+		projects.GET("/show/:id", handler.ViewProjectForm)
+		projects.POST("/update/:id", handler.UpdateProject)
+		projects.GET("/update/:id", func(c *gin.Context) {
+			c.Redirect(http.StatusFound, "/projects")
+		})
 	}
 
 	//oauthapi := auth.Group("/oauth")

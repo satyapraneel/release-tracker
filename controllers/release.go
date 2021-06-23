@@ -2,29 +2,25 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/gin-contrib/sessions"
-	"github.com/release-trackers/gin/cmd/bitbucket"
 	"log"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/release-trackers/gin/cmd/bitbucket"
+
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/release-trackers/gin/cmd"
 	"github.com/release-trackers/gin/models"
 	"github.com/release-trackers/gin/repositories"
 )
 
-type App struct {
-	*cmd.Application
-}
-
 func (app *App) GetIndex(c *gin.Context) {
 	oauthUrl := bitbucket.Authrorize()
 	c.HTML(http.StatusOK, "release/home", gin.H{
-		"url":oauthUrl,
+		"url": oauthUrl,
 	})
 }
 func (app *App) GetListOfReleases(c *gin.Context) {
@@ -124,7 +120,6 @@ func (app *App) CreateRelease(c *gin.Context) {
 	session.Save()
 	c.Redirect(http.StatusFound, "/release/index")
 }
-
 
 func (app *App) covertStringToIntArray(projectIds []string) []int {
 	var convertedProjectIds = []int{}
