@@ -111,11 +111,11 @@ $(document).ready(function () {
     $reviewersTable = $('#reviewers_table');
     if ($reviewersTable.length) {
         var additionalOptions = {
-            order: [[0, "desc"]],
+            // order: [[0, "desc"]],
             language: {
                 searchPlaceholder: "Search Reviewer"
             },
-            bInfo:false,
+            // bInfo:false,
             responsive: true,
             columnDefs: [
                 { className: 'text-center', targets: [0,1,2,3] },
@@ -204,10 +204,10 @@ if(selectedReviewers.length > 0) {
 
 var initDatatable = function ($table, $columns, additionalOptions) {
     var options = {
-        dom: 'lfrtip',
+        // dom: 'lfrtip',
         processing: true,
         serverSide: true,
-        autoWidth: false,
+        // autoWidth: false,
         "ordering": false,
         ajax: {
             url: $table.data('get_action'),

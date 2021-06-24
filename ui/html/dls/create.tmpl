@@ -1,61 +1,63 @@
 {{ define "dls/create" }}
 {{template "layout/top" }}
-<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-    <div
-        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Create DLS</h1>
-    </div>
+<div class="tab-content rounded-bottom">
+	<div class="tab-pane p-3 active preview" role="tabpanel" id="preview-943">
+		<div class="row">
+			<div class="offset-md-2 col-sm-7">
+				<div class="card callout callout-info mb-3">
+					<div class="card-body">
+						<h5 class="card-title">Create DLS</h5>
+						<hr/>
+						<form action='/dls/store' method='POST'>
+							<input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+							<div class="form-group col-md-auto">
+								<label for="dl_type" class="col-sm-12 control-label">Project Name:</label>
+								<div class="col-sm-12">
+									<select name='project_id' class="form-control" id="project_id" required>
+										<option value="">Select Project</option>
+										{{ range .Projects }}
+										<option value="{{ .ID }}"> {{ .Name }}</option>
+										{{end}}
+									</select>
+								</div>
+							</div></br>
+							<div class="form-group col-md-auto">
+								<label for="name" class="col-sm-12 col-form-label">Email:</label>
+								<div class="col-sm-12">
+									<input type="email" name='email' class="form-control" id="email" value="{{.values.Email}}"
+										required>
+									{{with .errors.Email }}
+									<small class="form-text text-danger">{{.}}</small>
+									{{ end }}
+								</div>
+							</div></br>
+							<div class="form-group col-md-auto">
+								<label for="dl_type" class="col-sm-12 control-label">DLS Type:</label>
+								<div class="col-sm-12">
+									<select name='dl_type' class="form-control" id="dl_type" required>
+										<option value="">Select DL type</option>
+										{{ range $dlkey, $dlvalue := .DlTypes }}
+										<option value="{{ $dlkey }}"> {{ $dlvalue }}</option>
+										{{end}}
+									</select>
+								</div>
+							</div></br>
 
-    <!--    <h2>Section title</h2>-->
-    <div class="container">
-        <div class="table-responsive row justify-content-md-center">
-            <form action='/dls/store' method='POST'>
-                <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
-                <div class="form-group col-md-auto">
-                    <label for="dl_type" class="col-sm-3 control-label">Project Name:</label>
-                    <div class="col-sm-6">
-                        <select name='project_id' class="form-control" id="project_id" required>
-                            <option value="">Select Project</option>
-                            {{ range .Projects }}
-                                <option value="{{ .ID }}"> {{ .Name }}</option>
-                            {{end}}
-                        </select>
-                    </div>
-                </div></br>
-                <div class="form-group col-md-auto">
-                    <label for="name" class="col-sm-3 col-form-label">Email:</label>
-                    <div class="col-sm-6">
-                        <input type="email" name='email' class="form-control" id="email"
-                            value="{{.values.Email}}" required>
-                        {{with .errors.Email }}
-                        <small class="form-text text-danger">{{.}}</small>
-                        {{ end }}
-                    </div>
-                </div></br>
-                <div class="form-group col-md-auto">
-                    <label for="dl_type" class="col-sm-3 control-label">DLS Type:</label>
-                    <div class="col-sm-6">
-                        <select name='dl_type' class="form-control" id="dl_type" required>
-                            <option value="">Select DL type</option>
-                            {{ range $dlkey, $dlvalue := .DlTypes }}
-                                <option value="{{ $dlkey }}"> {{ $dlvalue }}</option>
-                            {{end}}
-                        </select>
-                    </div>
-                </div></br>
-                
-                <br><br>
-                <div class="form-group">
-                    <div class="col-sm-4 col-sm-offset-2">
-                        <button class="btn btn-outline-success" type="submit">Save dls
-                        </button>
-                        <button type='button' class="btn btn-outline-secondary"
-                            onclick="window.location.href='/dls'"> Cancel </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-</main>
+							<br><br>
+							<div class="form-group">
+								<div class="col-sm-12">
+									<button class="btn btn-outline-success" type="submit">Save dls
+									</button>
+									<button type='button' class="btn btn-outline-secondary" onclick="window.location.href='/dls'">
+										Cancel </button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 {{template "layout/bottom" }}
 {{ end }}
