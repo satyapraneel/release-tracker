@@ -37,16 +37,18 @@ $(document).ready(function () {
     $releasesTable = $('#releases_table');
     if ($releasesTable.length) {
         var additionalOptions = {
-            order: [[0, "desc"]],
+            order: [],
             language: {
                 searchPlaceholder: "Search Releases"
             },
             bInfo:false,
-            // pagingType: "simple",
+            pagingType: "simple",
             responsive: true,
+            targets: 'no-sort',
+            "bSort": false,
         };
         var releaseDt = initDatatable($releasesTable, [
-            {data: 'ID', name: 'ID', 'visible': true, searchable: false},
+            {data: 'ID', name: 'ID', 'visible': false, searchable: false},
             {data: 'Name', name: 'Name', searchable: true,'orderable': false},
             {data: 'type', name: 'type','orderable': false},
             {data: 'target_date', name: 'target_date','orderable': false,
@@ -206,6 +208,7 @@ var initDatatable = function ($table, $columns, additionalOptions) {
         processing: true,
         serverSide: true,
         autoWidth: false,
+        "ordering": false,
         ajax: {
             url: $table.data('get_action'),
             type: 'post',
@@ -215,7 +218,7 @@ var initDatatable = function ($table, $columns, additionalOptions) {
             }
         },
         "pageLength": $('.admin.dashboard').length ? 5 : 10,
-        "pagingType": "full_numbers",
+        // "pagingType": "full_numbers",
         columns: $columns,
         drawCallback: function (settings) {
             var $dtContainer = $($(this).data('dt').table().container());

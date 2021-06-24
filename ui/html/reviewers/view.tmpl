@@ -1,49 +1,53 @@
 {{ define "reviewers/view" }}
 {{template "layout/top" }}
-<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Reviewers</h1>
-        <div class="btn-toolbar mb-2 mb-md-0">
-            <div class="btn-group me-2">
-                <a href="/reviewers/create" class="btn btn-sm btn-outline-info">
-                    Create Reviewer
-                </a>
+<div class="tab-content rounded-bottom">
+    <div class="tab-pane p-3 active preview" role="tabpanel" id="preview-943">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card callout callout-info mb-3">
+                    <div
+                        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">Reviewers</h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <div class="btn-group me-2">
+                                <a href="/reviewers/create" class="btn btn-sm btn-outline-info">
+                                    Create Reviewer
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <table class="table table-bordered datatable" id="reviewers_table"
+                        data-get_action="/reviewers/list" data-model="reviewers">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Bitbucket User Name</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id="reviewer_removal_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body" id="reviewer_removal_body">
+                        Are you sure you want to remove?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="reviewer_removal_yes" data-id=""
+                            data-url="reviewers">Yes</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal"
+                            id="reviewer_removal_modal_close">Close</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-
-    <div class="table-responsive">
-        <table class="table table-responsive" id="reviewers_table"
-               data-get_action="/reviewers/list"
-               data-model="reviewers">
-            <thead>
-            <tr>     
-                <th>Name</th>
-                <th>Email</th>
-                <th>Bitbucket User Name</th>
-                <th>Action</th>
-            </tr>
-            </thead>
-
-        </table>
-    </div>
-
-
-
-    <div id="reviewer_removal_modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-body" id="reviewer_removal_body">
-                Are you sure you want to remove?
-            </div>
-            <div class="modal-footer">
-            <button type="button" class="btn btn-primary" id="reviewer_removal_yes" data-id="" data-url="reviewers">Yes</button>
-            <button type="button" class="btn btn-default" data-dismiss="modal" id="reviewer_removal_modal_close">Close</button>
-            </div>
-        </div>
-        </div>
-   </div>
-</main>
+</div>
 {{template "layout/bottom" }}
 {{end}}
