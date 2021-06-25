@@ -1,62 +1,49 @@
+{{define "form_header"}}Create Reviewer{{end}}
 {{ define "reviewers/create" }}
-{{template "layout/top" }}
+{{template "layout/formheader"}}
+    <form action='/reviewers/store' method='POST'>
+        <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+        <div class="form-group col-md-auto">
+            <label for="name" class="col-sm-12 col-form-label">Reviewer Name:</label>
+            <div class="col-sm-12">
+                <input type='text' name='name' class="form-control" id="name"
+                    value="{{.values.Name}}" required>
+                {{with .errors.Name }}
+                <small class="form-text text-danger">{{.}}</small>
+                {{ end }}
+            </div>
+        </div></br>
+        <div class="form-group col-md-auto">
+            <label for="name" class="col-sm-12 col-form-label">Email:</label>
+            <div class="col-sm-12">
+                <input type="email" name='email' class="form-control" id="email"
+                    value="{{.values.Email}}" required>
+                {{with .errors.Email }}
+                <small class="form-text text-danger">{{.}}</small>
+                {{ end }}
+            </div>
+        </div></br>
+        <div class="form-group col-md-auto">
+            <label for="name" class="col-sm-12 col-form-label">Bitbucket user name:</label>
+            <div class="col-sm-12">
+                <input type="text" name='user_name' class="form-control" id="user_name"
+                    value="{{.values.UserName}}" required>
+                {{with .errors.UserName }}
+                <small class="form-text text-danger">{{.}}</small>
+                {{ end }}
+            </div>
+        </div></br>
 
-<div class="tab-content rounded-bottom">
-    <div class="tab-pane p-3 active preview" role="tabpanel" id="preview-943">
-        <div class="row">
-            <div class="offset-md-2 col-sm-7">
-                <div class="card callout callout-info mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Create Reviewer</h5>
-                        <hr />
-                        <form action='/reviewers/store' method='POST'>
-                            <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
-                            <div class="form-group col-md-auto">
-                                <label for="name" class="col-sm-12 col-form-label">Reviewer Name:</label>
-                                <div class="col-sm-12">
-                                    <input type='text' name='name' class="form-control" id="name"
-                                        value="{{.values.Name}}" required>
-                                    {{with .errors.Name }}
-                                    <small class="form-text text-danger">{{.}}</small>
-                                    {{ end }}
-                                </div>
-                            </div></br>
-                            <div class="form-group col-md-auto">
-                                <label for="name" class="col-sm-12 col-form-label">Email:</label>
-                                <div class="col-sm-12">
-                                    <input type="email" name='email' class="form-control" id="email"
-                                        value="{{.values.Email}}" required>
-                                    {{with .errors.Email }}
-                                    <small class="form-text text-danger">{{.}}</small>
-                                    {{ end }}
-                                </div>
-                            </div></br>
-                            <div class="form-group col-md-auto">
-                                <label for="name" class="col-sm-12 col-form-label">Bitbucket user name:</label>
-                                <div class="col-sm-12">
-                                    <input type="text" name='user_name' class="form-control" id="user_name"
-                                        value="{{.values.UserName}}" required>
-                                    {{with .errors.UserName }}
-                                    <small class="form-text text-danger">{{.}}</small>
-                                    {{ end }}
-                                </div>
-                            </div></br>
-
-                            <br><br>
-                            <div class="form-group">
-                                <div class="col-sm-12">
-                                    <button class="btn btn-outline-info" type="submit">Save Reviewer
-                                    </button>
-                                    <button type='button' class="btn btn-outline-dark"
-                                        onclick="window.location.href='/reviewers'"> Cancel </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+        <br><br>
+        <div class="form-group">
+            <div class="col-sm-12">
+                <button class="btn btn-outline-info" type="submit">Save Reviewer
+                </button>
+                <button type='button' class="btn btn-outline-dark"
+                    onclick="window.location.href='/reviewers'"> Cancel </button>
             </div>
         </div>
-    </div>
-</div>
-    {{template "layout/bottom" }}
-    {{ end }}
+    </form>
+{{template "layout/formfooter"}}           
+
+{{ end }}
