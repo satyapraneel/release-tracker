@@ -1,29 +1,65 @@
 {{ define "layout/sidebar" }}
-<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-    <div class="position-sticky pt-3">
-      <ul class="nav flex-column">
+<div class="sidebar sidebar-dark sidebar-fixed sidebar-self-hiding-xl" id="sidebar">
+  <div class="sidebar-brand d-none d-md-flex">
+    <img src="https://www.landmarkgroup.com/int/themes/lmg/images/logo.svg" alt="landmarkgroup" height="30"/>
+  </div>
+  <ul class="sidebar-nav" data-coreui="navigation" data-simplebar="">
+    <li class="nav-item">
+      <a class="nav-link" href="/">
+        <span class="nav-icon fa fa-home"></span>Dashboard
+      </a>
+    </li>
+    <li class="nav-group">
+      <a class="nav-link nav-group-toggle" href="#">
+        <span class="nav-icon fa fa-bell fa-fw">
+        </span>Releases
+      </a>
+      <ul class="nav-group-items">
         <li class="nav-item">
-          <a class="nav-link"  href="/release/index">
-            <span data-feather="clipboard"></span>
-            Releases
+          <a class="nav-link" href="/release/create">
+            <span class="fa fa-plus fa-fw"></span>&nbsp;Create
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link"  href="/projects">
-            <span data-feather="clipboard"></span>
-            Projects
+          <a class="nav-link" href="/release/index">
+            <span class="fa fa-list fa-fw"></span>&nbsp;View
+          </a>
+        </li>
+        
+      </ul>
+    </li>
+    <li class="nav-group">
+      <a class="nav-link nav-group-toggle" href="#">
+        <span class="nav-icon fa fa-tasks fa-fw"></span>Projects
+      </a>
+      <ul class="nav-group-items">
+        <li class="nav-item">
+          <a class="nav-link" href="/projects/create">
+            <span class="fa fa-plus fa-fw"></span>&nbsp;Create
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link"  href="/reviewers">
-            <span data-feather="clipboard"></span>
-            Reviewers
+          <a class="nav-link" href="/projects">
+            <span class="fa fa-list fa-fw"></span>&nbsp;View
+          </a>
+        </li>
+        
+      </ul>
+    </li>
+    <li class="nav-group">
+      <a class="nav-link nav-group-toggle" href="#">
+        <span class="nav-icon fa fa-search fa-fw">
+        </span>Reviewers
+      </a>
+      <ul class="nav-group-items">
+        <li class="nav-item">
+          <a class="nav-link" href="/reviewers/create">
+            <span class="fa fa-plus fa-fw"></span>&nbsp;Create
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link"  href="/dls">
-            <span data-feather="clipboard"></span>
-            DLS
+          <a class="nav-link" href="/reviewers">
+            <span class="fa fa-list fa-fw"></span>&nbsp;View
           </a>
         </li><li class="nav-item">
           <a class="nav-link"  href="/release/tickets">
@@ -32,7 +68,27 @@
           </a>
         </li>
       </ul>
-    </div>
-  </nav>
+    </li>
+    <li class="nav-group">
+      <a class="nav-link nav-group-toggle" href="#">
+        <span class="nav-icon fa fa-users fa-fw">
+        </span>DLS
+      </a>
+      <ul class="nav-group-items">
+        <li class="nav-item">
+          <a class="nav-link" href="/dls/create">
+            <span class="fa fa-plus fa-fw"></span>&nbsp;Create
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/dls">
+            <span class="fa fa-list fa-fw"></span>&nbsp;View
+          </a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+
 
 {{end}}

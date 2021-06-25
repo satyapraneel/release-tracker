@@ -9,8 +9,9 @@ import (
 )
 
 type DLsFields struct {
-	Email  string `form:"email" json:"email" binding:"required"`
-	DlType string `form:"dl_type" json:"dl_type" binding:"required"`
+	Email     string `form:"email" json:"email" binding:"required"`
+	DlType    string `form:"dl_type" json:"dl_type" binding:"required"`
+	ProjectID string `form:"project_id" json:"project_id" binding:"required"`
 }
 
 func ValidateDLs(c *gin.Context) {
