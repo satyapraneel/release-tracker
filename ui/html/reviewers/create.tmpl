@@ -1,6 +1,7 @@
-{{define "form_header"}}Create Reviewer{{end}}
 {{ define "reviewers/create" }}
 {{template "layout/formheader"}}
+    <h5 class="card-title">Create Reviewer</h5>
+    <hr />
     <form action='/reviewers/store' method='POST'>
         <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
         <div class="form-group col-md-auto">
@@ -44,6 +45,5 @@
             </div>
         </div>
     </form>
-{{template "layout/formfooter"}}           
-
+{{template "layout/formfooter"}}
 {{ end }}
