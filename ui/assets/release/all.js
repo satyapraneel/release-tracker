@@ -1,5 +1,6 @@
 var $releasesTable;
 $(document).ready(function () {
+    $('#releases_name').select2();
     window.$reviewerList = $('#reviewers');
     $('#type').select2();
     $('.reviewers').hide()
@@ -239,3 +240,37 @@ var initDatatable = function ($table, $columns, additionalOptions) {
     $table.data('dt', $dt);
     return $dt;
 }
+
+$('#releases_name').on('change', function () {
+    var str = $("#releases_name option:selected").text();
+    getJiraTicketsByLabel(str)
+    alert(str)
+});
+
+var getJiraTicketsByLabel = function (releaseName) {
+    $.ajax({
+        url: "/release/getTickets?release="+releaseName,
+        type:"get",
+        context: document.body
+    })
+        .done(function (res) {
+            $(function() {
+                $.each(res.data, function(i, item) {
+                    var $tr = $('<tr>').append(
+                        $('<td>').text(item.Id),
+                        $('<td>').text(item.Summary),
+                        $('<td>').text(item.CreationDate),
+                        $('<td>').text(item.CreationTime),
+                        $('<td>').text(item.Type),
+                        $('<td>').text(item.Project),
+                        $('<td>').text(item.Priority),
+                        $('<td>').text(item.Status),
+                    ).appendTo('.release_tickets');
+                });
+            });
+        })
+        .fail(function (response) {
+           alert('Failed to load data')
+        });
+}
+

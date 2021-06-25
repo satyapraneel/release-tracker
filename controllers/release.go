@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"github.com/release-trackers/gin/cmd/jira"
 	"log"
 	"net/http"
 	"strings"
@@ -58,6 +59,26 @@ func (app *App) CreateReleaseForm(c *gin.Context) {
 		"title":    "Create release",
 		"projects": projects,
 	})
+}
+func (app *App) ReleaseTicketsForm(c *gin.Context) {
+	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
+	releases, err := releaseRepsitoryHandler.GetLatestReleases()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": err.Error()})
+		//	return
+	}
+	c.HTML(http.StatusOK, "release/list", gin.H{
+		"title":    "Create release",
+		"releases": releases,
+	})
+}
+
+func (app *App)ReleaseListTickets(c *gin.Context)  {
+	releaseName := c.Query("release")
+	log.Printf("param : %v", releaseName)
+	jirsList := jira.GetIssuesByLabel(releaseName)
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "List found", "data": jirsList})
+	return
 }
 
 func (app *App) ViewReleaseForm(c *gin.Context) {

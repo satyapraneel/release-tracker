@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/providers/bitbucket"
 	"log"
@@ -74,10 +73,7 @@ func TestGetAccessToken(token_code string) *bitbucket.Session {
 	return se
 }
 
-func GetAccessToken(c *gin.Context)  {
-	session := sessions.Default(c)
-	accessToken := session.Get("access_token")
-	if accessToken == nil {
+func GetAccessToken() string {
 		params := url.Values{}
 		params.Add("grant_type", `client_credentials`)
 		body := strings.NewReader(params.Encode())
@@ -102,25 +98,18 @@ func GetAccessToken(c *gin.Context)  {
 		log.Printf("access token %+v : ", access.AccessToken)
 		//newT := currentTime.Add(time.Second * time.Duration(access.ExpiresIn))
 		//gob.Register(time.Time{})
-		sess := sessions.Default(c)
-		sess.Set("access_token", access.AccessToken)
-		if err := sess.Save(); err != nil {
-			log.Print(err)
-			return
-		}
-	}
-	fmt.Printf("access in\n: %s\n", session.Get("access_token"))
 
+	return access.AccessToken
 }
 
 func CreateBranch(c *gin.Context, branchType string, name string, reviewers []string, projectRepoName string) {
-	session := sessions.Default(c)
-	AccessToken :=  fmt.Sprintf("%v", session.Get("access_token"))
+	AccessToken :=  GetAccessToken()
 	branch := branchType+"/"+name
 	request := Payload{Name: branch, Target: Target{Hash: "master"}}
 	branchCreationUrl := "/repositories/"+os.Getenv("BITBUCKET_OWNER")+"/"+projectRepoName+"/refs/branches"
 	apiUrl := baseURL+branchCreationUrl
 	log.Printf("API URL ---- %+v : ", apiUrl)
+	log.Printf("Branch URL ---- %+v : ", branch)
 	payloadBytes, _ := json.Marshal(request)
 	body := bytes.NewReader(payloadBytes)
 	resp := PostRequest(apiUrl, body, AccessToken)

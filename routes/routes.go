@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"github.com/release-trackers/gin/cmd/bitbucket"
 	"log"
 	"net/http"
 	"os"
@@ -40,8 +39,6 @@ func RouterGin(app *cmd.Application) {
 			session := sessions.Default(c)
 			flashes := session.Flashes()
 			session.Save()
-			//set bitbucket access token in session
-			bitbucket.GetAccessToken(c)
 			c.HTML(http.StatusOK, "home", gin.H{
 				"title":   "Release tracker",
 				"flashes": flashes,
@@ -56,6 +53,8 @@ func RouterGin(app *cmd.Application) {
 		api.POST("/store", handler.CreateRelease)
 		api.GET("/getReviewers", handler.GetProjectReviewerList)
 		api.GET("/show/:id", handler.ViewReleaseForm)
+		api.GET("/tickets", handler.ReleaseTicketsForm)
+		api.GET("/getTickets", handler.ReleaseListTickets)
 	}
 
 	projects := auth.Group("/projects")
@@ -107,6 +106,7 @@ func RouterGin(app *cmd.Application) {
 			c.Redirect(http.StatusFound, "/dls")
 		})
 	}
+
 
 	//oauthapi := auth.Group("/oauth")
 	//{
