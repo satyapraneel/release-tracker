@@ -4,6 +4,7 @@ $(document).ready(function () {
     window.$reviewerList = $('#reviewers');
     $('#type').select2();
     $('.reviewers').hide()
+    $('.reviewers_list').hide()
 
 
     $('#projects').select2({
@@ -68,7 +69,7 @@ $(document).ready(function () {
                 "mData": "ID",
                 'orderable': false,
                 "mRender": function (data, type, row) {
-                    return "<a href='/release/show/" + data + "'><i class='fa fa-eye fa-2x'></i></a>";
+                    return "<a href='/release/show/" + data + "'><i class='fa fa-eye'></i></a>";
                 }
             },
         ], additionalOptions);
