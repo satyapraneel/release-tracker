@@ -185,7 +185,7 @@ func (app *App) GetReviewerUserNames(c *gin.Context, reviewerList string) []stri
 
 func (app *App) GetLatestReleases() ([]models.Release, error) {
 	releases := []models.Release{}
-	releaseRecords := app.Db.Table("releases").Where("id IN (?)", app.Db.Table("releases").Select("MAX(id)").Group("type"))
+	releaseRecords := app.Db.Debug().Table("releases").Where("id IN (?)", app.Db.Table("releases").Select("MAX(id)").Group("type"))
 	releaseRows, err := releaseRecords.Rows()
 	if err != nil {
 		log.Fatalln(err)

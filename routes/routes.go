@@ -53,6 +53,8 @@ func RouterGin(app *cmd.Application) {
 		api.POST("/store", handler.CreateRelease)
 		api.GET("/getReviewers", handler.GetProjectReviewerList)
 		api.GET("/show/:id", handler.ViewReleaseForm)
+		api.GET("/tickets", handler.ReleaseTicketsForm)
+		api.GET("/getTickets", handler.ReleaseListTickets)
 	}
 
 	projects := auth.Group("/projects")
@@ -104,6 +106,7 @@ func RouterGin(app *cmd.Application) {
 			c.Redirect(http.StatusFound, "/dls")
 		})
 	}
+
 
 	//oauthapi := auth.Group("/oauth")
 	//{

@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"github.com/release-trackers/gin/cmd/jira"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -45,7 +44,6 @@ func handle() {
 			os.Exit(0)
 		}
 	}
-	jira.GetIssuesByLabel()
 	app := &cmd.Application{
 		Db:   database.InitConnection(),
 		Name: "roopa",
