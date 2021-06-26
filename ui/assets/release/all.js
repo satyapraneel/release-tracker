@@ -6,6 +6,12 @@ $(document).ready(function () {
     $('.reviewers').hide()
     $('.reviewers_list').hide()
 
+    //for release notes grid
+    var rel = $("#releases_name option:selected").text();
+    $('#release_notes_button').show();
+    if(rel === "Select"){
+        $('#release_notes_button').hide();
+    }
 
     $('#projects').select2({
         placeholder: 'Select Projects',
@@ -244,34 +250,64 @@ var initDatatable = function ($table, $columns, additionalOptions) {
 
 $('#releases_name').on('change', function () {
     var str = $("#releases_name option:selected").text();
-    getJiraTicketsByLabel(str)
-    alert(str)
+    if(str !== "Select" ){
+        $('#release_notes_button').show();
+        getJiraTicketsByLabel(str)
+    }else{
+        $(".release_tick").empty();
+        $('#release_notes_button').hide();
+    }
+
 });
+
+
+$('.send_release_notes').on('click', function () {
+    var releaseName = $("#releases_name option:selected").text();
+    $.ajax({
+        url: "/release/getTickets?release="+releaseName+"&sendEmail=true",
+        type:"get",
+        context: document.body
+    })
+        .done(function (res) {
+            console.log(res)
+        });
+});
+
 
 var getJiraTicketsByLabel = function (releaseName) {
     $.ajax({
-        url: "/release/getTickets?release="+releaseName,
+        url: "/release/getTickets?release="+releaseName+"&sendEmail=false",
         type:"get",
         context: document.body
     })
         .done(function (res) {
             $(function() {
+                $(".release_tick").empty();
                 $.each(res.data, function(i, item) {
-                    var $tr = $('<tr>').append(
-                        $('<td>').text(item.Id),
-                        $('<td>').text(item.Summary),
-                        $('<td>').text(item.CreationDate),
-                        $('<td>').text(item.CreationTime),
-                        $('<td>').text(item.Type),
-                        $('<td>').text(item.Project),
-                        $('<td>').text(item.Priority),
-                        $('<td>').text(item.Status),
-                    ).appendTo('.release_tickets');
+                    ticketcolor="black";
+                    if(item.Type === "Bug"){
+                        ticketcolor="#b52107"
+                    }
+                    else if(item.Type === "Task"){
+                        ticketcolor="#18cded"
+                    }
+                    else if(item.Type === "Story"){
+                        ticketcolor="#07a621"
+                    }
+                    var str = "<font color="+ticketcolor+">"+item.Type+"</font> :   "+item.Summary
+                    $(".release_tick").append('<li class="list-group-item">'+str+'</li>');
+                    // var $tr = $('<tr>').append(
+                    //     $('<td>').text(item.Key),
+                    //     $('<td>').text(item.Type),
+                    //     $('<td>').text(item.Summary),
+                    //     $('<td>').text(item.Project),
+                    //     $('<td>').text(item.Status),
+                    // ).appendTo('.release_tickets');
                 });
             });
         })
         .fail(function (response) {
-           alert('Failed to load data')
+           log.console('Failed to load data')
         });
 }
 

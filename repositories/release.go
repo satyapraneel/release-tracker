@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"github.com/release-trackers/gin/cmd/bitbucket"
+	"github.com/release-trackers/gin/notifications/mails"
 	"log"
 	"strings"
 
@@ -41,9 +42,9 @@ func (app *App) CreateRelease(c *gin.Context, release models.Release, projectIds
 		}
 		log.Printf("brandName : %v", project.RepoName)
 		log.Printf("release : %+v, %v", release.Name, release.Type)
-		//go mails.SendReleaseCreatedMail(&release, project)
+		go mails.SendReleaseCreatedMail(&release, project)
 		reviewerUserNames := app.GetReviewerUserNames(c, project.ReviewerList)
-		go bitbucket.CreateBranch(c, release.Type, release.Name, reviewerUserNames, project.RepoName)
+		go bitbucket.CreateBranch(app.Db, release, reviewerUserNames, project.RepoName)
 		project = &models.Project{}
 	}
 

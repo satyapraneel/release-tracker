@@ -54,7 +54,7 @@ func RouterGin(app *cmd.Application) {
 		api.GET("/getReviewers", handler.GetProjectReviewerList)
 		api.GET("/show/:id", handler.ViewReleaseForm)
 		api.GET("/tickets", handler.ReleaseTicketsForm)
-		api.GET("/getTickets", handler.ReleaseListTickets)
+		api.GET("/getTickets", handler.ReleaseListTicketsByReleaseId)
 	}
 
 	projects := auth.Group("/projects")

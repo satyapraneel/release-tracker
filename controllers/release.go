@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/release-trackers/gin/cmd/jira"
+	"github.com/release-trackers/gin/notifications/mails"
 	"log"
 	"net/http"
 	"strings"
@@ -76,8 +77,50 @@ func (app *App) ReleaseTicketsForm(c *gin.Context) {
 func (app *App)ReleaseListTickets(c *gin.Context)  {
 	releaseName := c.Query("release")
 	log.Printf("param : %v", releaseName)
+	release := &models.Release{}
+	fetchRelease := app.Db.Debug().Where("name = ?", strings.TrimSpace(releaseName)).Find(release)
+	if fetchRelease.Error != nil {
+		log.Print(fetchRelease.Error)
+	}
 	jirsList := jira.GetIssuesByLabel(releaseName)
+	for _, jiraTickets := range jirsList {
+		releaseTickets := &models.ReleaseTickets{Key: jiraTickets.Id, Summary: jiraTickets.Summary, Type: jiraTickets.Type,
+			Project: jiraTickets.Project, Status: jiraTickets.Status, ReleaseId: release.ID}
+		app.Db.Create(releaseTickets)
+	}
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "List found", "data": jirsList})
+	return
+}
+
+func (app *App)ReleaseListTicketsByReleaseId(c *gin.Context)  {
+	releaseName := c.Query("release")
+	sendMail := c.Query("sendEmail")
+	log.Printf("param : %v", releaseName)
+	log.Printf("send email : %v", sendMail)
+	release := &models.Release{}
+	fetchRelease := app.Db.Debug().Where("name = ?", strings.TrimSpace(releaseName)).Find(release)
+	if fetchRelease.Error != nil {
+		log.Print(fetchRelease.Error)
+	}
+	releaseTickets := []models.ReleaseTickets{}
+	records := app.Db.Debug().Where("release_id = ?", release.ID).Find(&releaseTickets)
+	ticketsrows, _ := records.Rows()
+	defer ticketsrows.Close()
+
+	ticketsrr := []*models.ReleaseTickets{}
+	for ticketsrows.Next() {
+		tickets := &models.ReleaseTickets{}
+		err := app.Db.Debug().ScanRows(ticketsrows, &tickets)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		ticketsrr = append(ticketsrr, tickets)
+	}
+	log.Printf("release tickets : %+v", ticketsrr)
+	if sendMail ==  "true" {
+		mails.SendReleaseNotes(release, ticketsrr)
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "List found", "data": ticketsrr})
 	return
 }
 
