@@ -1,0 +1,18 @@
+.card_shadow {
+    box-shadow: 0 0 10px 0 rgba(100, 100, 100, 0.26);
+}
+.text-theme {
+    color: #7b6a1f;
+}
+
+
+.custom_link > a:link { text-decoration: none; }
+
+
+.custom_link > a:visited { text-decoration: none; }
+
+
+.custom_link >  a:hover { text-decoration: none; }
+
+
+.custom_link > a:active { text-decoration: none; }
