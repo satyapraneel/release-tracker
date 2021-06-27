@@ -74,6 +74,7 @@ func (app *App) ReleaseTicketsForm(c *gin.Context) {
 	})
 }
 
+//Not using as of now
 func (app *App)ReleaseListTickets(c *gin.Context)  {
 	releaseName := c.Query("release")
 	log.Printf("param : %v", releaseName)
