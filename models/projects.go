@@ -14,6 +14,7 @@ type Project struct {
 	RegressionSignorDate string `json:"regression_signor_date"`
 	CodeFreezeDate       string `json:"code_freeze_date"`
 	DevCompletionDate    string `json:"dev_completion_date"`
+	RelatedCodes         string `json:"related_codes"`
 	Status               string `gorm:"type:varchar(1)" sql:"DEFAULT:1"`
 }
 

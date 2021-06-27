@@ -8,7 +8,7 @@ import (
 func CreateProject(db *gorm.DB, name string,
 	reponame string, reviewers string,
 	betaReleaseDate string, regressionDate string,
-	codeFreezedate string, devComplDate string, status string,
+	codeFreezedate string, devComplDate string, relatedCodes string, status string,
 ) error {
 	return db.Create(&models.
 		Project{
@@ -19,6 +19,7 @@ func CreateProject(db *gorm.DB, name string,
 		RegressionSignorDate: regressionDate,
 		CodeFreezeDate:       codeFreezedate,
 		DevCompletionDate:    devComplDate,
+		RelatedCodes:         relatedCodes,
 		Status:               status,
 	}).Error
 }

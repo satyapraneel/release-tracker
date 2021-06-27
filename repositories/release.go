@@ -1,10 +1,11 @@
 package repositories
 
 import (
-	"github.com/release-trackers/gin/cmd/bitbucket"
-	"github.com/release-trackers/gin/notifications/mails"
 	"log"
 	"strings"
+
+	"github.com/release-trackers/gin/cmd/bitbucket"
+	"github.com/release-trackers/gin/notifications/mails"
 
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/cmd"
@@ -199,4 +200,14 @@ func (app *App) GetLatestReleases() ([]models.Release, error) {
 		releases = append(releases, release)
 	}
 	return releases, err
+}
+
+func (app *App) GetReleseIssuesIds(c *gin.Context) {
+	db := app.Db
+	release := models.Release{}
+	db.First(&release, 3)
+	project := models.Project{}
+	db.First(&project, 1)
+	releatedIds := bitbucket.GetReleseIssuesIds(c, release, project)
+	log.Print(releatedIds)
 }

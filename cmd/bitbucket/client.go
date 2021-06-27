@@ -4,15 +4,19 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
-	"github.com/markbates/goth/providers/bitbucket"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
+	"github.com/markbates/goth/providers/bitbucket"
+	"github.com/release-trackers/gin/models"
 )
+
 //type Sessions struct {
 //	*bitbucket.Session
 //}
@@ -24,27 +28,29 @@ type Target struct {
 	Hash string `json:"hash"`
 }
 
+type GetBody struct{}
+
 type BBAccessToken struct {
 	AccessToken  string `json:"access_token"`
 	ExpiresIn    int    `json:"expires_in"`
 	RefreshToken string `json:"refresh_token"`
 }
 
-type BranchRestriction struct{
-	Owner    string            `json:"owner"`
-	RepoSlug string            `json:"repo_slug"`
-	Kind     string            `json:"kind"`
-	FullSlug string            `json:"full_slug"`
-	Name     string            `json:"name"`
-	Users    []Users          	`json:"users"`
-	Pattern  string				`json:"pattern"`
+type BranchRestriction struct {
+	Owner    string  `json:"owner"`
+	RepoSlug string  `json:"repo_slug"`
+	Kind     string  `json:"kind"`
+	FullSlug string  `json:"full_slug"`
+	Name     string  `json:"name"`
+	Users    []Users `json:"users"`
+	Pattern  string  `json:"pattern"`
 }
 type Users struct {
 	Username string `json:"username"`
 }
 
 const callbackUrl = "http://localhost:4000/oauth/index"
-const baseURL  =  "https://api.bitbucket.org/2.0"
+const baseURL = "https://api.bitbucket.org/2.0"
 
 func Authrorize() string {
 	provider := bitbucketProvider()
@@ -163,9 +169,9 @@ func branchRestrictions(token string, branchName string, ReviewerList []string, 
 	}
 }
 
-func PostRequest(apiUrl string, body *bytes.Reader, token string) *http.Response {
+func PostRequest(apiUrl string, method string, body *bytes.Reader, token string) *http.Response {
 	fmt.Printf("**Access token: %+v \n", token)
-	req, err := http.NewRequest("POST", apiUrl, body)
+	req, err := http.NewRequest(method, apiUrl, body)
 	if err != nil {
 		fmt.Println("error :", err)
 	}
@@ -179,7 +185,25 @@ func PostRequest(apiUrl string, body *bytes.Reader, token string) *http.Response
 	return resp
 }
 
-
 func bitbucketProvider() *bitbucket.Provider {
 	return bitbucket.New(os.Getenv("BITBUCKET_KEY"), os.Getenv("BITBUCKET_SECRET"), callbackUrl, "account:write")
+}
+
+func GetReleseIssuesIds(c *gin.Context, release models.Release, project models.Project) []string {
+	var releaseIds []string
+	session := sessions.Default(c)
+	AccessToken := fmt.Sprintf("%v", session.Get("access_token"))
+	getCommits := "/repositories/" + os.Getenv("BITBUCKET_OWNER") + "/" + project.Name + "/commits/" + release.Type + "/" + release.Name + "?exclude=master"
+	apiUrl := baseURL + getCommits
+	request := GetBody{}
+	payloadBytes, _ := json.Marshal(request)
+	body := bytes.NewReader(payloadBytes)
+	resp := PostRequest(apiUrl, "GET", body, AccessToken)
+	defer resp.Body.Close()
+	responseCoomits, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Println(string(responseCoomits))
+	return releaseIds
 }

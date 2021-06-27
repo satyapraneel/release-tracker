@@ -63,6 +63,7 @@ func (app *App) CreateReleaseForm(c *gin.Context) {
 func (app *App) ViewReleaseForm(c *gin.Context) {
 	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
 	releases, projects, reviewers, err := releaseRepsitoryHandler.GetReleases(c)
+	releaseRepsitoryHandler.GetReleseIssuesIds(c)
 	for _, project := range projects {
 		log.Printf("project in loop : %v", project.Name)
 	}
