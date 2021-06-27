@@ -1,23 +1,62 @@
 {{ define "home"}}
 {{template "layout/top" }}
-<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-    <div class="login-container">
-      <div class="container">
-          <div class="row">
-              <div class="container justify-content-center">
-                  <div class="card p-4">
-                      <div class="card-body">
-
-                        {{ range $f := .flashes }}
-                          <div class="alert alert-success">{{ $f }}</div>
-                          {{ end }}
-                        <h3>Welcome to Release Tracker</h3>
-                      </div>
-                  </div>
-              </div>
+<div class="tab-content rounded-bottom">
+  <div class="tab-pane p-3 active preview" role="tabpanel" id="preview-147">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="card mb-3 card_shadow">
+          <div class="card-body custom_link">
+            <a href="/release/index">
+            <h5 class="card-title text-theme"><i class="fa fa-bell fa-fw"></i>&nbsp;Releases</h5>
+            <p class="card-text text-dark">This section contains release related details</p>
+            </a>
           </div>
+        </div>
       </div>
+      <div class="col-md-4 ">
+        <div class="card mb-3 card_shadow">
+          <div class="card-body custom_link">
+            <a href="/release/tickets">
+              <h5 class="card-title text-theme"><i class="fa fa-fw fa-bars"></i>&nbsp;Release tickets</h5>
+              <p class="card-text text-dark">This section contains tickets for the release</p>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <div class="card card_shadow">
+          <div class="card-body custom_link">
+            <a href="/projects">
+              <h5 class="card-title text-theme"><i class="fa fa-tasks fa-fw"></i>&nbsp;Projects</h5>
+              <p class="card-text text-dark">This section contains project related details</p>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <div class="card card_shadow">
+          <div class="card-body custom_link">
+            <a href="/reviewers">
+              <h5 class="card-title text-theme"><i class="fa-search fa fa-fw"></i>&nbsp;Reviewers</h5>
+              <p class="card-text text-dark">This section contatins details of the reviewers for the project</p>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <div class="card card_shadow">
+          <div class="card-body custom_link">
+            <a href="/dls">
+              <h5 class="card-title text-theme"><i class="fa-search fa fa-users"></i>&nbsp;Distibution Lists</h5>
+              <p class="card-text text-dark">This section contains destribution lists for the projects</p>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-</main>
-  {{template "layout/bottom" }}
+</div>
+{{template "layout/bottom" }}
 {{ end }}

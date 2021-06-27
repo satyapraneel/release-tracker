@@ -1,58 +1,48 @@
 {{ define "reviewers/edit" }}
-{{template "layout/top" }}
-<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-    <div
-        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Create Project</h1>
-    </div>
-
-    <!--    <h2>Section title</h2>-->
-    <div class="container">
-        <div class="table-responsive row justify-content-md-center">
-            <form action="/reviewers/update/{{.values.ID}}" method='POST'>
-                <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
-                <div class="form-group col-md-auto">
-                    <label for="name" class="col-sm-3 col-form-label">Project Name:</label>
-                    <div class="col-sm-6">
-                        <input type='text' name='name' class="form-control" id="name" value="{{.values.Name}}" required>
-                        {{with .errors.Name }}
-                        <small class="form-text text-danger">{{.}}</small>
-                        {{ end }}
-                    </div>
-                </div></br>
-                <div class="form-group col-md-auto">
-                    <label for="email" class="col-sm-3 col-form-label">Email:</label>
-                    <div class="col-sm-6">
-                        <input type='email' name='email' class="form-control" id="email"
-                            value="{{.values.Email}}" required>
-                        {{with .errors.Email }}
-                        <small class="form-text text-danger">{{.}}</small>
-                        {{ end }}
-                    </div>
-                </div></br>
-                <div class="form-group col-md-auto">
-                    <label for="user_name" class="col-sm-3 col-form-label">User name:</label>
-                    <div class="col-sm-6">
-                        <input type='text' name='user_name' class="form-control" id="user_name"
-                            value="{{.values.UserName}}" required>
-                        {{with .errors.UserName }}
-                        <small class="form-text text-danger">{{.}}</small>
-                        {{ end }}
-                    </div>
-                </div></br>
-                <br><br>
-                <input type="hidden" name="id" value="{{.values.ID}}" />
-                <div class="form-group">
-                    <div class="col-sm-4 col-sm-offset-2">
-                        <button class="btn btn-outline-success" type="submit">Save Reviewer
-                        </button>
-                        <button type='button' class="btn btn-outline-secondary"
-                            onclick="window.location.href='/reviewers'"> Cancel </button>
-                    </div>
+    {{template "layout/formheader"}}
+        <h5 class="card-title">Update Reviewer</h5>
+        <hr />
+        <form action="/reviewers/update/{{.values.ID}}" method='POST'>
+            <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+            <div class="form-group col-md-auto">
+                <label for="name" class="col-sm-12 col-form-label">Project Name:</label>
+                <div class="col-sm-12">
+                    <input type='text' name='name' class="form-control" id="name" value="{{.values.Name}}" required>
+                    {{with .errors.Name }}
+                    <small class="form-text text-danger">{{.}}</small>
+                    {{ end }}
                 </div>
-            </form>
-        </div>
-    </div>
-</main>
-{{template "layout/bottom" }}
+            </div></br>
+            <div class="form-group col-md-auto">
+                <label for="email" class="col-sm-12 col-form-label">Email:</label>
+                <div class="col-sm-12">
+                    <input type='email' name='email' class="form-control" id="email"
+                        value="{{.values.Email}}" required>
+                    {{with .errors.Email }}
+                    <small class="form-text text-danger">{{.}}</small>
+                    {{ end }}
+                </div>
+            </div></br>
+            <div class="form-group col-md-auto">
+                <label for="user_name" class="col-sm-12 col-form-label">User name:</label>
+                <div class="col-sm-12">
+                    <input type='text' name='user_name' class="form-control" id="user_name"
+                        value="{{.values.UserName}}" required>
+                    {{with .errors.UserName }}
+                    <small class="form-text text-danger">{{.}}</small>
+                    {{ end }}
+                </div>
+            </div></br>
+            <br><br>
+            <input type="hidden" name="id" value="{{.values.ID}}" />
+            <div class="form-group">
+                <div class="col-sm-12">
+                    <button class="btn btn-outline-success" type="submit">Save Reviewer
+                    </button>
+                    <button type='button' class="btn btn-outline-secondary"
+                        onclick="window.location.href='/reviewers'"> Cancel </button>
+                </div>
+            </div>
+        </form>
+    {{template "layout/formfooter"}}
 {{ end }}
