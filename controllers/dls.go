@@ -38,9 +38,16 @@ func (app *App) GetListOfDLs(c *gin.Context) {
 
 func (app *App) CreateDLsForm(c *gin.Context) {
 	dlTypes := map[string]string{"qa": "QA", "dev": "Developers"}
+	repsitoryHandler := repositories.NewRepositoryHandler(app.Application)
+	projects, err := repsitoryHandler.GetAllProjectsList(c)
+	if err != nil {
+		emptyProject := []*models.Project{}
+		projects = emptyProject
+	}
 	c.HTML(http.StatusOK, "dls/create", gin.H{
-		"title":   "Create DLs",
-		"DlTypes": dlTypes,
+		"title":    "Create DLs",
+		"DlTypes":  dlTypes,
+		"Projects": projects,
 	})
 }
 
@@ -56,8 +63,9 @@ func (app *App) CreateDL(c *gin.Context) {
 		Email:  c.Request.PostForm.Get("email"),
 		DlType: c.Request.PostForm.Get("dl_type"),
 	}
+	dlProjectId := c.Request.PostForm.Get("project_id")
 	repsitoryHandler := repositories.NewRepositoryHandler(app.Application)
-	created, err := repsitoryHandler.CreateDL(c, dl)
+	created, err := repsitoryHandler.CreateDL(c, dl, dlProjectId)
 	session := sessions.Default(c)
 	if err != nil {
 		log.Print(err)

@@ -13,6 +13,7 @@ type Release struct {
 	TargetDate time.Time `json:"target_date"`
 	Type       string    `json:"type"`
 	Owner      string    `json:"owner"`
+	RestrictionId uint	`json:"restriction_id"`
 }
 
 type DataResult struct {

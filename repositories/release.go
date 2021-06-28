@@ -17,6 +17,7 @@ func NewReleaseHandler(app *cmd.Application) *App {
 }
 
 func (app *App) CreateRelease(c *gin.Context, release models.Release, projectIds []int) (uint, error) {
+	//set bitbucket access token in session
 	err := c.Bind(&release)
 	if err != nil {
 		log.Print(err)
@@ -29,20 +30,22 @@ func (app *App) CreateRelease(c *gin.Context, release models.Release, projectIds
 		log.Print(errMessage)
 
 	}
-	project := models.Project{}
+	project := &models.Project{}
 	for _, projectId := range projectIds {
 		log.Printf("projectIds : %v", projectId)
 		app.Db.Create(&models.ReleaseProject{
 			ReleaseId: release.ID, ProjectId: uint(projectId),
 		})
-		fetchProject := app.Db.Debug().Where("id = ?", projectId).Find(&project)
+		fetchProject := app.Db.Debug().Where("id = ?", projectId).Find(project)
 		if fetchProject.Error != nil {
 			log.Print(errMessage)
 		}
-		go mails.SendReleaseCreatedMail(&release, &project)
+		log.Printf("brandName : %v", project.RepoName)
+		log.Printf("release : %+v, %v", release.Name, release.Type)
+		go mails.SendReleaseCreatedMail(&release, project)
 		reviewerUserNames := app.GetReviewerUserNames(c, project.ReviewerList)
-		go bitbucket.CreateBranch(c, release.Type, release.Name, reviewerUserNames, project.RepoName)
-		project = models.Project{}
+		go bitbucket.CreateBranch(app.Db, release, reviewerUserNames, project.RepoName)
+		project = &models.Project{}
 	}
 
 	return release.ID, errMessage
@@ -183,7 +186,7 @@ func (app *App) GetReviewerUserNames(c *gin.Context, reviewerList string) []stri
 
 func (app *App) GetLatestReleases() ([]models.Release, error) {
 	releases := []models.Release{}
-	releaseRecords := app.Db.Table("releases").Where("id IN (?)", app.Db.Table("releases").Select("MAX(id)").Group("type"))
+	releaseRecords := app.Db.Debug().Table("releases").Where("id IN (?)", app.Db.Table("releases").Select("MAX(id)").Group("type"))
 	releaseRows, err := releaseRecords.Rows()
 	if err != nil {
 		log.Fatalln(err)

@@ -9,6 +9,17 @@ import (
 	"time"
 )
 
+type jiraTickets struct {
+	Id string
+	Summary string
+	CreationDate string
+	CreationTime string
+	Type string
+	Project string
+	Priority string
+	Status string
+}
+
 func setUpClient() (*jira.Client, error) {
 	base := os.Getenv("JIRA_BASE_URL")
 	tp := jira.BasicAuthTransport{
@@ -20,9 +31,9 @@ func setUpClient() (*jira.Client, error) {
 	return jiraClient,err
 }
 
-func GetIssueByName(){
+func GetIssueDetails(issueKey string) *jiraTickets {
 	jiraClient, err := setUpClient()
-	req, _ := jiraClient.NewRequest("GET", "rest/api/2/issue/LOYAL-4643", nil)
+	req, _ := jiraClient.NewRequest("GET", "rest/api/2/issue/"+issueKey, nil)
 
 	issue := new(jira.Issue)
 	_, err = jiraClient.Do(req, issue)
@@ -30,12 +41,19 @@ func GetIssueByName(){
 		panic(err)
 	}
 
-	fmt.Printf("%s: %+v\n", issue.Key, issue.Fields.Summary)
-	fmt.Printf("Type: %s\n", issue.Fields.Type.Name)
-	fmt.Printf("Priority: %s\n", issue.Fields.Priority.Name)
+
+	t := time.Time(issue.Fields.Created) // convert go-jira.Time to time.Time for manipulation
+	date := t.Format("2006-01-02")
+	clock := t.Format("15:04")
+	jiraInfo := &jiraTickets{Id: issue.Key, Summary: issue.Fields.Summary, CreationDate: date, CreationTime: clock,
+		Type: issue.Fields.Type.Name, Project: issue.Fields.Project.Name, Priority: issue.Fields.Priority.Name,
+		Status: issue.Fields.Status.Name,
+	}
+
+	return jiraInfo
 }
 
-func GetIssuesByLabel() {
+func GetIssuesByLabel(releaseName string) []*jiraTickets {
 	jiraClient, err := setUpClient()
 	var issues []jira.Issue
 
@@ -45,18 +63,27 @@ func GetIssuesByLabel() {
 		return err
 	}
 
-	err = jiraClient.Issue.SearchPages(fmt.Sprintf(`labels IN (%s, %s)`, strings.TrimSpace("release01"),strings.TrimSpace("example02")), nil, appendFunc)
+	err = jiraClient.Issue.SearchPages(fmt.Sprintf(`labels IN (%s)`, strings.TrimSpace(releaseName)), nil, appendFunc)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	fmt.Printf("%d issues found.\n", len(issues))
-
+	jiraArr := []*jiraTickets{}
 	for _, i := range issues {
 		t := time.Time(i.Fields.Created) // convert go-jira.Time to time.Time for manipulation
 		date := t.Format("2006-01-02")
 		clock := t.Format("15:04")
+		jiraInfo := &jiraTickets{Id: i.Key, Summary: i.Fields.Summary, CreationDate: date, CreationTime: clock,
+			Type: i.Fields.Type.Name, Project: i.Fields.Project.Name, Priority: i.Fields.Priority.Name,
+			Status: i.Fields.Status.Name,
+		}
+
+		jiraArr = append(jiraArr, jiraInfo)
+		fmt.Printf("info of jira ticker %+v", i)
 		fmt.Printf("Creation Date: %s\nCreation Time: %s\nIssue Key: %s\nIssue Summary: %s\n\n", date, clock, i.Key, i.Fields.Summary)
 	}
+
+	return jiraArr
 }
 
