@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/providers/bitbucket"
+	"github.com/release-trackers/gin/models"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"net/url"
@@ -43,6 +43,10 @@ type Users struct {
 	Username string `json:"username"`
 }
 
+type BranchRestrictionResponse struct{
+	Id int
+}
+
 const callbackUrl = "http://localhost:4000/oauth/index"
 const baseURL  =  "https://api.bitbucket.org/2.0"
 
@@ -74,10 +78,7 @@ func TestGetAccessToken(token_code string) *bitbucket.Session {
 	return se
 }
 
-func GetAccessToken(c *gin.Context)  {
-	session := sessions.Default(c)
-	accessToken := session.Get("access_token")
-	if accessToken == nil {
+func GetAccessToken() string {
 		params := url.Values{}
 		params.Add("grant_type", `client_credentials`)
 		body := strings.NewReader(params.Encode())
@@ -102,25 +103,18 @@ func GetAccessToken(c *gin.Context)  {
 		log.Printf("access token %+v : ", access.AccessToken)
 		//newT := currentTime.Add(time.Second * time.Duration(access.ExpiresIn))
 		//gob.Register(time.Time{})
-		sess := sessions.Default(c)
-		sess.Set("access_token", access.AccessToken)
-		if err := sess.Save(); err != nil {
-			log.Print(err)
-			return
-		}
-	}
-	fmt.Printf("access in\n: %s\n", session.Get("access_token"))
 
+	return access.AccessToken
 }
 
-func CreateBranch(c *gin.Context, branchType string, name string, reviewers []string, projectRepoName string) {
-	session := sessions.Default(c)
-	AccessToken :=  fmt.Sprintf("%v", session.Get("access_token"))
-	branch := branchType+"/"+name
+func CreateBranch(db *gorm.DB, release models.Release, reviewers []string, projectRepoName string)  {
+	AccessToken :=  GetAccessToken()
+	branch := release.Type+"/"+release.Name
 	request := Payload{Name: branch, Target: Target{Hash: "master"}}
 	branchCreationUrl := "/repositories/"+os.Getenv("BITBUCKET_OWNER")+"/"+projectRepoName+"/refs/branches"
 	apiUrl := baseURL+branchCreationUrl
 	log.Printf("API URL ---- %+v : ", apiUrl)
+	log.Printf("Branch URL ---- %+v : ", branch)
 	payloadBytes, _ := json.Marshal(request)
 	body := bytes.NewReader(payloadBytes)
 	resp := PostRequest(apiUrl, body, AccessToken)
@@ -134,11 +128,16 @@ func CreateBranch(c *gin.Context, branchType string, name string, reviewers []st
 		log.Print(errs)
 	}
 	log.Printf("branch Name %+v : ", createdBranch)
-	branchRestrictions(AccessToken, branch, reviewers, projectRepoName)
-
+	restrictionId := branchRestrictions(AccessToken, branch, reviewers, projectRepoName)
+	log.Printf("restriction id: %v ", restrictionId)
+	releaseRestriction:= db.Model(&release).Update("restriction_id", restrictionId)
+	log.Printf("restriction error: %v ", releaseRestriction.Error)
+	if releaseRestriction.Error != nil {
+		log.Print(releaseRestriction.Error)
+	}
 }
 
-func branchRestrictions(token string, branchName string, ReviewerList []string, projectRepoName string)  {
+func branchRestrictions(token string, branchName string, ReviewerList []string, projectRepoName string) int {
 	branchRestriction := "/repositories/"+os.Getenv("BITBUCKET_OWNER")+"/"+projectRepoName+"/branch-restrictions"
 	apiUrl := baseURL+branchRestriction
 	var arrayOfUsers  []Users
@@ -161,6 +160,13 @@ func branchRestrictions(token string, branchName string, ReviewerList []string, 
 	if res.StatusCode != 201 {
 		fmt.Errorf("unknown error, status code: %d", res.StatusCode)
 	}
+	restriction := new(BranchRestrictionResponse)
+	errs := json.NewDecoder(res.Body).Decode(restriction)
+	if errs != nil {
+		log.Print(errs)
+	}
+
+	return restriction.Id
 }
 
 func PostRequest(apiUrl string, body *bytes.Reader, token string) *http.Response {

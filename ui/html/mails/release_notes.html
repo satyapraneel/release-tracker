@@ -1,0 +1,17 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en">
+    <body>
+        <div>
+            <p>Hi Team,</p><br/>
+            <p>Please find the below released items for <strong>{{.Release.Name}}</strong> branch on {{.Release.TargetDate}}</p>
+            <ul>
+            {{range .ReleaseTickets}}
+                <li>{{ .Summary}}</li>
+            {{end}}
+            </ul><br/>
+            Regards,<br/>
+            Release Updates
+        </div>
+    </body>
+</html>

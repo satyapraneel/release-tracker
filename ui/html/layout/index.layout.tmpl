@@ -4,15 +4,20 @@
 {{ template "layout/headerscript" }} 
 
 <body>
-  {{ template "layout/header" }}
+  {{ template "layout/sidebar" }}
+  
   
 
-  <div class="container-fluid mt-2">
-    <div class="row">
-      {{ template "layout/sidebar" }}
+  <div class="wrapper d-flex flex-column min-vh-100 bg-light">
+      {{ template "layout/header" }}
+      
+      <div class="body flex-grow-1 px-3">
+        <div class="container-lg">
+          <div class="car"></div>
 {{ end }}
 {{ define "layout/bottom" }}
-    </div>
+        </div>
+      </div>
   </div>
   {{ template "layout/scripts" }}
 </body>

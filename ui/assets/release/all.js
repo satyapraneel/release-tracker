@@ -1,9 +1,17 @@
 var $releasesTable;
 $(document).ready(function () {
+    $('#releases_name').select2();
     window.$reviewerList = $('#reviewers');
     $('#type').select2();
     $('.reviewers').hide()
+    $('.reviewers_list').hide()
 
+    //for release notes grid
+    var rel = $("#releases_name option:selected").text();
+    $('#release_notes_button').show();
+    if(rel === "Select"){
+        $('#release_notes_button').hide();
+    }
 
     $('#projects').select2({
         placeholder: 'Select Projects',
@@ -37,16 +45,18 @@ $(document).ready(function () {
     $releasesTable = $('#releases_table');
     if ($releasesTable.length) {
         var additionalOptions = {
-            order: [[0, "desc"]],
+            order: [],
             language: {
                 searchPlaceholder: "Search Releases"
             },
             bInfo:false,
-            // pagingType: "simple",
+            pagingType: "simple",
             responsive: true,
+            targets: 'no-sort',
+            "bSort": false,
         };
         var releaseDt = initDatatable($releasesTable, [
-            {data: 'ID', name: 'ID', 'visible': true, searchable: false},
+            {data: 'ID', name: 'ID', 'visible': false, searchable: false},
             {data: 'Name', name: 'Name', searchable: true,'orderable': false},
             {data: 'type', name: 'type','orderable': false},
             {data: 'target_date', name: 'target_date','orderable': false,
@@ -65,7 +75,7 @@ $(document).ready(function () {
                 "mData": "ID",
                 'orderable': false,
                 "mRender": function (data, type, row) {
-                    return "<a href='/release/show/" + data + "'><i class='fa fa-eye fa-2x'></i></a>";
+                    return "<a href='/release/show/" + data + "'><i class='fa fa-eye'></i></a>";
                 }
             },
         ], additionalOptions);
@@ -109,11 +119,11 @@ $(document).ready(function () {
     $reviewersTable = $('#reviewers_table');
     if ($reviewersTable.length) {
         var additionalOptions = {
-            order: [[0, "desc"]],
+            // order: [[0, "desc"]],
             language: {
                 searchPlaceholder: "Search Reviewer"
             },
-            bInfo:false,
+            // bInfo:false,
             responsive: true,
             columnDefs: [
                 { className: 'text-center', targets: [0,1,2,3] },
@@ -202,10 +212,11 @@ if(selectedReviewers.length > 0) {
 
 var initDatatable = function ($table, $columns, additionalOptions) {
     var options = {
-        dom: 'lfrtip',
+        // dom: 'lfrtip',
         processing: true,
         serverSide: true,
-        autoWidth: false,
+        // autoWidth: false,
+        "ordering": false,
         ajax: {
             url: $table.data('get_action'),
             type: 'post',
@@ -215,7 +226,7 @@ var initDatatable = function ($table, $columns, additionalOptions) {
             }
         },
         "pageLength": $('.admin.dashboard').length ? 5 : 10,
-        "pagingType": "full_numbers",
+        // "pagingType": "full_numbers",
         columns: $columns,
         drawCallback: function (settings) {
             var $dtContainer = $($(this).data('dt').table().container());
@@ -236,3 +247,67 @@ var initDatatable = function ($table, $columns, additionalOptions) {
     $table.data('dt', $dt);
     return $dt;
 }
+
+$('#releases_name').on('change', function () {
+    var str = $("#releases_name option:selected").text();
+    if(str !== "Select" ){
+        $('#release_notes_button').show();
+        getJiraTicketsByLabel(str)
+    }else{
+        $(".release_tick").empty();
+        $('#release_notes_button').hide();
+    }
+
+});
+
+
+$('.send_release_notes').on('click', function () {
+    var releaseName = $("#releases_name option:selected").text();
+    $.ajax({
+        url: "/release/getTickets?release="+releaseName+"&sendEmail=true",
+        type:"get",
+        context: document.body
+    })
+        .done(function (res) {
+            console.log(res)
+        });
+});
+
+
+var getJiraTicketsByLabel = function (releaseName) {
+    $.ajax({
+        url: "/release/getTickets?release="+releaseName+"&sendEmail=false",
+        type:"get",
+        context: document.body
+    })
+        .done(function (res) {
+            $(function() {
+                $(".release_tick").empty();
+                $.each(res.data, function(i, item) {
+                    ticketcolor="black";
+                    if(item.Type === "Bug"){
+                        ticketcolor="#b52107"
+                    }
+                    else if(item.Type === "Task"){
+                        ticketcolor="#18cded"
+                    }
+                    else if(item.Type === "Story"){
+                        ticketcolor="#07a621"
+                    }
+                    var str = "<font color="+ticketcolor+">"+item.Type+"</font> :   "+item.Summary
+                    $(".release_tick").append('<li class="list-group-item">'+str+'</li>');
+                    // var $tr = $('<tr>').append(
+                    //     $('<td>').text(item.Key),
+                    //     $('<td>').text(item.Type),
+                    //     $('<td>').text(item.Summary),
+                    //     $('<td>').text(item.Project),
+                    //     $('<td>').text(item.Status),
+                    // ).appendTo('.release_tickets');
+                });
+            });
+        })
+        .fail(function (response) {
+           log.console('Failed to load data')
+        });
+}
+

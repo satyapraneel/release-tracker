@@ -1,58 +1,49 @@
 {{ define "reviewers/create" }}
-{{template "layout/top" }}
-<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-    <div
-        class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Create Project</h1>
-    </div>
+{{template "layout/formheader"}}
+    <h5 class="card-title">Create Reviewer</h5>
+    <hr />
+    <form action='/reviewers/store' method='POST'>
+        <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+        <div class="form-group col-md-auto">
+            <label for="name" class="col-sm-12 col-form-label">Reviewer Name:</label>
+            <div class="col-sm-12">
+                <input type='text' name='name' class="form-control" id="name"
+                    value="{{.values.Name}}" required>
+                {{with .errors.Name }}
+                <small class="form-text text-danger">{{.}}</small>
+                {{ end }}
+            </div>
+        </div></br>
+        <div class="form-group col-md-auto">
+            <label for="name" class="col-sm-12 col-form-label">Email:</label>
+            <div class="col-sm-12">
+                <input type="email" name='email' class="form-control" id="email"
+                    value="{{.values.Email}}" required>
+                {{with .errors.Email }}
+                <small class="form-text text-danger">{{.}}</small>
+                {{ end }}
+            </div>
+        </div></br>
+        <div class="form-group col-md-auto">
+            <label for="name" class="col-sm-12 col-form-label">Bitbucket user name:</label>
+            <div class="col-sm-12">
+                <input type="text" name='user_name' class="form-control" id="user_name"
+                    value="{{.values.UserName}}" required>
+                {{with .errors.UserName }}
+                <small class="form-text text-danger">{{.}}</small>
+                {{ end }}
+            </div>
+        </div></br>
 
-    <!--    <h2>Section title</h2>-->
-    <div class="container">
-        <div class="table-responsive row justify-content-md-center">
-            <form action='/reviewers/store' method='POST'>
-                <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
-                <div class="form-group col-md-auto">
-                    <label for="name" class="col-sm-3 col-form-label">Reviewer Name:</label>
-                    <div class="col-sm-6">
-                        <input type='text' name='name' class="form-control" id="name" value="{{.values.Name}}" required>
-                        {{with .errors.Name }}
-                        <small class="form-text text-danger">{{.}}</small>
-                        {{ end }}
-                    </div>
-                </div></br>
-                <div class="form-group col-md-auto">
-                    <label for="name" class="col-sm-3 col-form-label">Email:</label>
-                    <div class="col-sm-6">
-                        <input type="email" name='email' class="form-control" id="email"
-                            value="{{.values.Email}}" required>
-                        {{with .errors.Email }}
-                        <small class="form-text text-danger">{{.}}</small>
-                        {{ end }}
-                    </div>
-                </div></br>
-                <div class="form-group col-md-auto">
-                    <label for="name" class="col-sm-3 col-form-label">Bitbucket user name:</label>
-                    <div class="col-sm-6">
-                        <input type="text" name='user_name' class="form-control" id="user_name"
-                            value="{{.values.UserName}}" required>
-                        {{with .errors.UserName }}
-                        <small class="form-text text-danger">{{.}}</small>
-                        {{ end }}
-                    </div>
-                </div></br>
-                
-                <br><br>
-                <div class="form-group">
-                    <div class="col-sm-4 col-sm-offset-2">
-                        <button class="btn btn-outline-success" type="submit">Save Reviewer
-                        </button>
-                        <button type='button' class="btn btn-outline-secondary"
-                            onclick="window.location.href='/reviewers'"> Cancel </button>
-                    </div>
-                </div>
-            </form>
+        <br><br>
+        <div class="form-group">
+            <div class="col-sm-12">
+                <button class="btn btn-outline-info" type="submit">Save Reviewer
+                </button>
+                <button type='button' class="btn btn-outline-dark"
+                    onclick="window.location.href='/reviewers'"> Cancel </button>
+            </div>
         </div>
-    </div>
-</main>
-{{template "layout/bottom" }}
+    </form>
+{{template "layout/formfooter"}}
 {{ end }}
