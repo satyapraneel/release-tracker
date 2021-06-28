@@ -21,6 +21,8 @@ import (
 type Milestones struct {
 	BetaReleaseDate string
 	DevCompletionDate string
+	RegressionDate string
+	CodeFreezeDate string
 	Project string
 }
 
@@ -143,7 +145,11 @@ func (app *App) ViewReleaseForm(c *gin.Context) {
 	for _, project := range projects {
 		betaRelease := GetMilestoneDates(project.BetaReleaseDate, releases, project)
 		devCompletion := GetMilestoneDates(project.DevCompletionDate, releases, project)
-		mileStone := &Milestones{BetaReleaseDate: betaRelease.Format("2006-01-02"), DevCompletionDate: devCompletion.Format("2006-01-02"), Project: project.Name}
+		regression := GetMilestoneDates(project.RegressionSignorDate,releases, project)
+		codeFreeze := GetMilestoneDates(project.CodeFreezeDate,releases, project)
+		mileStone := &Milestones{BetaReleaseDate: betaRelease.Format("2006-01-02"), DevCompletionDate: devCompletion.Format("2006-01-02"),
+			RegressionDate: regression.Format("2006-01-02"), CodeFreezeDate: codeFreeze.Format("2006-01-02"),
+			Project: project.Name}
 
 		milestones = append(milestones, mileStone)
 	}
