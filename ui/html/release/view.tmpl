@@ -1,32 +1,32 @@
 {{ define "release/view" }}
     {{template "layout/top" }}
     <div class="tab-content rounded-bottom">
-        <div class="tab-pane p-2 active preview" role="tabpanel" id="preview-943">
+        <div class="tab-pane p-1 active preview" role="tabpanel" id="preview-943">
             <div class="row">
-                <div class="offset-md-2 col-sm-7">
+                <div class="offset-md-1 col-sm-10">
                     <div class="card callout callout-info mb-3">
                         <div class="card-body">
-                            <h5 class="card-title">Create Release</h5>
+                            <h5 class="card-title">View Release</h5>
                             <hr />
                             <div class="table-responsive row">
                                 <form>
                                     <div class="form-group row">
-                                        <label for="name" class="col-sm-12 col-form-label">Release Name:</label>
-                                        <div class="col-sm-12">
+                                        <label for="name" class="col-sm-10 col-form-label">Release Name:</label>
+                                        <div class="col-sm-10">
                                             <input type='text' name='name' class="form-control" id="name" value="{{.releases.Name}}" readonly>
                                         </div>
                                     </div></br>
                                     <div class="form-group row">
-                                        <label for="type" class="col-sm-12 col-form-label">Release Type:</label>
-                                        <div class="col-sm-12">
+                                        <label for="type" class="col-sm-10 col-form-label">Release Type:</label>
+                                        <div class="col-sm-10">
                                             <select name='type' class="form-control" id="type" readonly="">
                                                 <option value="{{.releases.Type}}" selected> {{.releases.Type}}</option>
                                             </select>
                                         </div>
                                     </div></br>
                                     <div class="form-group row">
-                                        <label for="projects" class="col-sm-12 control-label">Project:</label>
-                                        <div class="col-sm-12">
+                                        <label for="projects" class="col-sm-10 control-label">Project:</label>
+                                        <div class="col-sm-10">
                                             <select name='projects' class="form-control" id="projects" multiple="multiple" readonly="">
                                                 {{range $project := .projects}}
                                                     <option value="{{ $project.ID}}" selected> {{$project.Name}}</option>
@@ -34,27 +34,63 @@
                                             </select>
                                         </div>
                                     </div></br>
-                                    <div class="form-group row reviewers_view" >
-                                        <label for="reviewers" class="col-sm-12 col-form-label">Reviewers:</label>
-                                        <div class="col-sm-12">
-                                            <textarea id="reviewers_view" name="reviewers_view" rows="3" cols="60" readonly>{{.reviewers}}</textarea>
+                                    <div class="form-group row">
+                                        <label for="reviewers" class="col-sm-10 control-label">Reviewers:</label>
+                                        <div class="col-sm-10">
+                                            <select name='reviewers' class="form-control" id="reviewers" multiple="multiple" readonly="">
+                                                {{range $reviewer := .reviewers}}
+                                                    <option value="{{ $reviewer}}" selected> {{$reviewer}}</option>
+                                                {{end}}
+                                            </select>
+                                        </div>
+                                    </div></br>
+                                    <div class="card" id="jira_tickets">
+                                        <div class="card-header" id="headingOne">
+                                            <h2 class="mb-0">
+                                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseOne"
+                                                        aria-expanded="true" aria-controls="collapseOne">
+                                                    Jira Tickets
+                                                </button>
+                                            </h2>
+                                        </div>
+                                        <div class="card-body">
+                                            {{range $ticket := .tickets}}
+                                             <strong>   {{$ticket}} </strong><br/>
+                                            {{end}}
+                                        </div>
+                                    </div><br/>
+                                <div class="card">
+                                    <div class="card-header" id="headingOne">
+                                        <h2 class="mb-0">
+                                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseOne"
+                                                    aria-expanded="true" aria-controls="collapseOne">
+                                                Projects Milestone
+                                            </button>
+                                        </h2>
+                                    </div>
+
+                                        <div class="card-body">
+                                            {{range $milestone := .milestones}}
+                                                <br/>Project : {{$milestone.Project}} <br/>
+                                                BetaReleaseDate : {{$milestone.BetaReleaseDate}} <br/>
+                                                DevCompletionDate : {{$milestone.DevCompletionDate}} <br/>
+                                            {{end}}
                                         </div>
                                     </div></br>
                                     <div class="form-group row">
-                                        <label for="target_date" class="col-sm-12 control-label">Release Date:</label>
-                                        <div class="col-sm-12">
+                                        <label for="target_date" class="col-sm-10 control-label">Release Date:</label>
+                                        <div class="col-sm-10">
                                             <input type="date" class="form-control" name="target_date" id="target_date" value="{{ .releases.TargetDate.Format "2006-01-02"}}"></div>
-                                    </div>
-                                    </br>
+                                    </div></br>
                                     <div class="form-group row">
-                                        <label for="owner" class="col-sm-12 control-label">Owner:</label>
-                                        <div class="col-sm-12">
+                                        <label for="owner" class="col-sm-10 control-label">Owner:</label>
+                                        <div class="col-sm-10">
                                             <input type='email' name='owner' class="form-control" id="owner" value="{{.releases.Owner}}" readonly>
                                         </div>
                                     </div>
                                     <br><br>
                                     <div class="form-group row">
-                                        <div class="col-sm-12 col-sm-offset-4">
+                                        <div class="col-sm-10 col-sm-offset-4">
                                             <button type='button'  class="btn btn-outline-secondary" onclick="window.location.href='/release/index'"> Cancel </button>
                                         </div>
                                     </div>

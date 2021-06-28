@@ -6,12 +6,11 @@ import (
 	"github.com/release-trackers/gin/notifications/mails"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/gin-contrib/sessions"
-	"github.com/release-trackers/gin/cmd/bitbucket"
-
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -19,12 +18,17 @@ import (
 	"github.com/release-trackers/gin/repositories"
 )
 
+type Milestones struct {
+	BetaReleaseDate string
+	DevCompletionDate string
+	Project string
+}
+
 func (app *App) GetIndex(c *gin.Context) {
-	oauthUrl := bitbucket.Authrorize()
 	c.HTML(http.StatusOK, "release/home", gin.H{
-		"url": oauthUrl,
 	})
 }
+
 func (app *App) GetListOfReleases(c *gin.Context) {
 	var columnOrder string
 	columnOrder = "desc"
@@ -48,6 +52,7 @@ func (app *App) GetListOfReleases(c *gin.Context) {
 	releases := releaseRepsitoryHandler.GetAllReleases(c, dtValues)
 	c.JSON(http.StatusOK, releases)
 }
+
 
 func (app *App) CreateReleaseForm(c *gin.Context) {
 	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
@@ -128,20 +133,44 @@ func (app *App)ReleaseListTicketsByReleaseId(c *gin.Context)  {
 func (app *App) ViewReleaseForm(c *gin.Context) {
 	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
 	releases, projects, reviewers, err := releaseRepsitoryHandler.GetReleases(c)
-	for _, project := range projects {
-		log.Printf("project in loop : %v", project.Name)
+	jiraTickets := jira.GetIssuesByLabel(releases.Name)
+	var ticketsarr []string
+	for _,tickets := range jiraTickets{
+		ticketId := tickets.Id
+		ticketsarr = append(ticketsarr,ticketId)
 	}
-	log.Printf("after loop : %v", releases.Name)
+	var milestones []*Milestones
+	for _, project := range projects {
+		betaRelease := GetMilestoneDates(project.BetaReleaseDate, releases, project)
+		devCompletion := GetMilestoneDates(project.DevCompletionDate, releases, project)
+		mileStone := &Milestones{BetaReleaseDate: betaRelease.Format("2006-01-02"), DevCompletionDate: devCompletion.Format("2006-01-02"), Project: project.Name}
+
+		milestones = append(milestones, mileStone)
+	}
+	log.Printf("after loop : %v", milestones)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": err.Error()})
 		//	return
 	}
+	jiraBaseUrl := os.Getenv("JIRA_BASE_URL")+"browse/"
 	c.HTML(http.StatusOK, "release/view", gin.H{
 		"title":     "View release",
 		"projects":  projects,
 		"releases":  releases,
 		"reviewers": reviewers,
+		"tickets":	ticketsarr,
+		"milestones" : milestones,
+		"jiraurl" : jiraBaseUrl,
 	})
+}
+
+func GetMilestoneDates(days string, release models.Release, project *models.Project) time.Time {
+	daysToSubtract, err := strconv.Atoi(days)
+	if err != nil {
+		log.Println(err)
+	}
+	releaseDate := release.TargetDate.AddDate(0, 0, -daysToSubtract).Truncate(24 * time.Hour)
+	return releaseDate
 }
 
 func (app *App) CreateRelease(c *gin.Context) {
