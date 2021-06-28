@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/providers/bitbucket"
+	"github.com/release-trackers/gin/models"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"net/url"
@@ -40,6 +41,10 @@ type BranchRestriction struct{
 }
 type Users struct {
 	Username string `json:"username"`
+}
+
+type BranchRestrictionResponse struct{
+	Id int
 }
 
 const callbackUrl = "http://localhost:4000/oauth/index"
@@ -102,9 +107,9 @@ func GetAccessToken() string {
 	return access.AccessToken
 }
 
-func CreateBranch(c *gin.Context, branchType string, name string, reviewers []string, projectRepoName string) {
+func CreateBranch(db *gorm.DB, release models.Release, reviewers []string, projectRepoName string)  {
 	AccessToken :=  GetAccessToken()
-	branch := branchType+"/"+name
+	branch := release.Type+"/"+release.Name
 	request := Payload{Name: branch, Target: Target{Hash: "master"}}
 	branchCreationUrl := "/repositories/"+os.Getenv("BITBUCKET_OWNER")+"/"+projectRepoName+"/refs/branches"
 	apiUrl := baseURL+branchCreationUrl
@@ -123,11 +128,16 @@ func CreateBranch(c *gin.Context, branchType string, name string, reviewers []st
 		log.Print(errs)
 	}
 	log.Printf("branch Name %+v : ", createdBranch)
-	branchRestrictions(AccessToken, branch, reviewers, projectRepoName)
-
+	restrictionId := branchRestrictions(AccessToken, branch, reviewers, projectRepoName)
+	log.Printf("restriction id: %v ", restrictionId)
+	releaseRestriction:= db.Model(&release).Update("restriction_id", restrictionId)
+	log.Printf("restriction error: %v ", releaseRestriction.Error)
+	if releaseRestriction.Error != nil {
+		log.Print(releaseRestriction.Error)
+	}
 }
 
-func branchRestrictions(token string, branchName string, ReviewerList []string, projectRepoName string)  {
+func branchRestrictions(token string, branchName string, ReviewerList []string, projectRepoName string) int {
 	branchRestriction := "/repositories/"+os.Getenv("BITBUCKET_OWNER")+"/"+projectRepoName+"/branch-restrictions"
 	apiUrl := baseURL+branchRestriction
 	var arrayOfUsers  []Users
@@ -150,6 +160,13 @@ func branchRestrictions(token string, branchName string, ReviewerList []string, 
 	if res.StatusCode != 201 {
 		fmt.Errorf("unknown error, status code: %d", res.StatusCode)
 	}
+	restriction := new(BranchRestrictionResponse)
+	errs := json.NewDecoder(res.Body).Decode(restriction)
+	if errs != nil {
+		log.Print(errs)
+	}
+
+	return restriction.Id
 }
 
 func PostRequest(apiUrl string, body *bytes.Reader, token string) *http.Response {

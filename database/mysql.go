@@ -44,6 +44,7 @@ func DbMigrate() {
 		&models.Reviewers{},
 		&models.DLS{},
 		&models.DlsProjects{},
+		models.ReleaseTickets{},
 	)
 
 	if err != nil {
