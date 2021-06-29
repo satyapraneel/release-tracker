@@ -53,9 +53,9 @@
                                                 </button>
                                             </h2>
                                         </div>
-                                        <div class="card-body">
+                                        <div class="card-body scrollCard">
                                             {{range $ticket := .tickets}}
-                                             <strong>   {{$ticket}} </strong><br/>
+                                                <strong><a href="{{$ticket.Url}}" target="_blank">{{$ticket.Id}}</a></strong> -  {{$ticket.Status}} <br/>
                                             {{end}}
                                         </div>
                                     </div><br/>
@@ -69,13 +69,13 @@
                                         </h2>
                                     </div>
 
-                                        <div class="card-body">
+                                        <div class="card-body scrollCard">
                                             {{range $milestone := .milestones}}
-                                                <br/>Project : {{$milestone.Project}} <br/>
-                                                BetaReleaseDate : {{$milestone.BetaReleaseDate}} <br/>
+                                                <br/>Project : <span style="color: #0d6efd">{{$milestone.Project}}</span> <br/>
                                                 DevCompletionDate : {{$milestone.DevCompletionDate}} <br/>
-                                                RegressionSignorDate : {{$milestone.RegressionDate}} <br/>
                                                 CodeFreezeDate : {{$milestone.CodeFreezeDate}} <br/>
+                                                RegressionSignorDate : {{$milestone.RegressionDate}} <br/>
+                                                BetaReleaseDate : {{$milestone.BetaReleaseDate}} <br/>
                                             {{end}}
                                         </div>
                                     </div></br>

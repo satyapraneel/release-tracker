@@ -251,7 +251,6 @@ var initDatatable = function ($table, $columns, additionalOptions) {
 $('#releases_name').on('change', function () {
     var str = $("#releases_name option:selected").text();
     if(str !== "Select" ){
-        $('#release_notes_button').show();
         getJiraTicketsByLabel(str)
     }else{
         $(".release_tick").empty();
@@ -283,7 +282,14 @@ var getJiraTicketsByLabel = function (releaseName) {
         .done(function (res) {
             $(function() {
                 $(".release_tick").empty();
-                $.each(res.data, function(i, item) {
+                var releases = res.data
+                console.log(releases)
+                if(releases.length === 0 ){
+                    $('#release_notes_button').hide();
+                }else{
+                    $('#release_notes_button').show();
+                }
+                $.each(releases, function(i, item) {
                     ticketcolor="black";
                     if(item.Type === "Bug"){
                         ticketcolor="#b52107"
@@ -307,6 +313,7 @@ var getJiraTicketsByLabel = function (releaseName) {
             });
         })
         .fail(function (response) {
+            $('#release_notes_button').hide();
            log.console('Failed to load data')
         });
 }

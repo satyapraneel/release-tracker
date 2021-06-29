@@ -26,6 +26,12 @@ type Milestones struct {
 	Project string
 }
 
+type JiraStatus struct {
+	Id string
+	Status string
+	Url string
+}
+
 func (app *App) GetIndex(c *gin.Context) {
 	c.HTML(http.StatusOK, "release/home", gin.H{
 	})
@@ -136,10 +142,15 @@ func (app *App) ViewReleaseForm(c *gin.Context) {
 	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
 	releases, projects, reviewers, err := releaseRepsitoryHandler.GetReleases(c)
 	jiraTickets := jira.GetIssuesByLabel(releases.Name)
-	var ticketsarr []string
+	var  jiraStatus []*JiraStatus
+	jiraBaseUrl := os.Getenv("JIRA_BASE_URL")+"browse"
 	for _,tickets := range jiraTickets{
-		ticketId := tickets.Id
-		ticketsarr = append(ticketsarr,ticketId)
+		jiraArr := &JiraStatus{
+			Status: tickets.Status,
+			Id: tickets.Id,
+			Url: jiraBaseUrl+"/"+tickets.Id,
+		}
+		jiraStatus = append(jiraStatus,jiraArr)
 	}
 	var milestones []*Milestones
 	for _, project := range projects {
@@ -153,18 +164,19 @@ func (app *App) ViewReleaseForm(c *gin.Context) {
 
 		milestones = append(milestones, mileStone)
 	}
-	log.Printf("after loop : %v", milestones)
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": err.Error()})
 		//	return
 	}
-	jiraBaseUrl := os.Getenv("JIRA_BASE_URL")+"browse/"
+
+	log.Printf("baseurl : %v", jiraBaseUrl)
 	c.HTML(http.StatusOK, "release/view", gin.H{
 		"title":     "View release",
 		"projects":  projects,
 		"releases":  releases,
 		"reviewers": reviewers,
-		"tickets":	ticketsarr,
+		"tickets":	jiraStatus,
 		"milestones" : milestones,
 		"jiraurl" : jiraBaseUrl,
 	})
