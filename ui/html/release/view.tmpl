@@ -11,22 +11,22 @@
                             <div class="table-responsive row">
                                 <form>
                                     <div class="form-group row">
-                                        <label for="name" class="col-sm-10 col-form-label">Release Name:</label>
-                                        <div class="col-sm-10">
+                                        <label for="name" class="col-sm-8 col-form-label">Release Name:</label>
+                                        <div class="col-sm-8">
                                             <input type='text' name='name' class="form-control" id="name" value="{{.releases.Name}}" readonly>
                                         </div>
                                     </div></br>
                                     <div class="form-group row">
-                                        <label for="type" class="col-sm-10 col-form-label">Release Type:</label>
-                                        <div class="col-sm-10">
+                                        <label for="type" class="col-sm-8 col-form-label">Release Type:</label>
+                                        <div class="col-sm-8">
                                             <select name='type' class="form-control" id="type" readonly="">
                                                 <option value="{{.releases.Type}}" selected> {{.releases.Type}}</option>
                                             </select>
                                         </div>
                                     </div></br>
                                     <div class="form-group row">
-                                        <label for="projects" class="col-sm-10 control-label">Project:</label>
-                                        <div class="col-sm-10">
+                                        <label for="projects" class="col-sm-8 control-label">Project:</label>
+                                        <div class="col-sm-8">
                                             <select name='projects' class="form-control" id="projects" multiple="multiple" readonly="">
                                                 {{range $project := .projects}}
                                                     <option value="{{ $project.ID}}" selected> {{$project.Name}}</option>

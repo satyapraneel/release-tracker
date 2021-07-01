@@ -6,13 +6,6 @@ $(document).ready(function () {
     $('.reviewers').hide()
     $('.reviewers_list').hide()
 
-    //for release notes grid
-    var rel = $("#releases_name option:selected").text();
-    $('#release_notes_button').show();
-    if(rel === "Select"){
-        $('#release_notes_button').hide();
-    }
-
     $('#projects').select2({
         placeholder: 'Select Projects',
         allowClear: true
@@ -75,7 +68,7 @@ $(document).ready(function () {
                 "mData": "ID",
                 'orderable': false,
                 "mRender": function (data, type, row) {
-                    return "<a href='/release/show/" + data + "'><i class='fa fa-eye'></i></a>";
+                    return "<a href='/release/show/" + data + "'><i class='fa fa-eye fa-fw'></i></a><span></span><span></span><a href='/release/getJiraTickets/" + data + "/false'><i class='fa fa-sticky-note-o fa-fw'></i></a>";
                 }
             },
         ], additionalOptions);
@@ -248,27 +241,34 @@ var initDatatable = function ($table, $columns, additionalOptions) {
     return $dt;
 }
 
-$('#releases_name').on('change', function () {
-    var str = $("#releases_name option:selected").text();
-    if(str !== "Select" ){
-        getJiraTicketsByLabel(str)
-    }else{
-        $(".release_tick").empty();
-        $('#release_notes_button').hide();
-    }
+// $('#releases_name').on('change', function () {
+//     var str = $("#releases_name option:selected").text();
+//     if(str !== "Select" ){
+//     }else{
+//
+//     }
+// });
 
-});
+if($("#release_tick li").length == 0 ){
+    $('#release_notes_button').hide();
+}else{
+    $('#release_notes_button').show();
+}
 
 
 $('.send_release_notes').on('click', function () {
-    var releaseName = $("#releases_name option:selected").text();
+    var releaseid = $("#release_id").val();
     $.ajax({
-        url: "/release/getTickets?release="+releaseName+"&sendEmail=true",
-        type:"get",
+        url: "/release/getJiraTickets/"+releaseid+"/true",
+        type:"GET",
         context: document.body
     })
         .done(function (res) {
-            console.log(res)
+            swal("Email!", res.message,"success");
+
+        })
+        .fail(function (res) {
+            alert(res.message)
         });
 });
 
@@ -283,24 +283,8 @@ var getJiraTicketsByLabel = function (releaseName) {
             $(function() {
                 $(".release_tick").empty();
                 var releases = res.data
-                console.log(releases)
-                if(releases.length === 0 ){
-                    $('#release_notes_button').hide();
-                }else{
-                    $('#release_notes_button').show();
-                }
                 $.each(releases, function(i, item) {
-                    ticketcolor="black";
-                    if(item.Type === "Bug"){
-                        ticketcolor="#b52107"
-                    }
-                    else if(item.Type === "Task"){
-                        ticketcolor="#18cded"
-                    }
-                    else if(item.Type === "Story"){
-                        ticketcolor="#07a621"
-                    }
-                    var str = "<font color="+ticketcolor+">"+item.Type+"</font> :   "+item.Summary
+                    var str = "<span style='color:darkred'>"+item.Type+"</span> :  "+item.Key+" : "+item.Summary
                     $(".release_tick").append('<li class="list-group-item">'+str+'</li>');
                     // var $tr = $('<tr>').append(
                     //     $('<td>').text(item.Key),

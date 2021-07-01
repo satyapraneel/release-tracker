@@ -107,17 +107,21 @@ func (app *App)ReleaseListTickets(c *gin.Context)  {
 }
 
 func (app *App)ReleaseListTicketsByReleaseId(c *gin.Context)  {
-	releaseName := c.Query("release")
-	sendMail := c.Query("sendEmail")
-	log.Printf("param : %v", releaseName)
-	log.Printf("send email : %v", sendMail)
+	releaseid := c.Param("id")
+	sendmail, _ := strconv.ParseBool(c.Param("sendmail"))
+	//releaseName := c.Query("release")
+	//sendMail := c.Query("sendEmail")
+	//log.Printf("param : %v", releaseName)
+	//log.Printf("send email : %v", sendMail)
+	//release := &models.Release{}
+	//fetchRelease := app.Db.Debug().Where("name = ?", strings.TrimSpace(releaseName)).Find(release)
+	//if fetchRelease.Error != nil {
+	//	log.Print(fetchRelease.Error)
+	//}
 	release := &models.Release{}
-	fetchRelease := app.Db.Debug().Where("name = ?", strings.TrimSpace(releaseName)).Find(release)
-	if fetchRelease.Error != nil {
-		log.Print(fetchRelease.Error)
-	}
+	app.Db.First(release, releaseid)
 	releaseTickets := []models.ReleaseTickets{}
-	records := app.Db.Debug().Where("release_id = ?", release.ID).Find(&releaseTickets)
+	records := app.Db.Debug().Where("release_id = ?", releaseid).Find(&releaseTickets)
 	ticketsrows, _ := records.Rows()
 	defer ticketsrows.Close()
 
@@ -130,12 +134,23 @@ func (app *App)ReleaseListTicketsByReleaseId(c *gin.Context)  {
 		}
 		ticketsrr = append(ticketsrr, tickets)
 	}
-	log.Printf("release tickets : %+v", ticketsrr)
-	if sendMail ==  "true" {
-		mails.SendReleaseNotes(release, ticketsrr)
+	log.Printf("Send mail : %+v", sendmail)
+	if sendmail {
+		isSent, err := mails.SendReleaseNotes(release, ticketsrr)
+		if isSent {
+			c.JSON(http.StatusOK, gin.H{"status": true, "message": "Release notes sent successfully"})
+		}else{
+			c.JSON(http.StatusBadRequest, gin.H{"status": false, "message": err.Error()})
+		}
+	}else{
+		c.HTML(http.StatusOK, "release/list", gin.H{
+			"title":    "Create release",
+			"jiraTickets": ticketsrr,
+			"releaseId":release.ID,
+		})
 	}
-	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "List found", "data": ticketsrr})
-	return
+
+
 }
 
 func (app *App) ViewReleaseForm(c *gin.Context) {
