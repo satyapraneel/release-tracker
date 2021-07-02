@@ -273,6 +273,19 @@ func (app *App) GetProjectReviewerList(c *gin.Context) {
 	return
 }
 
+func (app *App) UpdateJiraTicketsToDB(jirsList []*jira.JiraTickets, releaseId uint){
+	for _, jiraTickets := range jirsList {
+		releaseTickets := &models.ReleaseTickets{Key: jiraTickets.Id, Summary: jiraTickets.Summary, Type: jiraTickets.Type,
+			Project: jiraTickets.Project, Status: jiraTickets.Status, ReleaseId: releaseId}
+		createdReleaseTickets := app.Db.Create(releaseTickets)
+		var errMessage = createdReleaseTickets.Error
+		log.Print("Unable to store release tickets", errMessage)
+		if createdReleaseTickets.Error != nil {
+			log.Print(errMessage)
+		}
+	}
+}
+
 //func (app *App) GetAccessToken(c *gin.Context)  {
 //	err := c.Request.ParseForm()
 //	if err != nil {

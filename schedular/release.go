@@ -1,6 +1,7 @@
 package schedular
 
 import (
+	"github.com/release-trackers/gin/cmd/jira"
 	"log"
 	"strconv"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/release-trackers/gin/notifications/mails"
 	"github.com/release-trackers/gin/repositories"
 )
+
 
 func (app *Application) ReleaseDateReminder() {
 	//
@@ -55,29 +57,77 @@ func (app *Application) TriggerMailIfDate(typeOfRelease string, project *models.
 	dlsRepository := repositories.NewReleaseHandler(app.Application)
 	var dlType string
 	var releaseType string
+	var template string
+	dataTosend := new(mails.MailData)
 	switch typeOfRelease {
 	case "beta":
 		dlType = models.DEV
 		releaseType = "Beta"
 		log.Println("its working")
+		subject := "Reminder mail for "+releaseType
+		template = "/ui/html/mails/reminder.html"
+		dataTosend = &mails.MailData{
+			ProjectName:  project.Name,
+			ReminderType: releaseType,
+			Subject:      subject,
+		}
 	case "regression":
 		dlType = models.DEV
 		releaseType = "Regression"
 		log.Println("Regression")
+		subject := "Regression Sign-off reminder for "+releaseRecord.Name
+		template = "/ui/html/mails/regression.html"
+		jiraList := app.getRegressionData(releaseRecord,dlsRepository)
+		dataTosend = &mails.MailData{
+			JiraTickets: jiraList,
+			ProjectName: project.Name,
+			ReminderType: releaseType,
+			Subject: subject,
+			Release: releaseRecord,
+		}
 	case "code_freeze":
 		dlType = models.QA
 		releaseType = "Code Freeze"
 		log.Println("its freeze")
+		subject := "Reminder mail for "+releaseType
+		template = "/ui/html/mails/reminder.html"
+		dataTosend = &mails.MailData{
+			ProjectName: project.Name,
+			ReminderType: releaseType,
+			Subject: subject,
+		}
 	case "dev_completion":
 		dlType = models.DEV
 		releaseType = "Dev Completion"
 		log.Println("its devcompletion")
+		subject := "Reminder mail for "+releaseType
+		template = "/ui/html/mails/reminder.html"
+		dataTosend = &mails.MailData{
+			ProjectName: project.Name,
+			ReminderType: releaseType,
+			Subject: subject,
+		}
 		//get the project
 		//get the dls list for project depending on type of release
 	}
 	dlsList, _ := dlsRepository.GetDLsByProject(project.ID, dlType)
 	//if current date is beta release date send reminder
 	for _, dls := range dlsList {
-		mails.SendReminderMail(project, dls, releaseType)
+		mails.SendReminderMailTest(dls, dataTosend, template)
 	}
 }
+
+func (app *Application) getRegressionData(releaseRecord *models.Release, repository *repositories.App) []*jira.JiraTickets {
+	jirsList := jira.GetIssuesByLabel(releaseRecord.Name)
+	log.Printf("regression Data %+v", jirsList)
+	for _, tick := range jirsList {
+		log.Printf("regression Data 2 %+v", tick.Id)
+
+	}
+	go repository.UpdateJiraTicketsToDB(jirsList, releaseRecord.ID)
+
+	return jirsList
+}
+
+
+
