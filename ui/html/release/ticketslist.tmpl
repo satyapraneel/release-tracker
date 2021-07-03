@@ -9,29 +9,42 @@
                             <h5 class="card-title">Release Notes</h5>
                             <hr />
                                 <div class="table-responsive row justify-content-md-center">
-                                    <form>
-                                    <br class="form-group col-md-auto">
-                                        <label for="releases" class="col-sm-3 control-label">Releases:</label>
-                                        <div class="col-sm-6">
-                                            <select name='releases_name' class="form-control" id="releases_name">
-                                                <option value="select">Select</option>
-                                                {{range .releases}}
-                                                    <option value="{{ .ID}}"> {{ .Name}}</option>
-                                                {{end}}
-                                            </select>
-                                        </div>
-                                    </form>
-                                    <p></p><p></p>
+{{/*                                    <form>*/}}
+{{/*                                    <div class="form-group col-md-auto">*/}}
+{{/*                                        <label for="releases" class="col-sm-3 control-label">Releases:</label>*/}}
+{{/*                                        <div class="col-sm-6">*/}}
+{{/*                                            <select name='releases_name' class="form-control" id="releases_name">*/}}
+{{/*                                                <option value="select">Select</option>*/}}
+{{/*                                                {{range .releases}}*/}}
+{{/*                                                    <option value="{{ .ID}}"> {{ .Name}}</option>*/}}
+{{/*                                                {{end}}*/}}
+{{/*                                            </select>*/}}
+{{/*                                        </div>*/}}
+{{/*                                    </div>*/}}
+{{/*                                    </form>*/}}
+{{/*                                    <p></p><p></p>*/}}
 
                                     <div class="card" style="width: 100rem;">
                                         <div class="card-body">
                                             <h5 class="card-title">List Of Tickets created for Release</h5>
                                             <p class="card-text">Summary and Type</p>
                                         </div>
-                                        <ul class="list-group list-group-flush release_tick scrollCard">
+                                        <ul class="list-group list-group-flush release_tick scrollCard" id="release_tick">
+                                            {{range .jiraTickets}}
+                                                {{$color := "black"}}
+                                                {{if eq .Type "Bug"}}
+                                                    {{$color = "#b52107"}}
+                                                {{else if eq .Type "Story"}}
+                                                    {{$color = "#07a621"}}
+                                                {{else if eq .Type "Task"}}
+                                                    {{$color = "#18cded"}}
+                                                {{end}}
+                                                <li class="list-group-item"><span style='color:{{$color}}'>{{.Type}}</span> :  {{.Key}} : {{.Summary}}</li>
+                                            {{end}}
                                         </ul>
                                         <div class="card-body" id="release_notes_button">
-                                            <button class="btn btn-primary send_release_notes">Send Release notes</button>
+                                                <input type="hidden" id="release_id" value="{{.releaseId}}">
+                                                <button class="btn btn-primary send_release_notes">Send Release notes</button>
                                         </div>
                                     </div>
 {{/*                                    <div class="table-responsive">*/}}

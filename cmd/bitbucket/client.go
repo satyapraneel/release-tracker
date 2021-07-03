@@ -46,6 +46,11 @@ type BranchRestriction struct {
 	Users    []Users `json:"users"`
 	Pattern  string  `json:"pattern"`
 }
+
+type UpdateRestriction struct {
+	Values []*BranchRestriction
+}
+
 type Users struct {
 	Username string `json:"username"`
 }
@@ -124,7 +129,7 @@ func CreateBranch(db *gorm.DB, release models.Release, reviewers []string, proje
 	log.Printf("Branch URL ---- %+v : ", branch)
 	payloadBytes, _ := json.Marshal(request)
 	body := bytes.NewReader(payloadBytes)
-	resp := PostRequest(apiUrl, "POST", body, AccessToken)
+	resp := PostRequest(apiUrl, body, AccessToken, "POST")
 	defer resp.Body.Close()
 	if resp.StatusCode != 201 {
 		fmt.Errorf("unknown error, status code: %d", resp.StatusCode)
@@ -135,16 +140,17 @@ func CreateBranch(db *gorm.DB, release models.Release, reviewers []string, proje
 		log.Print(errs)
 	}
 	log.Printf("branch Name %+v : ", createdBranch)
-	restrictionId := branchRestrictions(AccessToken, branch, reviewers, projectRepoName)
-	log.Printf("restriction id: %v ", restrictionId)
-	releaseRestriction := db.Model(&release).Update("restriction_id", restrictionId)
+	restrictionPushId := branchRestrictions(AccessToken, branch, reviewers, projectRepoName, "push")
+	restrictionMergeId := branchRestrictions(AccessToken, branch, reviewers, projectRepoName, "restrict_merges")
+	log.Printf("restriction push id: %v ", restrictionPushId)
+	releaseRestriction := db.Model(&release).Updates(map[string]interface{}{"restriction_push_id": restrictionPushId, "restriction_merge_id": restrictionMergeId})
 	log.Printf("restriction error: %v ", releaseRestriction.Error)
 	if releaseRestriction.Error != nil {
 		log.Print(releaseRestriction.Error)
 	}
 }
 
-func branchRestrictions(token string, branchName string, ReviewerList []string, projectRepoName string) int {
+func branchRestrictions(token string, branchName string, ReviewerList []string, projectRepoName string, restrictionKind string) int {
 	branchRestriction := "/repositories/" + os.Getenv("BITBUCKET_OWNER") + "/" + projectRepoName + "/branch-restrictions"
 	apiUrl := baseURL + branchRestriction
 	var arrayOfUsers []Users
@@ -153,7 +159,7 @@ func branchRestrictions(token string, branchName string, ReviewerList []string, 
 		arrayOfUsers = append(arrayOfUsers, user)
 	}
 	request := BranchRestriction{
-		Kind:     "restrict_merges",
+		Kind:     restrictionKind,
 		Owner:    os.Getenv("BITBUCKET_OWNER"),
 		RepoSlug: projectRepoName,
 		Pattern:  "*" + branchName + "*",
@@ -161,7 +167,7 @@ func branchRestrictions(token string, branchName string, ReviewerList []string, 
 	}
 	payloadBytes, _ := json.Marshal(request)
 	body := bytes.NewReader(payloadBytes)
-	res := PostRequest(apiUrl, "POST", body, token)
+	res := PostRequest(apiUrl, body, token, "POST")
 	defer res.Body.Close()
 	fmt.Printf("branch restrcition %+v", res)
 	if res.StatusCode != 201 {
@@ -176,9 +182,31 @@ func branchRestrictions(token string, branchName string, ReviewerList []string, 
 	return restriction.Id
 }
 
-func PostRequest(apiUrl string, method string, body *bytes.Reader, token string) *http.Response {
+func UpdateBranchRestriction(projectRepoName string, restrictionId string, branchName string, restrictionKind string) {
+	AccessToken := GetAccessToken()
+	branchRestriction := "/repositories/" + os.Getenv("BITBUCKET_OWNER") + "/" + projectRepoName + "/branch-restrictions/" + restrictionId
+	apiUrl := baseURL + branchRestriction
+	var arrayOfUsers []Users
+	request := &BranchRestriction{
+		Kind:     restrictionKind,
+		Owner:    os.Getenv("BITBUCKET_OWNER"),
+		RepoSlug: projectRepoName,
+		Pattern:  "*" + branchName + "*",
+		Users:    arrayOfUsers,
+	}
+	payloadBytes, _ := json.Marshal(request)
+	body := bytes.NewReader(payloadBytes)
+	res := PostRequest(apiUrl, body, AccessToken, "PUT")
+	defer res.Body.Close()
+	fmt.Printf("branch update restrcition %+v", res)
+	if res.StatusCode != 200 {
+		fmt.Errorf("unknown error, status code: %d", res.StatusCode)
+	}
+}
+
+func PostRequest(apiUrl string, body *bytes.Reader, token string, reqType string) *http.Response {
 	fmt.Printf("**Access token: %+v \n", token)
-	req, err := http.NewRequest(method, apiUrl, body)
+	req, err := http.NewRequest(reqType, apiUrl, body)
 	if err != nil {
 		fmt.Println("error :", err)
 	}
@@ -205,7 +233,7 @@ func GetReleseIssuesIds(c *gin.Context, release models.Release, project models.P
 	request := GetBody{}
 	payloadBytes, _ := json.Marshal(request)
 	body := bytes.NewReader(payloadBytes)
-	resp := PostRequest(apiUrl, "GET", body, AccessToken)
+	resp := PostRequest(apiUrl, body, AccessToken, "GET")
 	defer resp.Body.Close()
 	responseCoomits, err := io.ReadAll(resp.Body)
 	if err != nil {

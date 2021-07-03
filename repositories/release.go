@@ -5,6 +5,10 @@ import (
 	"strings"
 
 	"github.com/release-trackers/gin/cmd/bitbucket"
+	"github.com/release-trackers/gin/cmd/jira"
+	"github.com/release-trackers/gin/notifications/mails"
+
+	"github.com/release-trackers/gin/cmd/bitbucket"
 	"github.com/release-trackers/gin/notifications/mails"
 
 	"github.com/gin-gonic/gin"
@@ -213,4 +217,16 @@ func (app *App) GetReleseIssuesIds(c *gin.Context) {
 	db.First(&project, 1)
 	releatedIds := bitbucket.GetReleseIssuesIds(c, release, project)
 	log.Print(releatedIds)
+}
+
+func (app *App) UpdateJiraTicketsToDB(jirsList []*jira.JiraTickets, releaseId uint) {
+	for _, jiraTickets := range jirsList {
+		releaseTickets := &models.ReleaseTickets{Key: jiraTickets.Id, Summary: jiraTickets.Summary, Type: jiraTickets.Type,
+			Project: jiraTickets.Project, Status: jiraTickets.Status, ReleaseId: releaseId}
+		createdReleaseTickets := app.Db.Create(releaseTickets)
+		var errMessage = createdReleaseTickets.Error
+		if createdReleaseTickets.Error != nil {
+			log.Print(errMessage)
+		}
+	}
 }

@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-type jiraTickets struct {
+type JiraTickets struct {
 	Id string
 	Summary string
 	CreationDate string
@@ -31,7 +31,7 @@ func setUpClient() (*jira.Client, error) {
 	return jiraClient,err
 }
 
-func GetIssueDetails(issueKey string) *jiraTickets {
+func GetIssueDetails(issueKey string) *JiraTickets {
 	jiraClient, err := setUpClient()
 	req, _ := jiraClient.NewRequest("GET", "rest/api/2/issue/"+issueKey, nil)
 
@@ -45,7 +45,7 @@ func GetIssueDetails(issueKey string) *jiraTickets {
 	t := time.Time(issue.Fields.Created) // convert go-jira.Time to time.Time for manipulation
 	date := t.Format("2006-01-02")
 	clock := t.Format("15:04")
-	jiraInfo := &jiraTickets{Id: issue.Key, Summary: issue.Fields.Summary, CreationDate: date, CreationTime: clock,
+	jiraInfo := &JiraTickets{Id: issue.Key, Summary: issue.Fields.Summary, CreationDate: date, CreationTime: clock,
 		Type: issue.Fields.Type.Name, Project: issue.Fields.Project.Name, Priority: issue.Fields.Priority.Name,
 		Status: issue.Fields.Status.Name,
 	}
@@ -53,7 +53,7 @@ func GetIssueDetails(issueKey string) *jiraTickets {
 	return jiraInfo
 }
 
-func GetIssuesByLabel(releaseName string) []*jiraTickets {
+func GetIssuesByLabel(releaseName string) []*JiraTickets {
 	jiraClient, err := setUpClient()
 	var issues []jira.Issue
 
@@ -69,12 +69,12 @@ func GetIssuesByLabel(releaseName string) []*jiraTickets {
 	}
 
 	fmt.Printf("%d issues found.\n", len(issues))
-	jiraArr := []*jiraTickets{}
+	jiraArr := []*JiraTickets{}
 	for _, i := range issues {
 		t := time.Time(i.Fields.Created) // convert go-jira.Time to time.Time for manipulation
 		date := t.Format("2006-01-02")
 		clock := t.Format("15:04")
-		jiraInfo := &jiraTickets{Id: i.Key, Summary: i.Fields.Summary, CreationDate: date, CreationTime: clock,
+		jiraInfo := &JiraTickets{Id: i.Key, Summary: i.Fields.Summary, CreationDate: date, CreationTime: clock,
 			Type: i.Fields.Type.Name, Project: i.Fields.Project.Name, Priority: i.Fields.Priority.Name,
 			Status: i.Fields.Status.Name,
 		}
