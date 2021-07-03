@@ -12,16 +12,22 @@ type ReMinderData struct {
 	ReminderType string
 }
 
-func SendReminderMailTest(dls *models.DLS, mailData *MailData, mailTemplate string) {
+func SendReminderMail(dlsLists []*models.DLS, mailData *MailData, mailTemplate string) {
+	var dlsList []string
+	for _, dls := range dlsLists {
+		dlsList = append(dlsList, dls.Email)
+	}
 	// tagetDate := &release.TargetDate
-	dlsList := []string{dls.Email}
+	// dlsList := []string{dls.Email}
 
 	mail := NewMail(dlsList, mailData.Subject, "", "")
 	errs := mail.ParseTemplate(mailTemplate, mailData)
 	if errs != nil {
 		log.Printf("template parse : %v", errs)
 	}
-	ok, _ := mail.SendEmail()
+	fmt.Println("mail data", mailData.Release)
+	ok, err := mail.SendEmail()
+	fmt.Println(err)
 	fmt.Println(ok)
 }
 
