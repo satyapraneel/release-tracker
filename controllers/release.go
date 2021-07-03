@@ -6,12 +6,11 @@ import (
 	"github.com/release-trackers/gin/notifications/mails"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/gin-contrib/sessions"
-	"github.com/release-trackers/gin/cmd/bitbucket"
-
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -19,12 +18,25 @@ import (
 	"github.com/release-trackers/gin/repositories"
 )
 
+type Milestones struct {
+	BetaReleaseDate string
+	DevCompletionDate string
+	RegressionDate string
+	CodeFreezeDate string
+	Project string
+}
+
+type JiraStatus struct {
+	Id string
+	Status string
+	Url string
+}
+
 func (app *App) GetIndex(c *gin.Context) {
-	oauthUrl := bitbucket.Authrorize()
 	c.HTML(http.StatusOK, "release/home", gin.H{
-		"url": oauthUrl,
 	})
 }
+
 func (app *App) GetListOfReleases(c *gin.Context) {
 	var columnOrder string
 	columnOrder = "desc"
@@ -48,6 +60,7 @@ func (app *App) GetListOfReleases(c *gin.Context) {
 	releases := releaseRepsitoryHandler.GetAllReleases(c, dtValues)
 	c.JSON(http.StatusOK, releases)
 }
+
 
 func (app *App) CreateReleaseForm(c *gin.Context) {
 	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
@@ -94,17 +107,21 @@ func (app *App)ReleaseListTickets(c *gin.Context)  {
 }
 
 func (app *App)ReleaseListTicketsByReleaseId(c *gin.Context)  {
-	releaseName := c.Query("release")
-	sendMail := c.Query("sendEmail")
-	log.Printf("param : %v", releaseName)
-	log.Printf("send email : %v", sendMail)
+	releaseid := c.Param("id")
+	sendmail, _ := strconv.ParseBool(c.Param("sendmail"))
+	//releaseName := c.Query("release")
+	//sendMail := c.Query("sendEmail")
+	//log.Printf("param : %v", releaseName)
+	//log.Printf("send email : %v", sendMail)
+	//release := &models.Release{}
+	//fetchRelease := app.Db.Debug().Where("name = ?", strings.TrimSpace(releaseName)).Find(release)
+	//if fetchRelease.Error != nil {
+	//	log.Print(fetchRelease.Error)
+	//}
 	release := &models.Release{}
-	fetchRelease := app.Db.Debug().Where("name = ?", strings.TrimSpace(releaseName)).Find(release)
-	if fetchRelease.Error != nil {
-		log.Print(fetchRelease.Error)
-	}
+	app.Db.First(release, releaseid)
 	releaseTickets := []models.ReleaseTickets{}
-	records := app.Db.Debug().Where("release_id = ?", release.ID).Find(&releaseTickets)
+	records := app.Db.Debug().Where("release_id = ?", releaseid).Find(&releaseTickets)
 	ticketsrows, _ := records.Rows()
 	defer ticketsrows.Close()
 
@@ -117,31 +134,76 @@ func (app *App)ReleaseListTicketsByReleaseId(c *gin.Context)  {
 		}
 		ticketsrr = append(ticketsrr, tickets)
 	}
-	log.Printf("release tickets : %+v", ticketsrr)
-	if sendMail ==  "true" {
-		mails.SendReleaseNotes(release, ticketsrr)
+	log.Printf("Send mail : %+v", sendmail)
+	if sendmail {
+		isSent, err := mails.SendReleaseNotes(release, ticketsrr)
+		if isSent {
+			c.JSON(http.StatusOK, gin.H{"status": true, "message": "Release notes sent successfully"})
+		}else{
+			c.JSON(http.StatusBadRequest, gin.H{"status": false, "message": err.Error()})
+		}
+	}else{
+		c.HTML(http.StatusOK, "release/list", gin.H{
+			"title":    "Create release",
+			"jiraTickets": ticketsrr,
+			"releaseId":release.ID,
+		})
 	}
-	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "List found", "data": ticketsrr})
-	return
+
+
 }
 
 func (app *App) ViewReleaseForm(c *gin.Context) {
 	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
 	releases, projects, reviewers, err := releaseRepsitoryHandler.GetReleases(c)
-	for _, project := range projects {
-		log.Printf("project in loop : %v", project.Name)
+	jiraTickets := jira.GetIssuesByLabel(releases.Name)
+	var  jiraStatus []*JiraStatus
+	jiraBaseUrl := os.Getenv("JIRA_BASE_URL")+"browse"
+	for _,tickets := range jiraTickets{
+		jiraArr := &JiraStatus{
+			Status: tickets.Status,
+			Id: tickets.Id,
+			Url: jiraBaseUrl+"/"+tickets.Id,
+		}
+		jiraStatus = append(jiraStatus,jiraArr)
 	}
-	log.Printf("after loop : %v", releases.Name)
+	var milestones []*Milestones
+	for _, project := range projects {
+		betaRelease := GetMilestoneDates(project.BetaReleaseDate, releases, project)
+		devCompletion := GetMilestoneDates(project.DevCompletionDate, releases, project)
+		regression := GetMilestoneDates(project.RegressionSignorDate,releases, project)
+		codeFreeze := GetMilestoneDates(project.CodeFreezeDate,releases, project)
+		mileStone := &Milestones{BetaReleaseDate: betaRelease.Format("2006-01-02"), DevCompletionDate: devCompletion.Format("2006-01-02"),
+			RegressionDate: regression.Format("2006-01-02"), CodeFreezeDate: codeFreeze.Format("2006-01-02"),
+			Project: project.Name}
+
+		milestones = append(milestones, mileStone)
+	}
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "failed", "message": err.Error()})
 		//	return
 	}
+
+	log.Printf("baseurl : %v", jiraBaseUrl)
 	c.HTML(http.StatusOK, "release/view", gin.H{
 		"title":     "View release",
 		"projects":  projects,
 		"releases":  releases,
 		"reviewers": reviewers,
+		"tickets":	jiraStatus,
+		"milestones" : milestones,
+		"jiraurl" : jiraBaseUrl,
 	})
+}
+
+func GetMilestoneDates(days string, release models.Release, project *models.Project) time.Time {
+	daysToSubtract, err := strconv.Atoi(days)
+	if err != nil {
+		log.Println(err)
+	}
+	releaseDate := release.TargetDate.AddDate(0, 0, -daysToSubtract).Truncate(24 * time.Hour)
+	return releaseDate
 }
 
 func (app *App) CreateRelease(c *gin.Context) {
@@ -209,6 +271,19 @@ func (app *App) GetProjectReviewerList(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "List found", "data": revList})
 	return
+}
+
+func (app *App) UpdateJiraTicketsToDB(jirsList []*jira.JiraTickets, releaseId uint){
+	for _, jiraTickets := range jirsList {
+		releaseTickets := &models.ReleaseTickets{Key: jiraTickets.Id, Summary: jiraTickets.Summary, Type: jiraTickets.Type,
+			Project: jiraTickets.Project, Status: jiraTickets.Status, ReleaseId: releaseId}
+		createdReleaseTickets := app.Db.Create(releaseTickets)
+		var errMessage = createdReleaseTickets.Error
+		log.Print("Unable to store release tickets", errMessage)
+		if createdReleaseTickets.Error != nil {
+			log.Print(errMessage)
+		}
+	}
 }
 
 //func (app *App) GetAccessToken(c *gin.Context)  {
