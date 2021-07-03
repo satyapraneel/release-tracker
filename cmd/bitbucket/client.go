@@ -4,9 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/markbates/goth/providers/bitbucket"
-	"github.com/release-trackers/gin/models"
-	"gorm.io/gorm"
 	"io"
 	"log"
 	"net/http"
@@ -18,6 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/providers/bitbucket"
 	"github.com/release-trackers/gin/models"
+	"gorm.io/gorm"
 )
 
 //type Sessions struct {
@@ -126,7 +124,7 @@ func CreateBranch(db *gorm.DB, release models.Release, reviewers []string, proje
 	log.Printf("Branch URL ---- %+v : ", branch)
 	payloadBytes, _ := json.Marshal(request)
 	body := bytes.NewReader(payloadBytes)
-	resp := PostRequest(apiUrl, body, AccessToken)
+	resp := PostRequest(apiUrl, "POST", body, AccessToken)
 	defer resp.Body.Close()
 	if resp.StatusCode != 201 {
 		fmt.Errorf("unknown error, status code: %d", resp.StatusCode)
@@ -163,7 +161,7 @@ func branchRestrictions(token string, branchName string, ReviewerList []string, 
 	}
 	payloadBytes, _ := json.Marshal(request)
 	body := bytes.NewReader(payloadBytes)
-	res := PostRequest(apiUrl, body, token)
+	res := PostRequest(apiUrl, "POST", body, token)
 	defer res.Body.Close()
 	fmt.Printf("branch restrcition %+v", res)
 	if res.StatusCode != 201 {
