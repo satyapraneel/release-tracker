@@ -4,10 +4,10 @@
     <body>
         <div>
             <p>Hi Team,</p><br/>
-            <p>Please find the below released items for <strong>{{.Release.Name}}</strong> branch on {{.Release.TargetDate}}</p>
+            <p>Please find the below released items for <strong>{{.Release.Name}}</strong> branch on {{.ReleaseDate}}</p>
             <ul>
             {{range .ReleaseTickets}}
-                <li>{{ .Summary}}</li>
+                <li>{{.Key}} : {{ .Summary}}</li>
             {{end}}
             </ul><br/>
             Regards,<br/>
