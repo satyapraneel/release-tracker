@@ -8,11 +8,11 @@ import (
 	"github.com/release-trackers/gin/models"
 )
 
-func (app *App) GetDLsByProject(projectID uint, dlType string) ([]*models.DLS, error) {
+func (app *App) GetDLsByProject(projectID uint) ([]*models.DLS, error) {
 
 	db := app.Db
 	dlsArr := []*models.DLS{}
-	rows, err := db.Table("dls").Select("dls.*").Joins("join dls_projects on dls_projects.dls_id = dls.id").Where("dls_projects.project_id = ?", projectID).Where("dl_type = ?", dlType).Rows()
+	rows, err := db.Table("dls").Select("dls.*").Joins("join dls_projects on dls_projects.dls_id = dls.id").Where("dls_projects.project_id = ?", projectID).Rows()
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -32,14 +32,14 @@ func (app *App) GetAllDls(dt models.DataTableValues) models.DLSResult {
 	table := "dls"
 	db := app.Db
 	var total, filtered int64
-	var dls []models.DLS
-	query := db.Table(table)
+	var dls []models.DLSDetails
+	query := db.Table(table).Joins("JOIN dls_projects on dls_projects.dls_id = dls.id").Joins("JOIN projects on projects.id = dls_projects.project_id")
 	query = query.Offset(dt.Offset)
 	query = query.Limit(dt.Limit)
 	query = query.Scopes(dt.Search)
 	query = query.Order("id " + dt.Order)
 
-	if err := query.Find(&dls).Error; err != nil {
+	if err := query.Debug().Select("dls.*, projects.name as project_name").Find(&dls).Error; err != nil {
 		return models.DLSResult{
 			Total:    0,
 			Filtered: 0,
@@ -60,23 +60,38 @@ func (app *App) GetAllDls(dt models.DataTableValues) models.DLSResult {
 	}
 }
 
-func (app *App) GetDL(c *gin.Context) (models.DLS, error) {
-	id := c.Param("id")
+func (app *App) GetDL(id string) (models.DLS, error) {
 	dls := models.DLS{}
 	result := app.Db.First(&dls, id)
 	return dls, result.Error
 }
 
-func (app *App) UpdateDL(c *gin.Context, dlData models.DLS) (uint, error) {
-	dl, err := app.GetDL(c)
+func (app *App) GetDLProject(id string) (models.DlsProjects, error) {
+	dlProject := models.DlsProjects{}
+	result := app.Db.Where("dls_id = ?", id).First(&dlProject)
+	return dlProject, result.Error
+}
+
+func (app *App) UpdateDL(c *gin.Context, dlData models.DLS, dlProjectId string) (uint, error) {
+	dl, err := app.GetDL(c.Param("id"))
 	if err != nil {
 		return 0, err
 	}
+	app.Db.Unscoped().Where("dls_id = ?", dl.ID).Delete(&models.DlsProjects{})
 	updatedProject := app.Db.Model(&dl).Updates(&dlData)
 	var errMessage = updatedProject.Error
 	if updatedProject.Error != nil {
 		log.Print(errMessage)
 
+	}
+	projectId, err := strconv.ParseUint(dlProjectId, 10, 32)
+	dlProjects := models.DlsProjects{
+		DlsId:     dl.ID,
+		ProjectId: uint(projectId),
+	}
+	createDlProjects := app.Db.Create(&dlProjects)
+	if createDlProjects.Error != nil {
+		log.Print(createDlProjects.Error)
 	}
 	return dl.ID, errMessage
 }
@@ -108,8 +123,8 @@ func (app *App) CreateDL(c *gin.Context, dl models.DLS, dlProjectId string) (uin
 	return dl.ID, errMessage
 }
 
-func (app *App) DeleteDL(c *gin.Context) (uint, error) {
-	dl, err := app.GetDL(c)
+func (app *App) DeleteDL(id string) (uint, error) {
+	dl, err := app.GetDL(id)
 	if err != nil {
 		return 0, err
 	}

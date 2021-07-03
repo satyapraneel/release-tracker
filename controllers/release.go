@@ -19,22 +19,21 @@ import (
 )
 
 type Milestones struct {
-	BetaReleaseDate string
+	BetaReleaseDate   string
 	DevCompletionDate string
-	RegressionDate string
-	CodeFreezeDate string
-	Project string
+	RegressionDate    string
+	CodeFreezeDate    string
+	Project           string
 }
 
 type JiraStatus struct {
-	Id string
+	Id     string
 	Status string
-	Url string
+	Url    string
 }
 
 func (app *App) GetIndex(c *gin.Context) {
-	c.HTML(http.StatusOK, "release/home", gin.H{
-	})
+	c.HTML(http.StatusOK, "release/home", gin.H{})
 }
 
 func (app *App) GetListOfReleases(c *gin.Context) {
@@ -60,7 +59,6 @@ func (app *App) GetListOfReleases(c *gin.Context) {
 	releases := releaseRepsitoryHandler.GetAllReleases(c, dtValues)
 	c.JSON(http.StatusOK, releases)
 }
-
 
 func (app *App) CreateReleaseForm(c *gin.Context) {
 	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
@@ -88,7 +86,7 @@ func (app *App) ReleaseTicketsForm(c *gin.Context) {
 }
 
 //Not using as of now
-func (app *App)ReleaseListTickets(c *gin.Context)  {
+func (app *App) ReleaseListTickets(c *gin.Context) {
 	releaseName := c.Query("release")
 	log.Printf("param : %v", releaseName)
 	release := &models.Release{}
@@ -106,7 +104,7 @@ func (app *App)ReleaseListTickets(c *gin.Context)  {
 	return
 }
 
-func (app *App)ReleaseListTicketsByReleaseId(c *gin.Context)  {
+func (app *App) ReleaseListTicketsByReleaseId(c *gin.Context) {
 	releaseid := c.Param("id")
 	sendmail, _ := strconv.ParseBool(c.Param("sendmail"))
 	//releaseName := c.Query("release")
@@ -139,17 +137,16 @@ func (app *App)ReleaseListTicketsByReleaseId(c *gin.Context)  {
 		isSent, err := mails.SendReleaseNotes(release, ticketsrr)
 		if isSent {
 			c.JSON(http.StatusOK, gin.H{"status": true, "message": "Release notes sent successfully"})
-		}else{
+		} else {
 			c.JSON(http.StatusBadRequest, gin.H{"status": false, "message": err.Error()})
 		}
-	}else{
+	} else {
 		c.HTML(http.StatusOK, "release/list", gin.H{
-			"title":    "Create release",
+			"title":       "Create release",
 			"jiraTickets": ticketsrr,
-			"releaseId":release.ID,
+			"releaseId":   release.ID,
 		})
 	}
-
 
 }
 
@@ -157,22 +154,22 @@ func (app *App) ViewReleaseForm(c *gin.Context) {
 	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
 	releases, projects, reviewers, err := releaseRepsitoryHandler.GetReleases(c)
 	jiraTickets := jira.GetIssuesByLabel(releases.Name)
-	var  jiraStatus []*JiraStatus
-	jiraBaseUrl := os.Getenv("JIRA_BASE_URL")+"browse"
-	for _,tickets := range jiraTickets{
+	var jiraStatus []*JiraStatus
+	jiraBaseUrl := os.Getenv("JIRA_BASE_URL") + "browse"
+	for _, tickets := range jiraTickets {
 		jiraArr := &JiraStatus{
 			Status: tickets.Status,
-			Id: tickets.Id,
-			Url: jiraBaseUrl+"/"+tickets.Id,
+			Id:     tickets.Id,
+			Url:    jiraBaseUrl + "/" + tickets.Id,
 		}
-		jiraStatus = append(jiraStatus,jiraArr)
+		jiraStatus = append(jiraStatus, jiraArr)
 	}
 	var milestones []*Milestones
 	for _, project := range projects {
 		betaRelease := GetMilestoneDates(project.BetaReleaseDate, releases, project)
 		devCompletion := GetMilestoneDates(project.DevCompletionDate, releases, project)
-		regression := GetMilestoneDates(project.RegressionSignorDate,releases, project)
-		codeFreeze := GetMilestoneDates(project.CodeFreezeDate,releases, project)
+		regression := GetMilestoneDates(project.RegressionSignorDate, releases, project)
+		codeFreeze := GetMilestoneDates(project.CodeFreezeDate, releases, project)
 		mileStone := &Milestones{BetaReleaseDate: betaRelease.Format("2006-01-02"), DevCompletionDate: devCompletion.Format("2006-01-02"),
 			RegressionDate: regression.Format("2006-01-02"), CodeFreezeDate: codeFreeze.Format("2006-01-02"),
 			Project: project.Name}
@@ -187,13 +184,13 @@ func (app *App) ViewReleaseForm(c *gin.Context) {
 
 	log.Printf("baseurl : %v", jiraBaseUrl)
 	c.HTML(http.StatusOK, "release/view", gin.H{
-		"title":     "View release",
-		"projects":  projects,
-		"releases":  releases,
-		"reviewers": reviewers,
-		"tickets":	jiraStatus,
-		"milestones" : milestones,
-		"jiraurl" : jiraBaseUrl,
+		"title":      "View release",
+		"projects":   projects,
+		"releases":   releases,
+		"reviewers":  reviewers,
+		"tickets":    jiraStatus,
+		"milestones": milestones,
+		"jiraurl":    jiraBaseUrl,
 	})
 }
 
@@ -233,6 +230,7 @@ func (app *App) CreateRelease(c *gin.Context) {
 		Type:       release_type,
 		TargetDate: target_format,
 		Owner:      owner,
+		Status:     1,
 	}
 	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
 	createReleaseData, err := releaseRepsitoryHandler.CreateRelease(c, release, convertedProjectIds)
@@ -253,7 +251,7 @@ func (app *App) covertStringToIntArray(projectIds []string) []int {
 	for _, i := range projectIds {
 		j, err := strconv.Atoi(i)
 		if err != nil {
-			panic(err)
+			return convertedProjectIds
 		}
 		convertedProjectIds = append(convertedProjectIds, j)
 	}
@@ -273,7 +271,7 @@ func (app *App) GetProjectReviewerList(c *gin.Context) {
 	return
 }
 
-func (app *App) UpdateJiraTicketsToDB(jirsList []*jira.JiraTickets, releaseId uint){
+func (app *App) UpdateJiraTicketsToDB(jirsList []*jira.JiraTickets, releaseId uint) {
 	for _, jiraTickets := range jirsList {
 		releaseTickets := &models.ReleaseTickets{Key: jiraTickets.Id, Summary: jiraTickets.Summary, Type: jiraTickets.Type,
 			Project: jiraTickets.Project, Status: jiraTickets.Status, ReleaseId: releaseId}
