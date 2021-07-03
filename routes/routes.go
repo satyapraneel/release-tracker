@@ -53,6 +53,7 @@ func RouterGin(app *cmd.Application) {
 		api.POST("/store", handler.CreateRelease)
 		api.GET("/getReviewers", handler.GetProjectReviewerList)
 		api.GET("/show/:id", handler.ViewReleaseForm)
+		api.GET("/getJiraTickets/:id/:sendmail", handler.ReleaseListTicketsByReleaseId)
 		api.GET("/tickets", handler.ReleaseTicketsForm)
 		api.GET("/getTickets", handler.ReleaseListTicketsByReleaseId)
 	}
