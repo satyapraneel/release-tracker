@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/release-trackers/gin/cmd/jira"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -48,6 +49,7 @@ func handle() {
 		Db:   database.InitConnection(),
 		Name: "roopa",
 	}
+	jira.GetMultipleIssuesById()
 	schedular.Run(app)
 	routes.RouterGin(app)
 }
