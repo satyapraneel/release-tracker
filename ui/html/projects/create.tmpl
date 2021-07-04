@@ -80,6 +80,17 @@
             </div></br>
 
             <div class="form-group col-md-auto">
+                <label for="name" class="col-sm-12 col-form-label">Related Codes:</label>
+                <div class="col-sm-12">
+                    <input type='text' name='related_codes' class="form-control" id="related_codes"
+                        value="{{.values.RelatedCodes}}" min="0" required>
+                    {{with .errors.RelatedCodes }}
+                    <small class="form-text text-danger">{{.}}</small>
+                    {{ end }}
+                </div>
+            </div></br>
+
+            <div class="form-group col-md-auto">
                 <label for="type" class="col-sm-12 col-form-label">Project status:</label>
                 <div class="col-sm-12">
                     <select name="status" class="form-control" id="status" required>

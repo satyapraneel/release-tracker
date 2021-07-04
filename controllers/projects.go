@@ -62,6 +62,7 @@ func (app *App) CreateProject(c *gin.Context) {
 		RegressionSignorDate: c.Request.PostForm.Get("regression_signor_date"),
 		CodeFreezeDate:       c.Request.PostForm.Get("code_freeze_date"),
 		DevCompletionDate:    c.Request.PostForm.Get("dev_completion_date"),
+		RelatedCodes:         c.Request.PostForm.Get("related_codes"),
 		Status:               c.Request.PostForm.Get("status"),
 	}
 	reviewersList := c.PostFormArray("reviewers")
@@ -112,6 +113,7 @@ func (app *App) UpdateProject(c *gin.Context) {
 		RegressionSignorDate: c.Request.PostForm.Get("regression_signor_date"),
 		CodeFreezeDate:       c.Request.PostForm.Get("code_freeze_date"),
 		DevCompletionDate:    c.Request.PostForm.Get("dev_completion_date"),
+		RelatedCodes:         c.Request.PostForm.Get("related_codes"),
 		Status:               c.Request.PostForm.Get("status"),
 	}
 	reviewersList := c.PostFormArray("reviewers")

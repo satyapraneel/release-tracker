@@ -1,11 +1,12 @@
 package repositories
 
 import (
+	"log"
+	"strings"
+
 	"github.com/release-trackers/gin/cmd/bitbucket"
 	"github.com/release-trackers/gin/cmd/jira"
 	"github.com/release-trackers/gin/notifications/mails"
-	"log"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/cmd"
@@ -205,7 +206,17 @@ func (app *App) GetLatestReleases() ([]models.Release, error) {
 	return releases, err
 }
 
-func  (app *App) UpdateJiraTicketsToDB(jirsList []*jira.JiraTickets, releaseId uint){
+func (app *App) GetReleseIssuesIds() {
+	db := app.Db
+	release := models.Release{}
+	db.First(&release, 1)
+	project := models.Project{}
+	db.First(&project, 3)
+	releatedIds := bitbucket.GetReleseIssuesIds(release, project)
+	log.Print(releatedIds)
+}
+
+func (app *App) UpdateJiraTicketsToDB(jirsList []*jira.JiraTickets, releaseId uint) {
 	for _, jiraTickets := range jirsList {
 		releaseTickets := &models.ReleaseTickets{Key: jiraTickets.Id, Summary: jiraTickets.Summary, Type: jiraTickets.Type,
 			Project: jiraTickets.Project, Status: jiraTickets.Status, ReleaseId: releaseId}
