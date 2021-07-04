@@ -151,7 +151,7 @@ func CreateBranch(db *gorm.DB, release models.Release, reviewers []string, proje
 	restrictionPushId := branchRestrictions(AccessToken, branch, reviewers, projectRepoName, "push")
 	restrictionMergeId := branchRestrictions(AccessToken, branch, reviewers, projectRepoName, "restrict_merges")
 	log.Printf("restriction push id: %v ", restrictionPushId)
-	releaseRestriction := db.Model(&release).Updates(map[string]interface{}{"restriction_push_id": restrictionPushId, "restriction_merge_id": restrictionMergeId})
+	releaseRestriction := db.Where("id = ? ", release.ID).Model(&release).Updates(map[string]interface{}{"restriction_push_id": restrictionPushId, "restriction_merge_id": restrictionMergeId})
 	log.Printf("restriction error: %v ", releaseRestriction.Error)
 	if releaseRestriction.Error != nil {
 		log.Print(releaseRestriction.Error)

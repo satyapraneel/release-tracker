@@ -233,6 +233,7 @@ func (app *App) CreateRelease(c *gin.Context) {
 		Type:       release_type,
 		TargetDate: target_format,
 		Owner:      owner,
+		Status:     1,
 	}
 	releaseRepsitoryHandler := repositories.NewReleaseHandler(app.Application)
 	createReleaseData, err := releaseRepsitoryHandler.CreateRelease(c, release, convertedProjectIds)
@@ -253,7 +254,7 @@ func (app *App) covertStringToIntArray(projectIds []string) []int {
 	for _, i := range projectIds {
 		j, err := strconv.Atoi(i)
 		if err != nil {
-			panic(err)
+			return convertedProjectIds
 		}
 		convertedProjectIds = append(convertedProjectIds, j)
 	}
