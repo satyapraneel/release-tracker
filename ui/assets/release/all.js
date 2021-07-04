@@ -155,7 +155,8 @@ $(document).ready(function () {
             ],
         };
         var dlsDt = initDatatable($dlsTable, [
-            {data: 'ID', name: 'ID', searchable: true,'orderable': false},
+            {data: 'ID', name: 'ID', searchable: false,'orderable': false},
+            {data: 'ProjectName', name: 'project_name', searchable: true,'orderable': false},
             {data: 'Email', name: 'Email', searchable: true,'orderable': false},
             {data: 'DlType', name: 'DlType', searchable: true,'orderable': false},
             {

@@ -2,12 +2,13 @@ package mails
 
 import (
 	"bytes"
-	"github.com/release-trackers/gin/cmd/jira"
-	"github.com/release-trackers/gin/models"
 	"html/template"
 	"log"
 	"net/smtp"
 	"os"
+
+	"github.com/release-trackers/gin/cmd/jira"
+	"github.com/release-trackers/gin/models"
 
 	"github.com/release-trackers/gin/config"
 )
@@ -23,9 +24,11 @@ type MailSettings struct {
 type MailData struct {
 	ProjectName  string
 	ReminderType string
-	Subject string
+	DLType       string
+	Subject      string
 	JiraTickets  []*jira.JiraTickets
-	Release *models.Release
+	Release      *models.Release
+	BranchName   string
 }
 
 func NewMail(to []string, subject, body, mailType string) *MailSettings {
