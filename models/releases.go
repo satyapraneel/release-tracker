@@ -15,7 +15,7 @@ type Release struct {
 	Owner              string    `json:"owner"`
 	RestrictionPushId  uint      `json:"restriction_push_id"`
 	RestrictionMergeId uint      `json:"restriction_merge_id"`
-	Status             byte      `json:"status"`
+	Status             byte      `gorm:"default:1"`
 }
 
 type DataResult struct {
