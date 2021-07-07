@@ -68,7 +68,7 @@ $(document).ready(function () {
                 "mData": "ID",
                 'orderable': false,
                 "mRender": function (data, type, row) {
-                    return "<a href='/release/show/" + data + "'><i class='fa fa-eye fa-fw'></i></a><span></span><span></span><a href='/release/getJiraTickets/" + data + "/false'><i class='fa fa-sticky-note-o fa-fw'></i></a>";
+                    return "<a href='/release/show/" + data + "'><i class='fa fa-eye fa-fw' data-toggle='tooltip' data-placement='top' title='View'></i></a><span></span><span></span><a href='/release/getJiraTickets/" + data + "/false'><i class='fa fa-sticky-note-o fa-fw' data-toggle='tooltip' data-placement='top' title='Release Notes'></i></a>";
                 }
             },
         ], additionalOptions);
