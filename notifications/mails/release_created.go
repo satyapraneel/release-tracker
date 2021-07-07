@@ -18,14 +18,19 @@ type ReleaseNotesDate struct {
 	ReleaseTickets []*models.ReleaseTickets
 	Release        *models.Release
 	ReleaseDate    string
-	JiraUrl      string
+	JiraUrl        string
 }
 
-func SendReleaseCreatedMail(release *models.Release, project *models.Project) {
+func SendReleaseCreatedMail(release *models.Release, project *models.Project, dlsLists []*models.DLS) {
+
 	// tagetDate := &release.TargetDate
 	subject := "Jira Label for " + project.Name + "!"
-	reviews := strings.Split(project.ReviewerList, ",")
-	mail := NewMail(reviews, subject, "", "")
+	// reviews := strings.Split(project.ReviewerList, ",")
+	var dlsList []string
+	for _, dls := range dlsLists {
+		dlsList = append(dlsList, dls.Email)
+	}
+	mail := NewMail(dlsList, subject, "", "")
 	releaseData := &ReleaseCreateData{ProjectName: project.Name, ReleaseName: release.Name}
 	errs := mail.ParseTemplate("/ui/html/mails/release_create.html", releaseData)
 	if errs != nil {

@@ -45,7 +45,8 @@ func (app *App) CreateRelease(c *gin.Context, release models.Release, projectIds
 		}
 		log.Printf("brandName : %v", project.RepoName)
 		log.Printf("release : %+v, %v", release.Name, release.Type)
-		go mails.SendReleaseCreatedMail(&release, project)
+		dlsList, _ := app.GetDLsByProject(project.ID)
+		go mails.SendReleaseCreatedMail(&release, project, dlsList)
 		reviewerUserNames := app.GetReviewerUserNames(c, project.ReviewerList)
 		go bitbucket.CreateBranch(app.Db, release, reviewerUserNames, project.RepoName)
 		project = &models.Project{}
