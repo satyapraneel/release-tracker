@@ -37,7 +37,7 @@ func (app *App) GetListOfDLs(c *gin.Context) {
 }
 
 func (app *App) CreateDLsForm(c *gin.Context) {
-	dlTypes := map[string]string{models.QA: "QA", models.DEV: "Developers", models.PM: "PMs", models.DEVOPS: "DevOps"}
+	dlTypes := map[string]string{models.QA: "QA", models.DEV: "Developers", models.PM: "PMs", models.DEVOPS: "DevOps", models.SM: "Scrum Masters"}
 	repsitoryHandler := repositories.NewRepositoryHandler(app.Application)
 	projects, err := repsitoryHandler.GetAllProjectsList(c)
 	if err != nil {
@@ -79,7 +79,7 @@ func (app *App) CreateDL(c *gin.Context) {
 }
 
 func (app *App) ViewDLForm(c *gin.Context) {
-	dlTypes := map[string]string{models.QA: "QA", models.DEV: "Developers", models.PM: "PMs", models.DEVOPS: "DevOps"}
+	dlTypes := map[string]string{models.QA: "QA", models.DEV: "Developers", models.PM: "PMs", models.DEVOPS: "DevOps", models.SM: "Scrum Masters"}
 	repsitoryHandler := repositories.NewReleaseHandler(app.Application)
 	dl, err := repsitoryHandler.GetDL(c.Param("id"))
 

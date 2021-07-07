@@ -73,7 +73,7 @@ func (app *Application) TriggerMailIfDate(typeOfRelease string, project *models.
 		dlType = models.DEV
 		releaseType = "Beta"
 		log.Println("its beta")
-		subject := "Reminder mail for " + releaseType
+		subject := releaseRecord.Name + ": Reminder mail for " + releaseType
 		template = "/ui/html/mails/release_beta.html"
 		dataTosend = &mails.MailData{
 			ProjectName:  project.Name,
@@ -86,7 +86,7 @@ func (app *Application) TriggerMailIfDate(typeOfRelease string, project *models.
 		dlType = models.DEV
 		releaseType = "Regression"
 		log.Println("its regression")
-		subject := "Regression Sign-off reminder for " + releaseRecord.Name
+		subject := releaseRecord.Name + ": Regression Sign-off reminder for " + releaseRecord.Name
 		template = "/ui/html/mails/regression.html"
 		jiraList := app.getRegressionData(releaseRecord, dlsRepository)
 		jiraBrowseUrl := os.Getenv("JIRA_BASE_URL") + "browse"
@@ -97,14 +97,14 @@ func (app *Application) TriggerMailIfDate(typeOfRelease string, project *models.
 			Subject:      subject,
 			Release:      releaseRecord,
 			DLType:       dlType,
-			JiraUrl:	jiraBrowseUrl,
+			JiraUrl:      jiraBrowseUrl,
 		}
 	//tested
 	case "code_freeze":
 		dlType = models.DEV
 		releaseType = "Code Freeze"
 		log.Println("its code freeze")
-		subject := "Reminder mail for " + releaseType
+		subject := releaseRecord.Name + ": Reminder mail for " + releaseType
 		template = "/ui/html/mails/code_freeze.html"
 		dataTosend = &mails.MailData{
 			ProjectName:  project.Name,
@@ -121,7 +121,7 @@ func (app *Application) TriggerMailIfDate(typeOfRelease string, project *models.
 		bitbucket.UpdateBranchRestriction(project.RepoName, restrictionMergeId, releaseRecord.Name, "restrict_merges")
 		dlType = models.DEV
 		releaseType = "Code Freeze"
-		subject := "Reminder mail for " + releaseType
+		subject := releaseRecord.Name + ": Reminder mail for " + releaseType
 		template = "/ui/html/mails/code_freeze_restrict_branch.html"
 		dataTosend = &mails.MailData{
 			ProjectName:  project.Name,
@@ -135,7 +135,7 @@ func (app *Application) TriggerMailIfDate(typeOfRelease string, project *models.
 		dlType = models.DEV
 		releaseType = "Dev Completion"
 		log.Println("its devcompletion")
-		subject := "Reminder mail for " + releaseType
+		subject := releaseRecord.Name + ": Reminder mail for " + releaseType
 		template = "/ui/html/mails/dev_completion.html"
 		dataTosend = &mails.MailData{
 			ProjectName:  project.Name,
@@ -148,7 +148,7 @@ func (app *Application) TriggerMailIfDate(typeOfRelease string, project *models.
 		log.Println("its release date")
 		dlType = models.DEV
 		releaseType = "Release Date"
-		subject := "Reminder mail for " + releaseType
+		subject := releaseRecord.Name + ": Reminder mail for " + releaseType
 		template = "/ui/html/mails/release_reminder.html"
 		dataTosend = &mails.MailData{
 			ProjectName:  project.Name,

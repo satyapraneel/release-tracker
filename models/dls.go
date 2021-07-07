@@ -6,6 +6,7 @@ const QA = "qa"
 const DEV = "dev"
 const PM = "pm"
 const DEVOPS = "devops"
+const SM = "sm"
 
 //User struct declaration
 type DLS struct {
