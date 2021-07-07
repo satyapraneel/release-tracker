@@ -7,7 +7,7 @@
             <p>Please find the below released items for <strong>{{.Release.Name}}</strong> branch on {{.ReleaseDate}}</p>
             <ul>
             {{range .ReleaseTickets}}
-                <li>{{.Key}} : {{ .Summary}}</li>
+                <li><a href="{{$.JiraUrl}}/{{.Key}}">{{.Key}}</a> : {{ .Summary}}</li>
             {{end}}
             </ul><br/>
             Regards,<br/>

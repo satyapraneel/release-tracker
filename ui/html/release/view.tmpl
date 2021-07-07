@@ -55,7 +55,7 @@
                                         </div>
                                         <div class="card-body scrollCard">
                                             {{range $ticket := .tickets}}
-                                                <strong><a href="{{$ticket.Url}}" target="_blank">{{$ticket.Id}}</a></strong> -  {{$ticket.Status}} <br/>
+                                                <strong><a href="{{$ticket.Url}}" target="_blank">{{$ticket.Id}}</a></strong> - {{$ticket.Summary}} - <strong>{{$ticket.Status}}</strong> <br/>
                                             {{end}}
                                         </div>
                                     </div><br/>
@@ -72,10 +72,10 @@
                                         <div class="card-body scrollCard">
                                             {{range $milestone := .milestones}}
                                                 <br/>Project : <span style="color: #0d6efd">{{$milestone.Project}}</span> <br/>
-                                                DevCompletionDate : {{$milestone.DevCompletionDate}} <br/>
-                                                CodeFreezeDate : {{$milestone.CodeFreezeDate}} <br/>
-                                                RegressionSignorDate : {{$milestone.RegressionDate}} <br/>
-                                                BetaReleaseDate : {{$milestone.BetaReleaseDate}} <br/>
+                                                Dev Completion Date : {{$milestone.DevCompletionDate}} <br/>
+                                                Code Freeze Date : {{$milestone.CodeFreezeDate}} <br/>
+                                                Regression Signor Date : {{$milestone.RegressionDate}} <br/>
+                                                Beta Release Date : {{$milestone.BetaReleaseDate}} <br/>
                                             {{end}}
                                         </div>
                                     </div></br>

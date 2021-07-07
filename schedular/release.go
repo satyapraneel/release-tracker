@@ -3,6 +3,7 @@ package schedular
 import (
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"time"
 
@@ -88,6 +89,7 @@ func (app *Application) TriggerMailIfDate(typeOfRelease string, project *models.
 		subject := "Regression Sign-off reminder for " + releaseRecord.Name
 		template = "/ui/html/mails/regression.html"
 		jiraList := app.getRegressionData(releaseRecord, dlsRepository)
+		jiraBrowseUrl := os.Getenv("JIRA_BASE_URL") + "browse"
 		dataTosend = &mails.MailData{
 			JiraTickets:  jiraList,
 			ProjectName:  project.Name,
@@ -95,6 +97,7 @@ func (app *Application) TriggerMailIfDate(typeOfRelease string, project *models.
 			Subject:      subject,
 			Release:      releaseRecord,
 			DLType:       dlType,
+			JiraUrl:	jiraBrowseUrl,
 		}
 	//tested
 	case "code_freeze":

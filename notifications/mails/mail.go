@@ -29,6 +29,7 @@ type MailData struct {
 	JiraTickets  []*jira.JiraTickets
 	Release      *models.Release
 	BranchName   string
+	JiraUrl      string
 }
 
 func NewMail(to []string, subject, body, mailType string) *MailSettings {

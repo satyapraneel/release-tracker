@@ -3,6 +3,7 @@ package mails
 import (
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/release-trackers/gin/models"
@@ -17,6 +18,7 @@ type ReleaseNotesDate struct {
 	ReleaseTickets []*models.ReleaseTickets
 	Release        *models.Release
 	ReleaseDate    string
+	JiraUrl      string
 }
 
 func SendReleaseCreatedMail(release *models.Release, project *models.Project) {
@@ -39,7 +41,8 @@ func SendReleaseNotes(release *models.Release, releaseTickets []*models.ReleaseT
 	subject := "Release Notes for " + release.Name
 	reviews := strings.Split(release.Owner, ",")
 	mail := NewMail(reviews, subject, "", "")
-	tickets := &ReleaseNotesDate{ReleaseTickets: releaseTickets, Release: release, ReleaseDate: release.TargetDate.Format("2006-01-02")}
+	jiraBrowseUrl := os.Getenv("JIRA_BASE_URL") + "browse"
+	tickets := &ReleaseNotesDate{ReleaseTickets: releaseTickets, Release: release, ReleaseDate: release.TargetDate.Format("2006-01-02"), JiraUrl: jiraBrowseUrl}
 	errs := mail.ParseTemplate("/ui/html/mails/release_notes.html", tickets)
 	if errs != nil {
 		log.Printf("template parse : %v", errs)

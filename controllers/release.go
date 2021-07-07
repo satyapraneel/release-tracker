@@ -30,6 +30,7 @@ type JiraStatus struct {
 	Id     string
 	Status string
 	Url    string
+	Summary string
 }
 
 func (app *App) GetIndex(c *gin.Context) {
@@ -133,6 +134,7 @@ func (app *App) ReleaseListTicketsByReleaseId(c *gin.Context) {
 		ticketsrr = append(ticketsrr, tickets)
 	}
 	log.Printf("Send mail : %+v", sendmail)
+	jiraBaseUrl := os.Getenv("JIRA_BASE_URL") + "browse"
 	if sendmail {
 		isSent, err := mails.SendReleaseNotes(release, ticketsrr)
 		if isSent {
@@ -145,6 +147,7 @@ func (app *App) ReleaseListTicketsByReleaseId(c *gin.Context) {
 			"title":       "Create release",
 			"jiraTickets": ticketsrr,
 			"releaseId":   release.ID,
+			"jiraUrl": jiraBaseUrl,
 		})
 	}
 
@@ -161,6 +164,7 @@ func (app *App) ViewReleaseForm(c *gin.Context) {
 			Status: tickets.Status,
 			Id:     tickets.Id,
 			Url:    jiraBaseUrl + "/" + tickets.Id,
+			Summary: tickets.Summary,
 		}
 		jiraStatus = append(jiraStatus, jiraArr)
 	}
