@@ -37,7 +37,7 @@ func (app *App) GetListOfDLs(c *gin.Context) {
 }
 
 func (app *App) CreateDLsForm(c *gin.Context) {
-	dlTypes := map[string]string{"qa": "QA", "dev": "Developers"}
+	dlTypes := map[string]string{models.QA: "QA", models.DEV: "Developers", models.PM: "PMs", models.DEVOPS: "DevOps", models.SM: "Scrum Masters"}
 	repsitoryHandler := repositories.NewRepositoryHandler(app.Application)
 	projects, err := repsitoryHandler.GetAllProjectsList(c)
 	if err != nil {
@@ -79,16 +79,25 @@ func (app *App) CreateDL(c *gin.Context) {
 }
 
 func (app *App) ViewDLForm(c *gin.Context) {
-	dlTypes := map[string]string{"qa": "QA", "dev": "Developers"}
+	dlTypes := map[string]string{models.QA: "QA", models.DEV: "Developers", models.PM: "PMs", models.DEVOPS: "DevOps", models.SM: "Scrum Masters"}
 	repsitoryHandler := repositories.NewReleaseHandler(app.Application)
-	dl, err := repsitoryHandler.GetDL(c)
+	dl, err := repsitoryHandler.GetDL(c.Param("id"))
+
 	if err != nil {
 		c.Redirect(http.StatusFound, "dls")
 	}
+
+	selectedProject, project_error := repsitoryHandler.GetDLProject(c.Param("id"))
+	if project_error != nil {
+		c.Redirect(http.StatusFound, "dls")
+	}
+	projects, _ := repsitoryHandler.GetAllProjectsList(c)
 	c.HTML(http.StatusOK, "dls/edit", gin.H{
-		"values":     dl,
-		"DlTypes":    dlTypes,
-		"SelectedDL": dl.DlType,
+		"values":          dl,
+		"DlTypes":         dlTypes,
+		"SelectedDL":      dl.DlType,
+		"Projects":        projects,
+		"SelectedProject": selectedProject.ProjectId,
 	})
 }
 
@@ -104,8 +113,9 @@ func (app *App) UpdateDL(c *gin.Context) {
 		Email:  c.Request.PostForm.Get("email"),
 		DlType: c.Request.PostForm.Get("dl_type"),
 	}
+	dlProjectId := c.Request.PostForm.Get("project_id")
 	repsitoryHandler := repositories.NewRepositoryHandler(app.Application)
-	updated, err := repsitoryHandler.UpdateDL(c, dl)
+	updated, err := repsitoryHandler.UpdateDL(c, dl, dlProjectId)
 	session := sessions.Default(c)
 	if err != nil {
 		log.Print(err)
@@ -120,7 +130,7 @@ func (app *App) UpdateDL(c *gin.Context) {
 
 func (app *App) DeleteDL(c *gin.Context) {
 	repsitoryHandler := repositories.NewRepositoryHandler(app.Application)
-	deleteRecord, err := repsitoryHandler.DeleteDL(c)
+	deleteRecord, err := repsitoryHandler.DeleteDL(c.Param("id"))
 	session := sessions.Default(c)
 	if err != nil {
 		log.Print(err)

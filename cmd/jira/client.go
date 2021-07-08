@@ -87,3 +87,37 @@ func GetIssuesByLabel(releaseName string) []*JiraTickets {
 	return jiraArr
 }
 
+func GetMultipleIssuesById() []*JiraTickets {
+	jiraClient, err := setUpClient()
+	var issues []jira.Issue
+
+	// appendFunc will append jira issues to []jira.Issue
+	appendFunc := func(i jira.Issue) (err error) {
+		issues = append(issues, i)
+		return err
+	}
+
+	err = jiraClient.Issue.SearchPages(("Issuekey IN (NP-1, RT-1, RT-2)"), nil, appendFunc)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("%d issues found.\n", len(issues))
+	jiraArr := []*JiraTickets{}
+	for _, i := range issues {
+		t := time.Time(i.Fields.Created) // convert go-jira.Time to time.Time for manipulation
+		date := t.Format("2006-01-02")
+		clock := t.Format("15:04")
+		jiraInfo := &JiraTickets{Id: i.Key, Summary: i.Fields.Summary, CreationDate: date, CreationTime: clock,
+			Type: i.Fields.Type.Name, Project: i.Fields.Project.Name, Priority: i.Fields.Priority.Name,
+			Status: i.Fields.Status.Name,
+		}
+
+		jiraArr = append(jiraArr, jiraInfo)
+		fmt.Printf("multiple issues %+v", i)
+		fmt.Printf("Creation Date: %s\nCreation Time: %s\nIssue Key: %s\nIssue Summary: %s\n\n", date, clock, i.Key, i.Fields.Summary)
+	}
+
+	return jiraArr
+}
+

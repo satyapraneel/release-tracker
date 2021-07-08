@@ -39,7 +39,7 @@
                                                 {{else if eq .Type "Task"}}
                                                     {{$color = "#18cded"}}
                                                 {{end}}
-                                                <li class="list-group-item"><span style='color:{{$color}}'>{{.Type}}</span> :  {{.Key}} : {{.Summary}}</li>
+                                                <li class="list-group-item"><span style='color:{{$color}}'>{{.Type}}</span> :  <a href="{{$.jiraUrl}}/{{.Key}}" target="_blank">{{.Key}}</a> : {{.Summary}} : <strong>{{.Status}}</strong></li>
                                             {{end}}
                                         </ul>
                                         <div class="card-body" id="release_notes_button">

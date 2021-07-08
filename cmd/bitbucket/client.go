@@ -42,8 +42,8 @@ type BranchRestriction struct {
 	Pattern  string  `json:"pattern"`
 }
 
-type UpdateRestriction struct{
-	Values    []*BranchRestriction
+type UpdateRestriction struct {
+	Values []*BranchRestriction
 }
 
 type Users struct {
@@ -138,7 +138,7 @@ func CreateBranch(db *gorm.DB, release models.Release, reviewers []string, proje
 	restrictionPushId := branchRestrictions(AccessToken, branch, reviewers, projectRepoName, "push")
 	restrictionMergeId := branchRestrictions(AccessToken, branch, reviewers, projectRepoName, "restrict_merges")
 	log.Printf("restriction push id: %v ", restrictionPushId)
-	releaseRestriction:= db.Model(&release).Updates(map[string]interface{}{"restriction_push_id": restrictionPushId, "restriction_merge_id": restrictionMergeId})
+	releaseRestriction := db.Where("id = ? ", release.ID).Model(&release).Updates(map[string]interface{}{"restriction_push_id": restrictionPushId, "restriction_merge_id": restrictionMergeId})
 	log.Printf("restriction error: %v ", releaseRestriction.Error)
 	if releaseRestriction.Error != nil {
 		log.Print(releaseRestriction.Error)
@@ -146,16 +146,16 @@ func CreateBranch(db *gorm.DB, release models.Release, reviewers []string, proje
 }
 
 func branchRestrictions(token string, branchName string, ReviewerList []string, projectRepoName string, restrictionKind string) int {
-	branchRestriction := "/repositories/"+os.Getenv("BITBUCKET_OWNER")+"/"+projectRepoName+"/branch-restrictions"
-	apiUrl := baseURL+branchRestriction
-	var arrayOfUsers  []Users
+	branchRestriction := "/repositories/" + os.Getenv("BITBUCKET_OWNER") + "/" + projectRepoName + "/branch-restrictions"
+	apiUrl := baseURL + branchRestriction
+	var arrayOfUsers []Users
 	for _, reviewer := range ReviewerList {
 		user := Users{Username: reviewer}
 		arrayOfUsers = append(arrayOfUsers, user)
 	}
 	request := BranchRestriction{
-		Kind: restrictionKind,
-		Owner: os.Getenv("BITBUCKET_OWNER"),
+		Kind:     restrictionKind,
+		Owner:    os.Getenv("BITBUCKET_OWNER"),
 		RepoSlug: projectRepoName,
 		Pattern:  "*" + branchName + "*",
 		Users:    arrayOfUsers,
@@ -177,17 +177,17 @@ func branchRestrictions(token string, branchName string, ReviewerList []string, 
 	return restriction.Id
 }
 
-func UpdateBranchRestriction(projectRepoName string, restrictionId string, branchName string, restrictionKind string)  {
-	AccessToken :=  GetAccessToken()
-	branchRestriction := "/repositories/"+os.Getenv("BITBUCKET_OWNER")+"/"+projectRepoName+"/branch-restrictions/"+restrictionId
-	apiUrl := baseURL+branchRestriction
-	var arrayOfUsers  []Users
+func UpdateBranchRestriction(projectRepoName string, restrictionId string, branchName string, restrictionKind string) {
+	AccessToken := GetAccessToken()
+	branchRestriction := "/repositories/" + os.Getenv("BITBUCKET_OWNER") + "/" + projectRepoName + "/branch-restrictions/" + restrictionId
+	apiUrl := baseURL + branchRestriction
+	var arrayOfUsers []Users
 	request := &BranchRestriction{
-			Kind: restrictionKind,
-			Owner: os.Getenv("BITBUCKET_OWNER"),
-			RepoSlug: projectRepoName,
-			Pattern: "*"+branchName+"*",
-			Users: arrayOfUsers,
+		Kind:     restrictionKind,
+		Owner:    os.Getenv("BITBUCKET_OWNER"),
+		RepoSlug: projectRepoName,
+		Pattern:  "*" + branchName + "*",
+		Users:    arrayOfUsers,
 	}
 	payloadBytes, _ := json.Marshal(request)
 	body := bytes.NewReader(payloadBytes)

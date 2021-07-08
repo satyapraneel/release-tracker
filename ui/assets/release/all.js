@@ -68,7 +68,7 @@ $(document).ready(function () {
                 "mData": "ID",
                 'orderable': false,
                 "mRender": function (data, type, row) {
-                    return "<a href='/release/show/" + data + "'><i class='fa fa-eye fa-fw'></i></a><span></span><span></span><a href='/release/getJiraTickets/" + data + "/false'><i class='fa fa-sticky-note-o fa-fw'></i></a>";
+                    return "<a href='/release/show/" + data + "'><i class='fa fa-eye fa-fw' data-toggle='tooltip' data-placement='top' title='View'></i></a><span></span><span></span><a href='/release/getJiraTickets/" + data + "/false'><i class='fa fa-sticky-note-o fa-fw' data-toggle='tooltip' data-placement='top' title='Release Notes'></i></a>";
                 }
             },
         ], additionalOptions);
@@ -155,7 +155,8 @@ $(document).ready(function () {
             ],
         };
         var dlsDt = initDatatable($dlsTable, [
-            {data: 'ID', name: 'ID', searchable: true,'orderable': false},
+            {data: 'ID', name: 'ID', searchable: false,'orderable': false},
+            {data: 'ProjectName', name: 'project_name', searchable: true,'orderable': false},
             {data: 'Email', name: 'Email', searchable: true,'orderable': false},
             {data: 'DlType', name: 'DlType', searchable: true,'orderable': false},
             {

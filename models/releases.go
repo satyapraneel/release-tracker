@@ -9,12 +9,13 @@ import (
 //Release struct declaration
 type Release struct {
 	gorm.Model
-	Name       string    `gorm:"type:varchar(100);index:,unique"`
-	TargetDate time.Time `json:"target_date"`
-	Type       string    `json:"type"`
-	Owner      string    `json:"owner"`
-	RestrictionPushId uint	`json:"restriction_push_id"`
-	RestrictionMergeId uint	`json:"restriction_merge_id"`
+	Name               string    `gorm:"type:varchar(100);index:,unique"`
+	TargetDate         time.Time `json:"target_date"`
+	Type               string    `json:"type"`
+	Owner              string    `json:"owner"`
+	RestrictionPushId  uint      `json:"restriction_push_id"`
+	RestrictionMergeId uint      `json:"restriction_merge_id"`
+	Status             byte      `gorm:"default:1"`
 }
 
 type DataResult struct {

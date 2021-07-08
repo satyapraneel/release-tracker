@@ -1,11 +1,13 @@
 package repositories
 
 import (
+	"log"
+	"strings"
+	"time"
+
 	"github.com/release-trackers/gin/cmd/bitbucket"
 	"github.com/release-trackers/gin/cmd/jira"
 	"github.com/release-trackers/gin/notifications/mails"
-	"log"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/cmd"
@@ -43,7 +45,8 @@ func (app *App) CreateRelease(c *gin.Context, release models.Release, projectIds
 		}
 		log.Printf("brandName : %v", project.RepoName)
 		log.Printf("release : %+v, %v", release.Name, release.Type)
-		go mails.SendReleaseCreatedMail(&release, project)
+		dlsList, _ := app.GetDLsByProject(project.ID)
+		go mails.SendReleaseCreatedMail(&release, project, dlsList)
 		reviewerUserNames := app.GetReviewerUserNames(c, project.ReviewerList)
 		go bitbucket.CreateBranch(app.Db, release, reviewerUserNames, project.RepoName)
 		project = &models.Project{}
@@ -75,9 +78,9 @@ func (app *App) GetAllReleases(c *gin.Context, dt models.DataTableValues) models
 	db.Table(table).Count(&total)
 
 	result := models.DataResult{
-		total,
-		filtered,
-		release,
+		Total:    total,
+		Filtered: filtered,
+		Data:     release,
 	}
 
 	return result
@@ -187,7 +190,7 @@ func (app *App) GetReviewerUserNames(c *gin.Context, reviewerList string) []stri
 
 func (app *App) GetLatestReleases() ([]models.Release, error) {
 	releases := []models.Release{}
-	releaseRecords := app.Db.Debug().Table("releases").Where("id IN (?)", app.Db.Table("releases").Select("MAX(id)").Group("type"))
+	releaseRecords := app.Db.Debug().Table("releases").Where("status = ?", 1)
 	releaseRows, err := releaseRecords.Rows()
 	if err != nil {
 		log.Fatalln(err)
@@ -205,7 +208,18 @@ func (app *App) GetLatestReleases() ([]models.Release, error) {
 	return releases, err
 }
 
-func  (app *App) UpdateJiraTicketsToDB(jirsList []*jira.JiraTickets, releaseId uint){
+func (app *App) CloseRelease() (int, error) {
+	todaysDate := time.Now()
+	today := todaysDate.Format("2006-01-02")
+	updatedRecord := app.Db.Debug().Model(&models.Release{}).Where("target_date < ?", today).Update("status", 0)
+	if updatedRecord.Error != nil {
+		println(updatedRecord.Error)
+		return 0, updatedRecord.Error
+	}
+	return 1, nil
+}
+
+func (app *App) UpdateJiraTicketsToDB(jirsList []*jira.JiraTickets, releaseId uint) {
 	for _, jiraTickets := range jirsList {
 		releaseTickets := &models.ReleaseTickets{Key: jiraTickets.Id, Summary: jiraTickets.Summary, Type: jiraTickets.Type,
 			Project: jiraTickets.Project, Status: jiraTickets.Status, ReleaseId: releaseId}
