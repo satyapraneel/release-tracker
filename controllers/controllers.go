@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/cmd"
-	"gorm.io/gorm"
+	"github.com/jinzhu/gorm"
 )
 
 type App struct {

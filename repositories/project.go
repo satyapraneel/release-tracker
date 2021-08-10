@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/release-trackers/gin/models"
+	"go.elastic.co/apm/module/apmgorm"
 )
 
 func (app *App) GetProjectsByIds(projectId []int) ([]*models.Project, error) {
@@ -33,9 +34,10 @@ func (app *App) GetProjectsByIds(projectId []int) ([]*models.Project, error) {
 	return projectArr, err
 }
 
-func (app *App) GetAllProjects(dt models.DataTableValues) models.ProjectResult {
+func (app *App) GetAllProjects(c *gin.Context, dt models.DataTableValues) models.ProjectResult {
 	table := "projects"
-	db := app.Db
+	// db := app.Db
+	db := apmgorm.WithContext(c.Request.Context(), app.Db)
 	var total, filtered int64
 	var project []models.Project
 	query := db.Table(table)

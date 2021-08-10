@@ -33,7 +33,7 @@ func (app *App) GetListOfProjects(c *gin.Context) {
 		Order:  columnOrder,
 	}
 	projectRepsitoryHandler := repositories.NewRepositoryHandler(app.Application)
-	projects := projectRepsitoryHandler.GetAllProjects(dtValues)
+	projects := projectRepsitoryHandler.GetAllProjects(c, dtValues)
 	c.JSON(http.StatusOK, projects)
 }
 

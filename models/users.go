@@ -1,6 +1,6 @@
 package models
 
-import "gorm.io/gorm"
+import "github.com/jinzhu/gorm"
 
 //User struct declaration
 type Users struct {

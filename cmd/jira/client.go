@@ -10,25 +10,25 @@ import (
 )
 
 type JiraTickets struct {
-	Id string
-	Summary string
+	Id           string
+	Summary      string
 	CreationDate string
 	CreationTime string
-	Type string
-	Project string
-	Priority string
-	Status string
+	Type         string
+	Project      string
+	Priority     string
+	Status       string
 }
 
 func setUpClient() (*jira.Client, error) {
 	base := os.Getenv("JIRA_BASE_URL")
 	tp := jira.BasicAuthTransport{
-		Username: os.Getenv("JIRA_USERNAME"),  //"jroopanov11@gmail.com",
+		Username: os.Getenv("JIRA_USERNAME"), //"jroopanov11@gmail.com",
 		Password: os.Getenv("JIRA_SECRET"),   //"MIjRCG1iztxW6yU8Xk754F98",
 	}
 
 	jiraClient, err := jira.NewClient(tp.Client(), base)
-	return jiraClient,err
+	return jiraClient, err
 }
 
 func GetIssueDetails(issueKey string) *JiraTickets {
@@ -40,7 +40,6 @@ func GetIssueDetails(issueKey string) *JiraTickets {
 	if err != nil {
 		panic(err)
 	}
-
 
 	t := time.Time(issue.Fields.Created) // convert go-jira.Time to time.Time for manipulation
 	date := t.Format("2006-01-02")
@@ -120,4 +119,3 @@ func GetMultipleIssuesById() []*JiraTickets {
 
 	return jiraArr
 }
-

@@ -1,8 +1,8 @@
 package seed
 
 import (
+	"github.com/jinzhu/gorm"
 	"github.com/release-trackers/gin/models"
-	"gorm.io/gorm"
 )
 
 func CreateUser(db *gorm.DB,

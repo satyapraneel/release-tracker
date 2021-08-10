@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"gorm.io/gorm"
+	"github.com/jinzhu/gorm"
 )
 
 type Application struct {

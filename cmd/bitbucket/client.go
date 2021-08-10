@@ -10,9 +10,9 @@ import (
 	"os"
 	"strings"
 
+	"github.com/jinzhu/gorm"
 	"github.com/markbates/goth/providers/bitbucket"
 	"github.com/release-trackers/gin/models"
-	"gorm.io/gorm"
 )
 
 //type Sessions struct {

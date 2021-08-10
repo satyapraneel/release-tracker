@@ -4,24 +4,25 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/jinzhu/gorm"
 	"github.com/release-trackers/gin/config"
 	"github.com/release-trackers/gin/database/seed"
 	"github.com/release-trackers/gin/models"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"go.elastic.co/apm/module/apmgorm"
+	_ "go.elastic.co/apm/module/apmgorm/dialects/mysql"
 )
 
 func InitConnection() *gorm.DB {
 	dsn := GetDbConnectionString()
-	enableDbLog := config.New().Database.DBLog
-	gormConfig := &gorm.Config{}
-	if enableDbLog == 1 {
-		gormConfig = &gorm.Config{
-			Logger: logger.Default.LogMode(logger.Info),
-		}
-	}
-	db, err := gorm.Open(mysql.Open(dsn), gormConfig)
+	// enableDbLog := config.New().Database.DBLog
+	// gormConfig := &gorm.Config{}
+	// if enableDbLog == 1 {
+	// 	gormConfig = &gorm.Config{
+	// 		Logger: logger.Default.LogMode(logger.Info),
+	// 	}
+	// }
+	// db, err := gorm.Open(mysql.Open(dsn), gormConfig)
+	db, err := apmgorm.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal("DB connection error")
 	}

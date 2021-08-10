@@ -11,6 +11,7 @@ import (
 	"github.com/release-trackers/gin/controllers"
 	"github.com/release-trackers/gin/handlers"
 	"github.com/release-trackers/gin/middleware"
+	"go.elastic.co/apm/module/apmgin"
 )
 
 // Config will hold repositories that will eventually be injected into this
@@ -23,7 +24,9 @@ type Config struct {
 func RouterGin(app *cmd.Application) {
 	log.Println("****name*******: ", app.Name)
 	handler := controllers.NewHandler(app)
-	router := gin.Default()
+	// router := gin.Default()
+	router := gin.New()
+	router.Use(apmgin.Middleware(router))
 	handlers.SetupSession(router, "release_tracker")
 	router.Static("/assets", "./ui/assets")
 	router.LoadHTMLGlob("ui/html/**/*.tmpl")
@@ -107,7 +110,6 @@ func RouterGin(app *cmd.Application) {
 			c.Redirect(http.StatusFound, "/dls")
 		})
 	}
-
 
 	//oauthapi := auth.Group("/oauth")
 	//{

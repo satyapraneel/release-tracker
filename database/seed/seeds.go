@@ -1,8 +1,8 @@
 package seed
 
 import (
+	"github.com/jinzhu/gorm"
 	"github.com/release-trackers/gin/repositories"
-	"gorm.io/gorm"
 )
 
 type Seed struct {
